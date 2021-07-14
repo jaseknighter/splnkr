@@ -50,6 +50,7 @@ a different sample file can be played by adding it to the lib folder and updatin
 * K1+E3: fine tune the value of the selected effect
 
 ## todo
+* integrate shell commands to reconfigure norns audio signal paths into the script
 * build out a sampler sequencer
 * add a frequency follower
 * augment supercollider effects processor
