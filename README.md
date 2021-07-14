@@ -25,27 +25,27 @@ crow outputs 1-4 send triggers corresponding to different amplitude levels detec
 * output 3: levels >= 0.05 and < 0.01
 * output 4: levels >= 0.01
 
-values triggering the crow outputs can be adjusted in the [splunkr.lua](https://github.com/jaseknighter/splnkr/blob/main/splnkr.lua) (search for `detect_level` in the code)
+the values listed above which trigger crow's outputs may be adjusted by editing the `splunkr.lua` file (search for `detect_level` in the code).
 
 ## sample file
-a different sample file can be played by adding it to the lib folder and updating the following variables in the [splunkr.lua](https://github.com/jaseknighter/splnkr/blob/main/splnkr.lua) file:
+a different sample file can be played by adding it to the lib folder and updating the following variables in the `splunkr.lua` file:
 
 * `file`: path to the sample
 * `loop_start`: default starting point of the sample (in seconds)
 * `loop_end`: default ending point of the sample (in seconds)
 
-## Interface (E1 switche between pages)
+## Interface (E1 switches between pages)
 ### page 1: rate/length 
-* E2 switch between parameters
-* E3 change the value of the selected parameter
+* E2: switch between parameters
+* E3: change the value of the selected parameter
 * K1+E3: fine tune the value of the selected parameter
 
 ### page 2: waveform
 * displays the selected waveform (keys/encoders don't change anything...yet)
 
 ### page 3: effects (+ dry/wet control)
-* E2 switch between parameters
-* E3 change the value of the selected effect
+* E2: switch between parameters
+* E3: change the value of the selected effect
   * Note: a value of 0 turns off the selected effect 
 * K1+E3: fine tune the value of the selected effect
 
@@ -56,4 +56,5 @@ a different sample file can be played by adding it to the lib folder and updatin
 * additional features tbd
 
 ## credits
-splnkr leverages the [stonesoup](https://github.com/schollz/stonesoup) script developed by @infinitedigits/@schollz
+* splnkr leverages the [stonesoup](https://github.com/schollz/stonesoup) script developed by @infinitedigits/@schollz
+* this project was inspired by the [lines discussion](https://llllllll.co/t/re-deconstructing-jan-jelineks-zwischen/46577/4) about Jan Jelinek’s album “Zwischen” initiated by Matt Lowery
