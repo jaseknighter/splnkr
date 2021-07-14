@@ -11,6 +11,7 @@
   * open a terminal/powershell
   * ssh to norns (`ssh we@norns.local`) and login
   * run this code to reset, recompile, and reconnect jacks: 
+  
   `~/norns/stop.sh; sleep 1; ~/norns/start.sh; sleep 9; jack_disconnect crone:output_5 SuperCollider:in_1; jack_disconnect crone:output_6 SuperCollider:in_2; jack_connect softcut:output_1 SuperCollider:in_1; jack_connect softcut:output_2 SuperCollider:in_2`
 ## norns audio outputs
 * left output sends dry signal with pinknoise generated when an amplitude onset is detected
