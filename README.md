@@ -2,7 +2,8 @@
  amplitude tracking sequencer/sampler for monome norns
 
 ## installation from maiden
-;install https://github.com/jaseknighter/splnkr
+`;install https://github.com/jaseknighter/splnkr`
+
 (restart after installing)
 
 ### IMPORTANT: prior to running the splnkr script:
