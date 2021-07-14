@@ -18,7 +18,7 @@
 * right output sends the processed audio after applying effects set on screen 3
 
 ## crow outputs
-crow outputs 1-4 send triggers corresponding to different amplitude levels detected by supercollider
+crow outputs 1-4 send triggers corresponding to different amplitude levels detected by the script's supercollider effects processor:
 
 * output 1: levels > 0.001
 * output 2: levels > 0.001 and < 0.05
