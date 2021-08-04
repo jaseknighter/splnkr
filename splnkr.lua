@@ -4,11 +4,19 @@
 --
 -- <script description>
 
+-- before running the script, execute this code:
+-- ~/norns/stop.sh; sleep 1; ~/norns/start.sh; sleep 9; jack_disconnect crone:output_5 SuperCollider:in_1; jack_disconnect crone:output_6 SuperCollider:in_2; jack_connect softcut:output_1 SuperCollider:in_1; jack_connect softcut:output_2 SuperCollider:in_2
+
+
 --[[
-questions for zack:
 
-* jack: detecting setup and reconfiguring on startup and exit
-
+ideas:
+* implement a bandbass filterbank 
+* preview changes in 1 channel before committing them (like dj's do...auditioning?)
+* track parameter history 
+  * turn the history into a sequence 
+  * reply according to the time of changes or by meter
+  * delete individual events
 ]]
 
 
@@ -19,6 +27,7 @@ engine.name = 'Splnkr'
   ----------------------------
   -- from softcut studies 5. filter
   -- file = _path.dust.."/code/softcut-studies/lib/whirl1.aif"
+  --[[
   file = _path.dust.."/code/splnkr/lib/minutemen_we_can_do_this.wav"
   rate = 1.0
   low = 15000
@@ -26,8 +35,11 @@ engine.name = 'Splnkr'
   loop_start = 17
   loop_end = 20
   loop_length = loop_end - loop_start
+  ]]
+
   alt_pressed = false
 
+  pitchshift = 1
   vinyl = 1
   phaser = 1
   delay = 1
@@ -40,6 +52,25 @@ engine.name = 'Splnkr'
 -- init
 ------------------------------
 function init()
+  -- os.execute("~/norns/stop.sh; sleep 1; ~/norns/start.sh; sleep 9; jack_disconnect crone:output_5 SuperCollider:in_1; jack_disconnect crone:output_6 SuperCollider:in_2; jack_connect softcut:output_1 SuperCollider:in_1; jack_connect softcut:output_2 SuperCollider:in_2")
+  -- os.execute("~/norns/stop.sh;")
+  -- os.execute("sleep 1;")
+  -- os.execute("~/norns/start.sh;")
+  -- os.execute("sleep 9;")
+  
+  -- os.execute("jack_disconnect softcut:output_1 SuperCollider:in_1;")  
+  -- os.execute("jack_disconnect softcut:output_2 SuperCollider:in_2;")
+  -- os.execute("jack_connect crone:output_5 SuperCollider:in_1;")  
+  -- os.execute("jack_connect crone:output_6 SuperCollider:in_2;")
+
+  
+  --
+  os.execute("jack_disconnect crone:output_5 SuperCollider:in_1;")  
+  os.execute("jack_disconnect crone:output_6 SuperCollider:in_2;")
+  os.execute("jack_connect softcut:output_1 SuperCollider:in_1;")  
+  os.execute("jack_connect softcut:output_2 SuperCollider:in_2;")
+  -- os.execute("sleep 9;")
+
   audio.level_eng_cut(0)
   crow.output[1].action = "{to(5,0),to(0,0.25)}"
   crow.output[2].action = "{to(5,0),to(0,0.25)}"
@@ -52,20 +83,40 @@ function init()
 
   pages = UI.Pages.new(0, 5)
     
-  redraw()
+  set_redraw_timer()
   page_scroll(1)
   
-  initializing = false
+  active_notes = {}
+  externals1 = externals:new(active_notes)
+  externals2 = externals:new(active_notes)
 
+  for i=1,num_envelopes,1
+  do
+    envelopes[i] = envelope:new(i, num_envelopes)
+    envelopes[i].init(num_envelopes)
+    local active = i == 1 and true or false
+    envelopes[i].set_active(active_envelope)
+  end
+
+
+
+  parameters.init()
+  -- parameters.set_params()
+
+  parameters.init_envelope_controls(1)
   -- startup all sc effects
   engine.bpm(clock.get_tempo())
-  engine.vinyl(1)
-  engine.phaser(1)
-  engine.delay(1)
-  engine.strobe(1)
+  -- engine.pitchshift(1)
+  -- engine.vinyl(1)
+  -- engine.phaser(1)
+  -- engine.delay(1)
+  -- engine.strobe(1)
+  sample_player.init()
 
+  
   ----------------------------
   -- from softcut studies 5. filter
+  --[[
   audio.level_adc_cut(1)
   softcut.level_input_cut(1,2,1.0)
   softcut.level_input_cut(2,2,1.0)
@@ -74,6 +125,7 @@ function init()
   softcut.buffer_read_mono(file,0,1,-1,1,1)
 
   waveform_loaded = true
+  print("file",file)
   local ch, samples = audio.file_info(file)
   length = samples/48000
 
@@ -121,48 +173,78 @@ function init()
   softcut.pre_filter_rq(2,1)
 
   softcut.event_render(on_render)
-
+  ]]
   ----------------------------
   
     -- Init polls
   
-    local amplitude_detect_poll = poll.set("amplitudeDetect", function(value)
-      -- if tonumber(value)>0.001 then print(value) end
-      local detect_level = tonumber(value)
-      local pulse_length = 0.01
-      local polarity = 1
-      local pulse_level1 = 5
-      local pulse_level2 = 5
-      local pulse_level3 = 5
-      local pulse_level4 = 5
+  local detect_level, note_num
+  local last_note_num = 0
 
-      -- sent triggers to crow outputs 1-4 depending on the amplitude level of the sample 
-      if detect_level >= 0.001 then
-        -- print(1)
-        crow.output[1].action = "pulse(" .. pulse_length ..",".. pulse_level1 .. "," .. polarity .. ")"
-        crow.output[1]() 
-      end
-      if detect_level >= 0.001 and detect_level < 0.05 then
-        print(2)
-        crow.output[2].action = "pulse(" .. pulse_length ..",".. pulse_level2 .. "," .. polarity .. ")"
-        crow.output[2]() 
-      end
-      if detect_level >= 0.05 and detect_level < 0.1 then
-        print(3)
-        crow.output[3].action = "pulse(" .. pulse_length ..",".. pulse_level3 .. "," .. polarity .. ")"
-        crow.output[3]() 
-      end
-      if detect_level >= 0.1 then
-        print(4)
-        crow.output[4].action = "pulse(" .. pulse_length ..",".. pulse_level4 .. "," .. polarity .. ")"
-        crow.output[4]() 
-      end
-    end)
-    amplitude_detect_poll:start()
-  
+  local amplitude_detect_poll1 = poll.set("amplitudeDetect1", function(value)
+    detect_level = tonumber(value)
+    -- print("amplitudeDetect1",value)
+  end)
+  local amplitude_detect_poll2 = poll.set("amplitudeDetect2", function(value)
+    -- print("amplitudeDetect2",value)
+    detect_level = tonumber(value)
+  end)
+  local amplitude_detect_poll3 = poll.set("amplitudeDetect3", function(value)
+    -- print("amplitudeDetect3",value)
+    detect_level = tonumber(value)
+  end)
+  local amplitude_detect_poll4 = poll.set("amplitudeDetect4", function(value)
+    -- print("amplitudeDetect4",value)
+    detect_level = tonumber(value)
+  end)
+
+  local frequency_detect_poll1 = poll.set("frequencyDetect1", function(value)
+    note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
+    -- if note_num ~= last_note_num and detect_level >= 0.05 and (value > 200 and value < 1800) then 
+    if note_num ~= last_note_num then 
+      externals1.note_on(1, note_num, note_num, 1, nil,"engine")
+    end
+  end)
+  local frequency_detect_poll2 = poll.set("frequencyDetect2", function(value)
+    note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
+    if note_num ~= last_note_num then 
+      externals1.note_on(1, note_num, note_num, 1, nil,"engine")
+    end
+  end)
+  local frequency_detect_poll3 = poll.set("frequencyDetect3", function(value)
+    note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
+    if note_num ~= last_note_num then 
+      externals1.note_on(1, note_num, note_num, 1, nil,"engine")
+    end
+  end)
+  local frequency_detect_poll4 = poll.set("frequencyDetect4", function(value)
+    note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
+    if note_num ~= last_note_num then 
+      externals1.note_on(1, note_num, note_num, 1, nil,"engine")
+    end
+  end)
+
+  amplitude_detect_poll1:start()
+  amplitude_detect_poll2:start()
+  amplitude_detect_poll3:start()
+  amplitude_detect_poll4:start()
+  frequency_detect_poll1:start()
+  frequency_detect_poll2:start()
+  frequency_detect_poll3:start()
+  frequency_detect_poll4:start()
   -- os.execute(" ~/norns/stop.sh; sleep 1;  ~/norns/start.sh; sleep 9;  ")
   -- os.execute(" jack_disconnect crone:output_5 SuperCollider:in_1;  jack_disconnect crone:output_6 SuperCollider:in_2;  ")
   -- os.execute(" jack_connect softcut:output_1 SuperCollider:in_1;  jack_connect softcut:output_2 SuperCollider:in_2; ") 
+
+  clock.run(finish_init)
+  -- params:bang()
+  -- initializing = false
+end
+
+function finish_init()
+  clock.sleep(0.1)
+  params:bang()
+  initializing = false
 end
 
 --------------------------
@@ -170,40 +252,39 @@ end
 --------------------------
 function enc(n, d)
   encoders_and_keys.enc(n, d)
-  redraw()
+  -- redraw()
 
 end
 
 function key(n,z)
-  -- encoders_and_keys.key(n, z)
-  if n==1 then
-    if z == 1 then alt_pressed = true else alt_pressed = false end
-  elseif n==2 then
-
-  elseif n==3 then
-
-  end
-
-  redraw()
+  encoders_and_keys.key(n, z)
+  
+  -- redraw()
 
 end
 
 --------------------------
 -- redraw 
 --------------------------
-function redraw()
-  --[[
+function set_redraw_timer()
   redrawtimer = metro.init(function() 
-    local menu_status = norns.menu.status()
-    if menu_status == false and initializing == false then
-      -- bball_pages.update_pages()
-      splnkr_pages.update_pages()
+  
+    menu_status = norns.menu.status()
+    if menu_status == false and initializing == false and selecting == false then
+      -- sample_player.update()
+      controller.update_pages()
+      -- print("update")
+      screen_dirty = false
+      clear_subnav = true
+    elseif menu_status == true and clear_subnav == true then
+      screen_dirty = true
+      clear_subnav = false
     end
   end, SCREEN_FRAMERATE, -1)
   redrawtimer:start()  
-  ]]
-  screen.clear()
-  splnkr_pages.update_pages()
+  
+  -- screen.clear()
+  -- controller.update_pages()
   -- screen.update()
 
 end
@@ -211,7 +292,13 @@ end
 
 function cleanup ()
   -- add cleanup code
+  -- os.execute("sleep 1;")
+  -- os.execute("jack_disconnect softcut:output_1 SuperCollider:in_1;")  
+  -- os.execute("jack_disconnect softcut:output_2 SuperCollider:in_2;")
+  -- os.execute("jack_connect crone:output_5 SuperCollider:in_1;")  
+  -- os.execute("jack_connect crone:output_6 SuperCollider:in_2;")
+  
   print("cleanupupup")
-  -- os.execute(" ~/norns/stop.sh; sleep 1;  ~/norns/start.sh; sleep 9;  jack_disconnect softcut:output_1 SuperCollider:in_1;  jack_disconnect softcut:output_2 SuperCollider:in_2; jack_connect crone:output_5 SuperCollider:in_1;  jack_connect crone:output_6 SuperCollider:in_2;  ")
+  
 end
 

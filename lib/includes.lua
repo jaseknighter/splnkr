@@ -1,18 +1,28 @@
 -- required and included files
 
--- required for multiple files
 MusicUtil = require "musicutil"
 tabutil = require "tabutil"
-
--- required for flora.lua
 UI = require "ui"
--- polls = include "flora/lib/polls"
-
--- required for parameters.lua
+fileselect = require 'fileselect'
+textentry= require 'textentry'
 cs = require 'controlspec'
 
--- required for multiple files
-vector = include("splnkr/lib/vector")
+w_slash = include "flora/lib/w_slash"
+include("splnkr/lib/midi_helper")
+
+vector = include("flora/lib/vector")
+ArbGraph = include("flora/lib/ArbitraryGraph")
+
+
+envelope = include "splnkr/lib/envelope"
+
+externals = include "splnkr/lib/externals"
 globals = include "splnkr/lib/globals"
 encoders_and_keys = include "splnkr/lib/encoders_and_keys"
-splnkr_pages = include("splnkr/lib/splnkr_pages")
+controller = include("splnkr/lib/controller")
+
+sample_player = include "splnkr/lib/sample_player"
+sample_recorder = include "splnkr/lib/sample_recorder"
+include "clipper/lib/Cutter"
+
+parameters = include("splnkr/lib/parameters")
