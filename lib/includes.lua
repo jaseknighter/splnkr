@@ -7,6 +7,8 @@ fileselect = require 'fileselect'
 textentry= require 'textentry'
 cs = require 'controlspec'
 
+_grid = include("lib/_grid")
+
 w_slash = include "flora/lib/w_slash"
 include("splnkr/lib/midi_helper")
 

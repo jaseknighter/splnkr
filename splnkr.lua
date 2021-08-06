@@ -52,17 +52,7 @@ engine.name = 'Splnkr'
 -- init
 ------------------------------
 function init()
-  -- os.execute("~/norns/stop.sh; sleep 1; ~/norns/start.sh; sleep 9; jack_disconnect crone:output_5 SuperCollider:in_1; jack_disconnect crone:output_6 SuperCollider:in_2; jack_connect softcut:output_1 SuperCollider:in_1; jack_connect softcut:output_2 SuperCollider:in_2")
-  -- os.execute("~/norns/stop.sh;")
-  -- os.execute("sleep 1;")
-  -- os.execute("~/norns/start.sh;")
-  -- os.execute("sleep 9;")
-  
-  -- os.execute("jack_disconnect softcut:output_1 SuperCollider:in_1;")  
-  -- os.execute("jack_disconnect softcut:output_2 SuperCollider:in_2;")
-  -- os.execute("jack_connect crone:output_5 SuperCollider:in_1;")  
-  -- os.execute("jack_connect crone:output_6 SuperCollider:in_2;")
-
+  -- ~/norns/stop.sh; sleep 1; ~/norns/start.sh; sleep 9; jack_disconnect crone:output_5 SuperCollider:in_1; jack_disconnect crone:output_6 SuperCollider:in_2; jack_connect softcut:output_1 SuperCollider:in_1; jack_connect softcut:output_2 SuperCollider:in_2
   
   --
   os.execute("jack_disconnect crone:output_5 SuperCollider:in_1;")  
@@ -85,6 +75,18 @@ function init()
     
   set_redraw_timer()
   page_scroll(1)
+  
+  
+  grid_dirty, screen_dirty, splash_break = true, true, false
+  -- graphics.init()
+  _grid.init()
+  if g.cols > 0 then
+    print("grid found with " .. _grid.last_known_width .. " columns")
+    grid_clock_id = clock.run(_grid.grid_redraw_clock)
+  else
+    print("no grid found")
+  end
+  
   
   active_notes = {}
   externals1 = externals:new(active_notes)
@@ -293,10 +295,10 @@ end
 function cleanup ()
   -- add cleanup code
   -- os.execute("sleep 1;")
-  -- os.execute("jack_disconnect softcut:output_1 SuperCollider:in_1;")  
-  -- os.execute("jack_disconnect softcut:output_2 SuperCollider:in_2;")
-  -- os.execute("jack_connect crone:output_5 SuperCollider:in_1;")  
-  -- os.execute("jack_connect crone:output_6 SuperCollider:in_2;")
+  os.execute("jack_disconnect softcut:output_1 SuperCollider:in_1;")  
+  os.execute("jack_disconnect softcut:output_2 SuperCollider:in_2;")
+  os.execute("jack_connect crone:output_5 SuperCollider:in_1;")  
+  os.execute("jack_connect crone:output_6 SuperCollider:in_2;")
   
   print("cleanupupup")
   

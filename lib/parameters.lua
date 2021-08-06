@@ -23,21 +23,34 @@ function parameters.init()
   end
   ]]
 
+-- local cs_freq = controlspec.FREQ:copy()
+-- cs_freq.maxval = 10000
+local cs_freq = controlspec.WIDEFREQ:copy()
+  for i=1,16,1 do
+    params:add_control("center_frequency"..i,"center freq"..i,cs_freq)
+    params:set_action("center_frequency"..i,function(x) 
+      print("x",i,x)
+      engine.set_center_frequency(i,x)
+    end)  
+    -- params:set("center_frequency"..i,(i/16)*cs_freq.maxval, false)
+    -- print("map?",cs_freq.map)
+    local c_freq = util.linexp(20,cs_freq.maxval,20,cs_freq.maxval,(i/16)*cs_freq.maxval)
+    params:set("center_frequency"..i, c_freq, false)
 
-  params:add_control("center_frequency","center frequency",controlspec.FREQ:copy())
-  params:set_action("center_frequency",function(x) 
-    engine.set_center_frequency(x)
-  end)  
-
-  params:add_control("rq","center rq",controlspec.AMP:copy())
-  params:set_action("rq",function(x) 
-    if x <= 0 then 
-      local rq = params:lookup_param("rq")
-      params:set("rq",0.01)
-    end
-    engine.set_center_frequency(x)
-  end)  
-
+    rc_cspec = controlspec.AMP:copy()
+    params:add_control("reciprocal_quality"..i,"reciprocal q"..i,controlspec.AMP:copy())
+    params:set("reciprocal_quality"..i,1, false)
+    params:set_action("reciprocal_quality"..i,function(x) 
+      -- print("lte0",x,initializing)
+      if x <= 0 and initializing == false then 
+        -- local rq = params:lookup_param("reciprocal_quality")
+        -- print("lte0")
+        x = 0.01
+        params:set("reciprocal_quality"..i,0.01, false)
+      end
+      engine.set_reciprocal_quality(i,x)
+    end)  
+  end
   ------------------------------
   -- effect params
   ------------------------------
@@ -58,7 +71,9 @@ function parameters.init()
       min=effect_min,max=effect_max,
       action = function(x) 
         effect_fn(x)
-      end}
+      end
+    }
+    params:set(effect_id,effect_default)
   end
 
   -- function parameters.set_params()
@@ -105,7 +120,6 @@ function parameters.init()
       for i=1,afd_num_params,1
     do
       local cspec = afd_controlspec:copy()
-      print(afd_spread_defaults)
       local spread = is_min == true and (max/afd_num_params) * (i-1) or  (max/afd_num_params) * (i)
       spread = util.linexp(min,max, 20, 2000, spread)
       if afd_spread_defaults == true then  

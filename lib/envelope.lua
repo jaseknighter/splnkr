@@ -326,7 +326,7 @@ function Envelope:new(id, num_envelopes, env_nodes)
   end
   
   e.remove_node = function()
-    print(e.active_node, #e.graph_nodes)
+    -- print(e.active_node, #e.graph_nodes)
     if (e.active_node > 1 and e.active_node < #e.graph_nodes and #e.graph_nodes > 3) then
       table.remove(e.graph_nodes, e.active_node)
       e.graph:remove_point(e.active_node)

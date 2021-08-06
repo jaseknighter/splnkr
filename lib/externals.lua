@@ -90,7 +90,7 @@ function externals:new(active_notes)
       end
     
       asl_envelope = "{" .. asl_envelope .. "}"
-      print(asl_envelope)
+      -- print(asl_envelope)
       return asl_envelope 
     end
 
