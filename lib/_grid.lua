@@ -101,22 +101,15 @@ function _grid:short_press(x, y, from_view)
   else
     if x <= 3 then -- change modes
       self.active_view = x
-    elseif x == 5 or x == 6 then  -- set animation view
+    elseif (x == 5 or x == 6) then  -- set animation view
       if (self.animation_mode[_grid.active_view] == 1 and x == 5) or (self.animation_mode[_grid.active_view] == 2 and x == 6) then 
         self.animation_mode[_grid.active_view] = 0 
-        _grid.animator[_grid.active_view] = self.animation_mode[_grid.active_view]
+        _grid.animator[_grid.active_view] = 0
       else
         self.animation_mode[_grid.active_view] = x==5 and 1 or 2
         _grid.animator[_grid.active_view] = self.animation_mode[_grid.active_view]
       end
     end
-    for i=1,16,1 do
-      if i==x then
-        i = i<=3 and i or self.active_view
-        _grid:register_solid_at(x, y, x, i)
-      end
-    end
-
     _grid.dirty_grid(true)
   end
 end
@@ -126,7 +119,7 @@ function _grid:is_long_press()
 end
 
 function _grid:grid_long_press(x, y)
-  clock.sleep(.5)
+  clock.sleep(0.5)
   -- print("long press",x,y)
   _grid:set_long_press(true)
   --samples:select_x(x)
