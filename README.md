@@ -1,6 +1,10 @@
 # splnkr
  amplitude tracking sequencer/sampler for monome norns
 
+*additional documentation in progress*
+
+*warning*: animating the center frequency with the grid interface can result in loud percussive sounds. use caution!
+
 ## installation from maiden
 `;install https://github.com/jaseknighter/splnkr`
 
@@ -12,41 +16,79 @@
 * run this code to reset, recompile, and reconnect jacks: 
 
   ```~/norns/stop.sh; sleep 1; ~/norns/start.sh; sleep 9; jack_disconnect crone:output_5 SuperCollider:in_1; jack_disconnect crone:output_6 SuperCollider:in_2; jack_connect softcut:output_1 SuperCollider:in_1; jack_connect softcut:output_2 SuperCollider:in_2```
-## norns audio outputs
-* left output sends dry signal with pinknoise generated when an amplitude onset is detected
-* right output sends the processed audio after applying effects set on screen 3
 
-## crow outputs
-crow outputs 1-4 send triggers corresponding to different amplitude levels detected by the script's supercollider effects processor:
+### norns ui: key/encoder controls
+access instructions for key/encoder controls within the script by pressing k1+e3
 
-* output 1: levels > 0.001
-* output 2: levels > 0.001 and < 0.05
-* output 3: levels >= 0.05 and < 0.01
-* output 4: levels >= 0.01
+* All screens
+  * e2: next/prev control
+* Screen 1: select/play sample 
+  * k2: select sample to slice up
+  * e3: incr/decr playhead
+  * k3: start/stop playhead
+* Screen 2: play mode
+  * k2/k3: delete/add cutter
+  * e3: change play mode
+* Screen 3: adjust cut ends
+  * k2/k3: delete/add cutter
+  * k1 + e2: select cutter
+  * k1 + e3: adjust cutter
+  * k1 + e1: fine adjust cutter
+  * e3: select cutter end
+* Screen 4: move cutter
+  * k2/k3: delete/add cutter
+  * k1 + e2: select cutter
+  * k1 + e3: adjust cutter
+  * k1 + e1: fine adjust cutter
+* Screen 5: adjust rate
+  * k2/k3: delete/add cutter
+  * k1 + e2: select rate
+  * e3: adjust all cutter rates
+  * k1 + e1: fine adjust rate
+  * k1 + e3: adjust selected cutter rate
+* Screen 6: adjust level
+  * k2/k3: delete/add cutter
+  * e3: adjust level
+* Screen 7: autogenerate cutters
+  * e3: autogenerate clips by level (up to 20)
+  * k1 + e3: autogenerate clips with even spacing (up to 20)
 
-the values listed above which trigger crow's outputs may be adjusted by editing the `splunkr.lua` file (search for `detect_level` in the code).
+### recording clips
+clips may be recorded from the PARAMETERS>EDIT menu. what gets recorded depends on the `play mode` setting:
+* *stop*: record the entire sample 
+* *full loop*: record the entire sample 
+* *all cuts*: record all sample areas set by cutters
+* *sel cut*: record the sample area set by the selected cutter
 
-## sample file
-a different sample file can be played by adding it to the lib folder and updating the following variables in the `splunkr.lua` file:
+*important note*: if *play mode* is set to `all cuts`, all *rate* settings must either be positive or negative. 
 
-* `file`: path to the sample
-* `loop_start`: default starting point of the sample (in seconds)
-* `loop_end`: default ending point of the sample (in seconds)
+## filterbank/grid interface
 
-## Interface (E1 switches between pages)
-### page 1: rate/length 
-* E2: switch between parameters
-* E3: change the value of the selected parameter
-* K1+E3: fine tune the value of the selected parameter
+parameters for the 16 channel filterbank may be controlled via the params menu or using the grid
 
-### page 2: waveform
-* displays the selected waveform (keys/encoders don't change anything...yet)
+each channel has three parameters: 
+* channel level (amp)
+* reciprocal quality (rq)
+* center frequency (cf)
 
-### page 3: effects (+ dry/wet control)
-* E2: switch between parameters
-* E3: change the value of the selected effect
-  * Note: a value of 0 turns off the selected effect 
-* K1+E3: fine tune the value of the selected effect
+### grid controls
+each of the three parameters may be accessed using by toggling between first three buttons on the grid's bottom row 
+
+the fifth and sixth buttons on the grid's bottom row control animation options for each of the three filter channel parameters:
+
+button 5: pressing this button sweeps the values of each channel to the left cycling the values around to the far right channel after the values pass by the far left channel. if lit, pressing the button again turns off the animation.
+button 6: pressing this button sweeps the values of each channel to the upwards, cycling back to the channel's min value when the max value is reached. if lit, pressing the button again turns off the animation.
+
+## effects
+
+
+## outputs 
+
+midi, crow, jf, and w/ outputs are avaiable in the params menu
+
+## envelope
+
+the second screen (accessed with E1) provides access to an envelope that is applied to the outputs
 
 ## todo
 * integrate shell commands to reconfigure norns audio signal paths into the script

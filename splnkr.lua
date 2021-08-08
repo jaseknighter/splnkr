@@ -183,49 +183,64 @@ function init()
   local detect_level, note_num
   local last_note_num = 0
 
-  local amplitude_detect_poll1 = poll.set("amplitudeDetect1", function(value)
+  amplitude_detect_poll1 = poll.set("amplitudeDetect1", function(value)
     detect_level = tonumber(value)
     -- print("amplitudeDetect1",value)
   end)
-  local amplitude_detect_poll2 = poll.set("amplitudeDetect2", function(value)
+  amplitude_detect_poll2 = poll.set("amplitudeDetect2", function(value)
     -- print("amplitudeDetect2",value)
     detect_level = tonumber(value)
   end)
-  local amplitude_detect_poll3 = poll.set("amplitudeDetect3", function(value)
+  amplitude_detect_poll3 = poll.set("amplitudeDetect3", function(value)
     -- print("amplitudeDetect3",value)
     detect_level = tonumber(value)
   end)
-  local amplitude_detect_poll4 = poll.set("amplitudeDetect4", function(value)
+  amplitude_detect_poll4 = poll.set("amplitudeDetect4", function(value)
     -- print("amplitudeDetect4",value)
     detect_level = tonumber(value)
   end)
 
-  local frequency_detect_poll1 = poll.set("frequencyDetect1", function(value)
+  frequency_detect_poll1 = poll.set("frequencyDetect1", function(value)
     note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
     -- if note_num ~= last_note_num and detect_level >= 0.05 and (value > 200 and value < 1800) then 
     if note_num ~= last_note_num then 
       externals1.note_on(1, note_num, note_num, 1, nil,"engine")
     end
   end)
-  local frequency_detect_poll2 = poll.set("frequencyDetect2", function(value)
+  frequency_detect_poll2 = poll.set("frequencyDetect2", function(value)
     note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
     if note_num ~= last_note_num then 
       externals1.note_on(1, note_num, note_num, 1, nil,"engine")
     end
   end)
-  local frequency_detect_poll3 = poll.set("frequencyDetect3", function(value)
+  frequency_detect_poll3 = poll.set("frequencyDetect3", function(value)
     note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
     if note_num ~= last_note_num then 
       externals1.note_on(1, note_num, note_num, 1, nil,"engine")
     end
   end)
-  local frequency_detect_poll4 = poll.set("frequencyDetect4", function(value)
+  frequency_detect_poll4 = poll.set("frequencyDetect4", function(value)
     note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
     if note_num ~= last_note_num then 
       externals1.note_on(1, note_num, note_num, 1, nil,"engine")
     end
   end)
 
+  splnkr_lattice = lattice:new()
+  p = splnkr_lattice:new_pattern{
+    action = function(t) 
+      -- samples:play() 
+      _grid:animate() 
+    end,
+    division = 1/16,
+    enabled = true
+  }
+
+  clock.run(finish_init)
+end
+
+function finish_init()
+  clock.sleep(0.2)
   amplitude_detect_poll1:start()
   amplitude_detect_poll2:start()
   amplitude_detect_poll3:start()
@@ -234,17 +249,10 @@ function init()
   frequency_detect_poll2:start()
   frequency_detect_poll3:start()
   frequency_detect_poll4:start()
-  -- os.execute(" ~/norns/stop.sh; sleep 1;  ~/norns/start.sh; sleep 9;  ")
-  -- os.execute(" jack_disconnect crone:output_5 SuperCollider:in_1;  jack_disconnect crone:output_6 SuperCollider:in_2;  ")
-  -- os.execute(" jack_connect softcut:output_1 SuperCollider:in_1;  jack_connect softcut:output_2 SuperCollider:in_2; ") 
 
-  clock.run(finish_init)
-  -- params:bang()
-  -- initializing = false
-end
+  splnkr_lattice:start()
+    
 
-function finish_init()
-  clock.sleep(0.1)
   params:bang()
   initializing = false
 end
@@ -265,6 +273,7 @@ function key(n,z)
 
 end
 
+
 --------------------------
 -- redraw 
 --------------------------
@@ -274,10 +283,12 @@ function set_redraw_timer()
     menu_status = norns.menu.status()
     if menu_status == false and initializing == false and selecting == false then
       -- sample_player.update()
+  
       controller.update_pages()
       -- print("update")
       screen_dirty = false
       clear_subnav = true
+      
     elseif menu_status == true and clear_subnav == true then
       screen_dirty = true
       clear_subnav = false

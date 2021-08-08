@@ -23,34 +23,107 @@ function parameters.init()
   end
   ]]
 
--- local cs_freq = controlspec.FREQ:copy()
--- cs_freq.maxval = 10000
-local cs_freq = controlspec.WIDEFREQ:copy()
-  for i=1,16,1 do
-    params:add_control("center_frequency"..i,"center freq"..i,cs_freq)
-    params:set_action("center_frequency"..i,function(x) 
-      print("x",i,x)
-      engine.set_center_frequency(i,x)
-    end)  
-    -- params:set("center_frequency"..i,(i/16)*cs_freq.maxval, false)
-    -- print("map?",cs_freq.map)
-    local c_freq = util.linexp(20,cs_freq.maxval,20,cs_freq.maxval,(i/16)*cs_freq.maxval)
-    params:set("center_frequency"..i, c_freq, false)
+  ------------------------------
+  -- filter params
+  ------------------------------
 
-    rc_cspec = controlspec.AMP:copy()
-    params:add_control("reciprocal_quality"..i,"reciprocal q"..i,controlspec.AMP:copy())
-    params:set("reciprocal_quality"..i,1, false)
-    params:set_action("reciprocal_quality"..i,function(x) 
-      -- print("lte0",x,initializing)
-      if x <= 0 and initializing == false then 
-        -- local rq = params:lookup_param("reciprocal_quality")
-        -- print("lte0")
-        x = 0.01
-        params:set("reciprocal_quality"..i,0.01, false)
+  params:add_separator("filters")
+
+  -- filter level
+  params:add_group("level",16)
+  local filter_level_grid_view = 1
+  cs_level = controlspec.AMP:copy()
+  cs_level.maxval = 1.6
+  for i=1,16,1 do
+    params:add_control("filter_level"..i,"filter level"..i,cs_level)
+    -- params:set("filter_level"..i,1.6, false)
+    local default_val = ((i-1)%5)+2
+    default_val = util.linlin(1,9,0,1.6,default_val)
+    params:set("filter_level"..i,default_val, false)
+    params:set_action("filter_level"..i,function(x) 
+      -- update engine
+      engine.set_filter_level(i,x)
+      -- update grid
+      if _grid.last_known_height > 0 then
+        local j = i
+        local l =math.floor(util.linlin(cs_level.minval,cs_level.maxval,8,1,x))
+        _grid.solids[filter_level_grid_view][j] = {}
+        for k=7,l,-1
+        do
+          _grid:register_solid_at(j, k, l, filter_level_grid_view)
+        end
       end
-      engine.set_reciprocal_quality(i,x)
     end)  
   end
+
+  -- reciprocal quality
+  params:add_group("reciprocal quality",16)
+  local filter_rq_grid_view = 2
+  cs_rq = controlspec.AMP:copy()
+  for i=1,16,1 do
+    params:add_control("reciprocal_quality"..i,"reciprocal q"..i,cs_rq)
+    -- local default_val = ((i-1)%5)+2
+    -- print(default_val)
+    local default_val = 1
+    params:set("reciprocal_quality"..i,default_val)
+    params:set_action("reciprocal_quality"..i,function(x) 
+      if x <= 0 and initializing == false then 
+        x = 0.1
+        params:set("reciprocal_quality"..i,0.1, false)
+      end
+      engine.set_reciprocal_quality(i,x)
+      -- update grid
+      if _grid.last_known_height > 0 then
+        local j = i
+        -- local l =math.floor(util.linlin(cs_rq.minval,cs_rq.maxval,8,1,x))
+        local l =math.floor(util.linlin(cs_rq.minval,cs_rq.maxval,1,8,x))
+        -- print("l",cs_rq.minval,cs_rq.maxval,x,l)
+
+        _grid.solids[filter_rq_grid_view][j] = {}
+        for k=7,l,-1
+        do
+          -- print(j, k, l, filter_rq_grid_view)
+          _grid:register_solid_at(j, k, l, filter_rq_grid_view)
+        end
+      end
+    end)  
+  end
+
+  -- center frequency
+  params:add_group("center frequency",16)
+  local filter_cf_grid_view = 3
+  cs_cf = controlspec.MIDFREQ:copy()
+  cs_cf.maxval = 1200
+  for i=1,16,1 do
+    params:add_control("center_frequency"..i,"center freq"..i,cs_cf)
+    params:set_action("center_frequency"..i,function(x) 
+      -- update engine
+      engine.set_center_frequency(i,x)
+      -- update grid
+      if _grid.last_known_height > 0 then
+        local j = i
+        -- local l =math.floor(util.linexp(cs_cf.minval,cs_cf.maxval,8,1,x))
+        local l = 
+          x < 50 and 8 or
+          x < 100 and 7 or 
+          x < 200 and 6 or 
+          x < 300 and 5 or
+          x < 400 and 4 or
+          x < 600 and 3 or
+          x < 900 and 2 or
+          1
+
+        _grid.solids[filter_cf_grid_view][j] = {}
+        for k=7,l,-1
+        do
+          _grid:register_solid_at(j, k, l, filter_cf_grid_view)
+        end
+      end
+    end)  
+    local c_freq = util.linexp(20,cs_cf.maxval,20,cs_cf.maxval,(i/16)*cs_cf.maxval)
+    params:set("center_frequency"..i, c_freq, false)
+  end
+
   ------------------------------
   -- effect params
   ------------------------------
@@ -178,7 +251,7 @@ local cs_freq = controlspec.WIDEFREQ:copy()
   end
 
   amp_params = {
-    {"amp_min","amp min",controlspec.AMP:copy(),engine.set_detect_amp_min,0.01,},
+    {"amp_min","amp min",controlspec.AMP:copy(),engine.set_detect_amp_min,0.1,},
     {"amp_max","amp max",controlspec.AMP:copy(),engine.set_detect_amp_max,0.99,},
   }
 

@@ -23,22 +23,22 @@ Engine_Splnkr : CroneEngine {
   var freqMinArray;//=Array.fill(4,{40}); 
   var freqMaxArray;//=Array.fill(4,{1200});
 
-  var centerFrequency1=440, reciprocalQuality1=1;
-  var centerFrequency2=440, reciprocalQuality2=1;
-  var centerFrequency3=440, reciprocalQuality3=1;
-  var centerFrequency4=440, reciprocalQuality4=1;
-  var centerFrequency5=440, reciprocalQuality5=1;
-  var centerFrequency6=440, reciprocalQuality6=1;
-  var centerFrequency7=440, reciprocalQuality7=1;
-  var centerFrequency8=440, reciprocalQuality8=1;
-  var centerFrequency9=440, reciprocalQuality9=1;
-  var centerFrequency10=440, reciprocalQuality10=1;
-  var centerFrequency11=440, reciprocalQuality11=1;
-  var centerFrequency12=440, reciprocalQuality12=1;
-  var centerFrequency13=440, reciprocalQuality13=1;
-  var centerFrequency14=440, reciprocalQuality14=1;
-  var centerFrequency15=440, reciprocalQuality15=1;
-  var centerFrequency16=440, reciprocalQuality16=1;
+  var filterLevel1=1,centerFrequency1=440, reciprocalQuality1=1;
+  var filterLevel2=1,centerFrequency2=440, reciprocalQuality2=1;
+  var filterLevel3=1,centerFrequency3=440, reciprocalQuality3=1;
+  var filterLevel4=1,centerFrequency4=440, reciprocalQuality4=1;
+  var filterLevel5=1,centerFrequency5=440, reciprocalQuality5=1;
+  var filterLevel6=1,centerFrequency6=440, reciprocalQuality6=1;
+  var filterLevel7=1,centerFrequency7=440, reciprocalQuality7=1;
+  var filterLevel8=1,centerFrequency8=440, reciprocalQuality8=1;
+  var filterLevel9=1,centerFrequency9=440, reciprocalQuality9=1;
+  var filterLevel0=1,centerFrequency10=440, reciprocalQuality10=1;
+  var filterLevel1=1,centerFrequency11=440, reciprocalQuality11=1;
+  var filterLevel2=1,centerFrequency12=440, reciprocalQuality12=1;
+  var filterLevel3=1,centerFrequency13=440, reciprocalQuality13=1;
+  var filterLevel4=1,centerFrequency14=440, reciprocalQuality14=1;
+  var filterLevel5=1,centerFrequency15=440, reciprocalQuality15=1;
+  var filterLevel6=1, centerFrequency16=440, reciprocalQuality16=1;
   
   *new { arg context, doneCallback;
     ^super.new(context, doneCallback);
@@ -53,39 +53,22 @@ Engine_Splnkr : CroneEngine {
       effect_bitcrush,bitcrush_bits=10,bitcrush_rate=12000, // this has parameters
       effect_strobe=0,effect_vinyl=0,effect_pitchshift=0,
       wobble_rpm=33, wobble_amp=0.05, wobble_exp=39, flutter_amp=0.03, flutter_fixedfreq=6, flutter_variationfreq=2,
-      centerFrequency1=440, reciprocalQuality1=1,
-      centerFrequency2=440, reciprocalQuality2=1,
-      centerFrequency3=440, reciprocalQuality3=1,
-      centerFrequency4=440, reciprocalQuality4=1,
-      centerFrequency5=440, reciprocalQuality5=1,
-      centerFrequency6=440, reciprocalQuality6=1,
-      centerFrequency7=440, reciprocalQuality7=1,
-      centerFrequency8=440, reciprocalQuality8=1,
-      centerFrequency9=440, reciprocalQuality9=1,
-      centerFrequency10=440, reciprocalQuality10=1,
-      centerFrequency11=440, reciprocalQuality11=1,
-      centerFrequency12=440, reciprocalQuality12=1,
-      centerFrequency13=440, reciprocalQuality13=1,
-      centerFrequency14=440, reciprocalQuality14=1,
-      centerFrequency15=440, reciprocalQuality15=1,
-      centerFrequency16=440, reciprocalQuality16=1;
-
-      // centerFrequency1=(1/16)*10000, reciprocalQuality1=1,
-      // centerFrequency2=(2/16)*10000, reciprocalQuality2=1,
-      // centerFrequency3=(3/16)*10000, reciprocalQuality3=1,
-      // centerFrequency4=(4/16)*10000, reciprocalQuality4=1,
-      // centerFrequency5=(5/16)*10000, reciprocalQuality5=1,
-      // centerFrequency6=(6/16)*10000, reciprocalQuality6=1,
-      // centerFrequency7=(7/16)*10000, reciprocalQuality7=1,
-      // centerFrequency8=(8/16)*10000, reciprocalQuality8=1,
-      // centerFrequency9=(9/16)*10000, reciprocalQuality9=1,
-      // centerFrequency10=(10/16)*10000, reciprocalQuality10=1,
-      // centerFrequency11=(11/16)*10000, reciprocalQuality11=1,
-      // centerFrequency12=(12/16)*10000, reciprocalQuality12=1,
-      // centerFrequency13=(13/16)*10000, reciprocalQuality13=1,
-      // centerFrequency14=(14/16)*10000, reciprocalQuality14=1,
-      // centerFrequency15=(15/16)*10000, reciprocalQuality15=1,
-      // centerFrequency16=(16/16)*10000, reciprocalQuality16=1;
+      filterLevel1=1, centerFrequency1=440, reciprocalQuality1=1, 
+      filterLevel2=1, centerFrequency2=440, reciprocalQuality2=1, 
+      filterLevel3=1, centerFrequency3=440, reciprocalQuality3=1, 
+      filterLevel4=1, centerFrequency4=440, reciprocalQuality4=1, 
+      filterLevel5=1, centerFrequency5=440, reciprocalQuality5=1, 
+      filterLevel6=1, centerFrequency6=440, reciprocalQuality6=1, 
+      filterLevel7=1, centerFrequency7=440, reciprocalQuality7=1, 
+      filterLevel8=1, centerFrequency8=440, reciprocalQuality8=1, 
+      filterLevel9=1, centerFrequency9=440, reciprocalQuality9=1, 
+      filterLevel10=1, centerFrequency10=440, reciprocalQuality10=1, 
+      filterLevel11=1, centerFrequency11=440, reciprocalQuality11=1, 
+      filterLevel12=1, centerFrequency12=440, reciprocalQuality12=1, 
+      filterLevel13=1, centerFrequency13=440, reciprocalQuality13=1, 
+      filterLevel14=1, centerFrequency14=440, reciprocalQuality14=1, 
+      filterLevel15=1, centerFrequency15=440, reciprocalQuality15=1, 
+      filterLevel16=1, centerFrequency16=440, reciprocalQuality16=1; 
 
       var wet,dry,detect,detectAmp,detectFreq;
       
@@ -143,7 +126,7 @@ Engine_Splnkr : CroneEngine {
       bpf15 = BPF.ar(wet,centerFrequency15,reciprocalQuality15);
       bpf16 = BPF.ar(wet,centerFrequency16,reciprocalQuality16);
       
-      wet = bpf1+bpf2+bpf3+bpf4+bpf5+bpf6+bpf7+bpf8+bpf9+bpf10+bpf11+bpf12+bpf13+bpf14+bpf15+bpf16;
+      wet = (bpf1*filterLevel1)+(bpf2*filterLevel2)+(bpf3*filterLevel3)+(bpf4*filterLevel4)+(bpf5*filterLevel5)+(bpf6*filterLevel6)+(bpf7*filterLevel7)+(bpf8*filterLevel8)+(bpf9*filterLevel9)+(bpf10*filterLevel10)+(bpf11*filterLevel11)+(bpf12*filterLevel12)+(bpf13*filterLevel13)+(bpf14*filterLevel14)+(bpf15*filterLevel15)+(bpf16*filterLevel16);
       // wet = Mix.ar[bpf1,bpf2,bpf3,bpf4,bpf5,bpf6,bpf7,bpf8,bpf9,bpf10,bpf11,bpf12,bpf13,bpf14,bpf15,bpf16];
 
 
@@ -182,7 +165,8 @@ Engine_Splnkr : CroneEngine {
       ));
 
       // phaser
-      wet = (wet*(1-effect_phaser))+(effect_phaser*CombC.ar(wet,1,SinOsc.kr(1/7).range(500,1000).reciprocal,0.05*SinOsc.kr(1/7.1).range(-1,1)));
+      // wet = (wet*(1-effect_phaser))+(effect_phaser*CombC.ar(wet,1,SinOsc.kr(1/7).range(500,1000).reciprocal,0.05*SinOsc.kr(1/7.1).range(-1,1)));
+      wet = (wet*(1-effect_phaser))+(effect_phaser*CombC.ar(wet,1,SinOsc.kr(1/7).range(500,550).reciprocal,0.05*SinOsc.kr(1/7.1).range(-1,1)));
 
       // distortion
       effect_distortion = Lag.kr(effect_distortion,0.5);
@@ -379,28 +363,52 @@ Engine_Splnkr : CroneEngine {
       synth.set(\freqMax, freqMaxArray);
     });
 
+    this.addCommand("set_filter_level", "ff", { arg msg;
+      var i = msg[1];
+      var filterLevel = msg[2];
+      ([i,filterLevel]).postln;
+      // synth.set(\centerFrequency, msg[1]);
+      case 
+        {i==1} {synth.set(\filterLevel1, filterLevel)}
+        {i==2} {synth.set(\filterLevel2, filterLevel)}
+        {i==3} {synth.set(\filterLevel3, filterLevel)}
+        {i==4} {synth.set(\filterLevel4, filterLevel)}
+        {i==5} {synth.set(\filterLevel5, filterLevel)}
+        {i==6} {synth.set(\filterLevel6, filterLevel)}
+        {i==7} {synth.set(\filterLevel7, filterLevel)}
+        {i==8} {synth.set(\filterLevel8, filterLevel)}
+        {i==9} {synth.set(\filterLevel9, filterLevel)}
+        {i==10} {synth.set(\filterLevel10, filterLevel)}
+        {i==11} {synth.set(\filterLevel11, filterLevel)}
+        {i==12} {synth.set(\filterLevel12, filterLevel)}
+        {i==13} {synth.set(\filterLevel13, filterLevel)}
+        {i==14} {synth.set(\filterLevel14, filterLevel)}
+        {i==15} {synth.set(\filterLevel15, filterLevel)}
+        {i==16} {synth.set(\filterLevel16, filterLevel)};
+    });
+
     this.addCommand("set_center_frequency", "ff", { arg msg;
       var i = msg[1];
       var centerFrequency = msg[2];
-      ([i,centerFrequency]).postln;
+      // ([i,centerFrequency]).postln;
       // synth.set(\centerFrequency, msg[1]);
       case 
-        {i==1} {synth.set(\centerFrequency1, centerFrequency)}
-        {i==2} {synth.set(\centerFrequency2, centerFrequency)}
-        {i==3} {synth.set(\centerFrequency3, centerFrequency)}
-        {i==4} {synth.set(\centerFrequency4, centerFrequency)}
-        {i==5} {synth.set(\centerFrequency5, centerFrequency)}
-        {i==6} {synth.set(\centerFrequency6, centerFrequency)}
-        {i==7} {synth.set(\centerFrequency7, centerFrequency)}
-        {i==8} {synth.set(\centerFrequency8, centerFrequency)}
-        {i==9} {synth.set(\centerFrequency9, centerFrequency)}
-        {i==10} {synth.set(\centerFrequency10, centerFrequency)}
-        {i==11} {synth.set(\centerFrequency11, centerFrequency)}
-        {i==12} {synth.set(\centerFrequency12, centerFrequency)}
-        {i==13} {synth.set(\centerFrequency13, centerFrequency)}
-        {i==14} {synth.set(\centerFrequency14, centerFrequency)}
-        {i==15} {synth.set(\centerFrequency15, centerFrequency)}
-        {i==16} {synth.set(\centerFrequency16, centerFrequency)};
+        {i==1} {synth.set(\centerFrequency1, centerFrequency); ([i,centerFrequency]).postln;}
+        {i==2} {synth.set(\centerFrequency2, centerFrequency); ([i,centerFrequency]).postln;}
+        {i==3} {synth.set(\centerFrequency3, centerFrequency); ([i,centerFrequency]).postln;}
+        {i==4} {synth.set(\centerFrequency4, centerFrequency); ([i,centerFrequency]).postln;}
+        {i==5} {synth.set(\centerFrequency5, centerFrequency); ([i,centerFrequency]).postln;}
+        {i==6} {synth.set(\centerFrequency6, centerFrequency); ([i,centerFrequency]).postln;}
+        {i==7} {synth.set(\centerFrequency7, centerFrequency); ([i,centerFrequency]).postln;}
+        {i==8} {synth.set(\centerFrequency8, centerFrequency); ([i,centerFrequency]).postln;}
+        {i==9} {synth.set(\centerFrequency9, centerFrequency); ([i,centerFrequency]).postln;}
+        {i==10} {synth.set(\centerFrequency10, centerFrequency); ([i,centerFrequency]).postln;}
+        {i==11} {synth.set(\centerFrequency11, centerFrequency); ([i,centerFrequency]).postln;}
+        {i==12} {synth.set(\centerFrequency12, centerFrequency); ([i,centerFrequency]).postln;}
+        {i==13} {synth.set(\centerFrequency13, centerFrequency); ([i,centerFrequency]).postln;}
+        {i==14} {synth.set(\centerFrequency14, centerFrequency); ([i,centerFrequency]).postln;}
+        {i==15} {synth.set(\centerFrequency15, centerFrequency); ([i,centerFrequency]).postln;}
+        {i==16} {synth.set(\centerFrequency16, centerFrequency); ([i,centerFrequency]).postln;};
 
     });
 
@@ -425,7 +433,6 @@ Engine_Splnkr : CroneEngine {
         {i==14} {synth.set(\reciprocalQuality14, reciprocalQuality)}
         {i==15} {synth.set(\reciprocalQuality15, reciprocalQuality)}
         {i==16} {synth.set(\reciprocalQuality16, reciprocalQuality)};
-
     });
 
 
