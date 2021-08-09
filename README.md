@@ -64,20 +64,32 @@ clips may be recorded from the PARAMETERS>EDIT menu. what gets recorded depends 
 
 ## filterbank/grid interface
 
-parameters for the 16 channel filterbank may be controlled via the params menu or using the grid
+parameters for the 16 channel filterbank may be controlled via the params menu or using the grid.
 
-each channel has three parameters: 
+each filter "channel" has three parameters: 
 * channel level (amp)
 * reciprocal quality (rq)
 * center frequency (cf)
 
 ### grid controls
-each of the three parameters may be accessed using by toggling between first three buttons on the grid's bottom row 
+*parameter adjustment*
+the top 7 buttons in each row indicate the intensity of the setting for the specified parameter (i.e. none of the top 7 buttons are lit indicates lowest intensity and all 7 buttons lit means indicates highest intensity.)
 
-the fifth and sixth buttons on the grid's bottom row control animation options for each of the three filter channel parameters:
+selecting a button sets the intensity for the active  parameter. selecting a button that is already lit sets the parameter to its lowest value.
 
-button 5: pressing this button sweeps the values of each channel to the left cycling the values around to the far right channel after the values pass by the far left channel. if lit, pressing the button again turns off the animation.
-button 6: pressing this button sweeps the values of each channel to the upwards, cycling back to the channel's min value when the max value is reached. if lit, pressing the button again turns off the animation.
+*toggling between parameters*
+each of the three parameters listed above may be controled via the grid by toggling between first three buttons on the grid's bottom row.
+
+*animation controls*
+the 5th and 6th buttons on the grid's bottom row control animation options for each of the three filter channel parameters:
+
+*button 5*: pressing this button sweeps the values of each channel to the left cycling the values around to the far right channel after the values pass by the far left channel. if lit, pressing the button again turns off the animation.
+*button 6*: pressing this button sweeps the values of each channel to the upwards, cycling back to the channel's min value when the max value is reached. if lit, pressing the button again turns off the animation.
+
+selecting a buttons 5 or 6 when they are already lit turns off the animation for the selected filter parameter
+
+*parameter overlay*
+selecting button 8 on the bottom row turns overlays the values of all three filter parameters over one another, making it easier to see how they interact, especially with animation turned on.
 
 ## effects
 

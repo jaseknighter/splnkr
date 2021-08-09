@@ -37,7 +37,8 @@ function parameters.init()
   for i=1,16,1 do
     params:add_control("filter_level"..i,"filter level"..i,cs_level)
     -- params:set("filter_level"..i,1.6, false)
-    local default_val = ((i-1)%5)+2
+    -- local default_val = ((i-1)%5)+2
+    local default_val = i%4==1 and 6 or 0
     default_val = util.linlin(1,9,0,1.6,default_val)
     params:set("filter_level"..i,default_val, false)
     params:set_action("filter_level"..i,function(x) 

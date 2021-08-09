@@ -16,6 +16,7 @@ function _grid.init()
   _grid.solids = {}
   _grid.animator = {0,0,0}
   _grid.animation_mode = {0,0,0}
+  _grid.filter_param_overlay = false
   _grid.frame = 0
   _grid.last_known_width = g.cols
   _grid.last_known_height = g.rows
@@ -42,7 +43,7 @@ function g.key(x, y, z)
   -- fn.dirty_screen(true)
   if z == 1 then
     _grid.counter[x][y] = clock.run(_grid.grid_long_press, g, x, y)
-    if y<8 or (x<=3 or (x>4 and x<7)) then
+    if y<8 or (x<=3 or (x>4 and x<7) or x == 8) then
       _grid:short_press(x,y) -- and execute a short press instead.
     end
   end
@@ -109,6 +110,12 @@ function _grid:short_press(x, y, from_view)
         self.animation_mode[_grid.active_view] = x==5 and 1 or 2
         _grid.animator[_grid.active_view] = self.animation_mode[_grid.active_view]
       end
+    elseif x == 8 then 
+      if self.filter_param_overlay == true then 
+        self.filter_param_overlay = false
+      else
+        self.filter_param_overlay = true
+      end
     end
     _grid.dirty_grid(true)
   end
@@ -166,10 +173,10 @@ function _grid:register_solid_at(x, y, active_led, view)
   solid.origin_frame = self.frame
   solid.active_led = active_led and active_led or nil
   if y<8 then 
-    solid.level = 5
+    solid.level = 10
   elseif x~=4 and x~=7 then
     if x <= 3 or _grid.animator[_grid.active_view] > 0 then
-      solid.level = 5
+      solid.level = 10
     else
       solid.level = 0
     end
@@ -181,19 +188,30 @@ function _grid:register_solid_at(x, y, active_led, view)
 end
   
 function _grid:draw_led_solids()
-  for i=1,16,1 do
-    -- if self.solids[i] == nil then break end
-    for k, v in pairs(self.solids[self.active_view][i]) do
-      -- if v.level == 0 or v.origin_frame + 2 < self.frame then
-      if v.level == 0 then
-        table.remove(self.solids[self.active_view][i], k)
-      else
-        g:led(v.x, v.y, v.level)
-        -- v.level = v.level - 1
+  for i=1,3,1 do
+    for j=1,16,1 do
+      -- for k, v in pairs(self.solids[self.active_view][j]) do
+      for k, v in pairs(self.solids[i][j]) do
+        if v.level == 0 then
+          -- table.remove(self.solids[self.active_view][j], k)
+          table.remove(self.solids[i][j], k)
+        else
+          if i == self.active_view then
+            g:led(v.x, v.y, v.level)
+          end
+          if self.filter_param_overlay == true then
+            if i== 1 and i ~= self.active_view then
+              g:led(v.x, v.y, 2)
+            elseif i== 2  and i ~= self.active_view then
+              g:led(v.x, v.y, 4)
+            elseif i== 3  and i ~= self.active_view then
+              g:led(v.x, v.y, 6)
+            end
+          end
+        end
       end
     end
   end
-  
 end
 
 function _grid:register_flicker_at(x, y)
@@ -262,8 +280,9 @@ function _grid:animate()
 end
 
 function _grid:draw_spacers()
-  g:led(4, 8, 3)
-  g:led(7, 8, 3)
+  g:led(4, 8, 2)
+  g:led(7, 8, 2)
+  g:led(9, 8, 2)
 end
 
 function _grid:draw_animation_indicators()
@@ -276,6 +295,13 @@ function _grid:draw_animation_indicators()
   end
 end
 
+function _grid:draw_filter_param_overlay()
+  if self.filter_param_overlay == true then
+    g:led(8, 8, 10)
+  else
+    g:led(8, 8, 0)
+  end
+end
 function _grid:draw_active_view()
   g:led(self.active_view, 8, 7)
 end
@@ -287,6 +313,7 @@ function _grid:grid_redraw()
   -- self:draw_led_flickers()
   self:draw_spacers()  
   self:draw_animation_indicators()
+  self:draw_filter_param_overlay()
   self:draw_led_solids()
 
   -- draw active_view
