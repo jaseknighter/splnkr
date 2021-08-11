@@ -1,5 +1,9 @@
 # splnkr
- amplitude tracking sequencer/sampler for monome norns
+this script is something like an amplitude/frequency tracking sequencer/sampler/effects processor for monome norns with a set of 16 grid-controlled bandpass filters. 
+
+features to consider adding: convolution reverb, multitap delay, envelopes for samples/live input (kinda like in MI Beads).
+
+*note*:  
 
 *additional documentation in progress*
 
@@ -10,15 +14,15 @@
 
 (restart after installing)
 
-### IMPORTANT: prior to running the splnkr script:
+<!-- ### IMPORTANT: prior to running the splnkr script:
 * open a terminal/powershell
 * ssh to norns (`ssh we@norns.local`) and login
 * run this code to reset, recompile, and reconnect jacks: 
 
-  ```~/norns/stop.sh; sleep 1; ~/norns/start.sh; sleep 9; jack_disconnect crone:output_5 SuperCollider:in_1; jack_disconnect crone:output_6 SuperCollider:in_2; jack_connect softcut:output_1 SuperCollider:in_1; jack_connect softcut:output_2 SuperCollider:in_2```
+  ```~/norns/stop.sh; sleep 1; ~/norns/start.sh; sleep 9; jack_disconnect crone:output_5 SuperCollider:in_1; jack_disconnect crone:output_6 SuperCollider:in_2; jack_connect softcut:output_1 SuperCollider:in_1; jack_connect softcut:output_2 SuperCollider:in_2``` -->
 
 ### norns ui: key/encoder controls
-access instructions for key/encoder controls within the script by pressing k1+e3
+<!-- access instructions for key/encoder controls within the script by pressing k1+e3 -->
 
 * All screens
   * e2: next/prev control
