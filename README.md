@@ -1,13 +1,11 @@
 # splnkr
 this script is something like an amplitude/frequency tracking sequencer/sampler/effects processor for monome norns with a set of 16 grid-controlled bandpass filters. 
 
-features to consider adding: convolution reverb, multitap delay, envelopes for samples/live input (kinda like in MI Beads).
-
-*note*:  
+features to add: convolution reverb, multitap delay, a note/drum/effect sequencer.
 
 *additional documentation in progress*
 
-*warning*: animating the center frequency with the grid interface can result in loud percussive sounds. use caution!
+*IMPORTANT WARNING*: animating the center frequency with the grid interface can result in loud percussive sounds. use caution!
 
 ## installation from maiden
 `;install https://github.com/jaseknighter/splnkr`
