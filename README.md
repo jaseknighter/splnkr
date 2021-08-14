@@ -101,11 +101,18 @@ selecting button 8 on the bottom row turns overlays the values of all three filt
 
 current basic effects (to be enhanced) are available in the params menu: pitchshift, phaser, delay, strobe
 
+## audio routing
+in the params menu, three options may be selected for how audio is routed to the supercollider engine:
+
+* audio in + softcut out -> engine 
+* audio in only -> engine
+* softcut out only -> engine
+
 ## outputs 
 
 midi, crow, jf, and w/ outputs are avaiable in the params menu (lots of bugs here to sort out). 
 
-*to be documented*: explanation of how SuperCollider pitch/frequency tracking is sent to the outputs
+*to be documented*: explanation of how SuperCollider pitch/frequency tracking is sent to the outputs.
  
 ## recording clips
 clips may be recorded from the PARAMETERS>EDIT menu. what gets recorded depends on the `play mode` setting:
