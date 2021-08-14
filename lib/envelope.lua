@@ -128,6 +128,7 @@ function Envelope:new(id, num_envelopes, env_nodes)
     end
   end
   
+  --[[
   e.modulate_env = function()
   
     ------------------------------------
@@ -184,7 +185,8 @@ function Envelope:new(id, num_envelopes, env_nodes)
       end
     end
   end
-  
+  ]]
+
   --------------------------
   -- init
   --------------------------
@@ -250,6 +252,7 @@ function Envelope:new(id, num_envelopes, env_nodes)
       e.graph:set_y_max(e.env_level_max)  
       if initializing == false then params:set("envelope" .. active_envelope .. "_max_level", e.env_level_max) end
     end
+    e.update_envelope()
   end
   
   e.set_active = function(is_active)
@@ -257,22 +260,24 @@ function Envelope:new(id, num_envelopes, env_nodes)
   end
   
   e.update_envelope = function()
+    print("update_env")
+    if initializing == false then
+      engine.set_numSegs(#e.graph_nodes)
+      
+      local env_arrays = e.get_envelope_arrays()
+      -- note: to prevent warning messages when changing the number of envelope segments 
+      --        (warnings like: "warning: wrong count of arguments for command 'set_env_levels'")
+      --        the envelope arrays are filled in  with zeros.
+      --        these zero values will be ignored by the engine
+      add_nil_values_to_array(env_arrays.levels,MAX_ENVELOPE_NODES)
+      add_nil_values_to_array(env_arrays.times,MAX_ENVELOPE_NODES)
+      add_nil_values_to_array(env_arrays.curves,MAX_ENVELOPE_NODES)
+      engine.set_env_levels(table.unpack(env_arrays.levels))
+      engine.set_env_times(table.unpack(env_arrays.times))
+      engine.set_env_curves(table.unpack(env_arrays.curves))
 
-    -- engine.set_numSegs(#e.graph_nodes)
-    
-    local env_arrays = e.get_envelope_arrays()
-    -- note: to prevent warning messages when changing the number of envelope segments 
-    --        (warnings like: "warning: wrong count of arguments for command 'set_env_levels'")
-    --        the envelope arrays are filled in  with zeros.
-    --        these zero values will be ignored by the engine
-    add_nil_values_to_array(env_arrays.levels,MAX_ENVELOPE_NODES)
-    add_nil_values_to_array(env_arrays.times,MAX_ENVELOPE_NODES)
-    add_nil_values_to_array(env_arrays.curves,MAX_ENVELOPE_NODES)
-  
-    engine.set_env_levels(table.unpack(env_arrays.levels))
-    engine.set_env_times(table.unpack(env_arrays.times))
-    engine.set_env_curves(table.unpack(env_arrays.curves))
-    set_dirty = true
+      set_dirty = true
+    end
 
   end
 

@@ -24,7 +24,9 @@ features to consider adding: convolution reverb, multitap delay, envelopes for s
 ### norns ui: key/encoder controls
 <!-- access instructions for key/encoder controls within the script by pressing k1+e3 -->
 
+*Page 1: sample selector/slicer*
 * All screens
+  * e1: previous page 
   * e2: next/prev control
 * Screen 1: select/play sample 
   * k2: select sample to slice up
@@ -56,6 +58,17 @@ features to consider adding: convolution reverb, multitap delay, envelopes for s
 * Screen 7: autogenerate cutters
   * e3: autogenerate clips by level (up to 20)
   * k1 + e3: autogenerate clips with even spacing (up to 20)
+
+*Page 2: envelope*
+* e1: previous page 
+<!-- * k1 + e1: select active plant   -->
+* e2: select envelope control  
+* e3: change envelope control value  
+* k2/k3: delete/add envelope control point  
+
+the envelope is used with/sent to external devices (crow, jf, midi, w/). 
+
+it also sets the envelope that is built into the supercollider splnkr engine. in the params menu, use the *enveloping* param to activate live signal enveloping.
 
 ### recording clips
 clips may be recorded from the PARAMETERS>EDIT menu. what gets recorded depends on the `play mode` setting:

@@ -66,6 +66,7 @@ function sample_player.load_file(file)
     sample_player.init_cutters()
     sample_player.reset()
     waveform_loaded = true
+    new_sample_load_completed()
   else
     sample_player.update()
   end

@@ -206,7 +206,8 @@ midi_event = function(data)
           -- end
           -- clock.run(plants[1].sounds.externals1.note_on,1, note_to_play, freq, random_note_frequency, nil,"midi")
           -- clock.run(externals1.note_on,1, note_to_play, freq, random_note_frequency, nil,"midi")
-          externals1.note_on(1, note_to_play, freq, random_note_frequency, nil,"midi")
+          -- externals1.note_on(1, note_to_play, freq, random_note_frequency, nil,"midi")
+          clock.run(externals1.note_on,1, note_to_play, freq, random_note_frequency, nil,"midi")
         end
         if data[1] == midi_in_command2 then -- plant 2 engine note on
           envelopes[2].update_envelope()

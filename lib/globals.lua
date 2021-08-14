@@ -4,6 +4,17 @@
 -- global functions
 -------------------------------------------
 
+round_decimals = function (value_to_round, num_decimals, rounding_direction)
+  local rounded_val
+  local mult = 10^num_decimals
+  if rounding_direction == "up" then
+    rounded_val = math.floor(value_to_round * mult + 0.5) / mult
+  else
+    rounded_val = math.floor(value_to_round * mult + 0.5) / mult
+  end
+  return rounded_val
+end
+
 -------------------------------------------
 -- global variables
 -------------------------------------------
@@ -49,9 +60,13 @@ envelopes = {}
 active_envelope = 1
 num_envelopes = 1
 
-envelope1_times = {"envelope1_time1","envelope1_time2","envelope1_time3","envelope1_time4","envelope1_time5","envelope1_time6","envelope1_time7","envelope1_time8","envelope1_time9","envelope1_time10","envelope1_time11","envelope1_time12","envelope1_time13","envelope1_time14","envelope1_time15","envelope1_time16","envelope1_time17","envelope1_time18","envelope1_time19","envelope1_time20"}
-envelope1_levels = {"envelope1_level1","envelope1_level2","envelope1_level3","envelope1_level4","envelope1_level5","envelope1_level6","envelope1_level7","envelope1_level8","envelope1_level9","envelope1_level10","envelope1_level11","envelope1_level12","envelope1_level13","envelope1_level14","envelope1_level15","envelope1_level16","envelope1_level17","envelope1_level18","envelope1_level19","envelope1_level20"}
-envelope1_curves = {"envelope1_curve1","envelope1_curve2","envelope1_curve3","envelope1_curve4","envelope1_curve5","envelope1_curve6","envelope1_curve7","envelope1_curve8","envelope1_curve9","envelope1_curve10","envelope1_curve11","envelope1_curve12","envelope1_curve13","envelope1_curve14","envelope1_curve15","envelope1_curve16","envelope1_curve17","envelope1_curve18","envelope1_curve19","envelope1_curve20"}
+envelope1_times = {"envelope1_time1","envelope1_time2","envelope1_time3","envelope1_time4","envelope1_time5","envelope1_time6","envelope1_time7","envelope1_time8"}
+envelope1_levels = {"envelope1_level1","envelope1_level2","envelope1_level3","envelope1_level4","envelope1_level5","envelope1_level6","envelope1_level7","envelope1_level8"}
+envelope1_curves = {"envelope1_curve1","envelope1_curve2","envelope1_curve3","envelope1_curve4","envelope1_curve5","envelope1_curve6","envelope1_curve7","envelope1_curve8"}
+
+-- envelope1_times = {"envelope1_time1","envelope1_time2","envelope1_time3","envelope1_time4","envelope1_time5","envelope1_time6","envelope1_time7","envelope1_time8","envelope1_time9","envelope1_time10","envelope1_time11","envelope1_time12","envelope1_time13","envelope1_time14","envelope1_time15","envelope1_time16","envelope1_time17","envelope1_time18","envelope1_time19","envelope1_time20"}
+-- envelope1_levels = {"envelope1_level1","envelope1_level2","envelope1_level3","envelope1_level4","envelope1_level5","envelope1_level6","envelope1_level7","envelope1_level8","envelope1_level9","envelope1_level10","envelope1_level11","envelope1_level12","envelope1_level13","envelope1_level14","envelope1_level15","envelope1_level16","envelope1_level17","envelope1_level18","envelope1_level19","envelope1_level20"}
+-- envelope1_curves = {"envelope1_curve1","envelope1_curve2","envelope1_curve3","envelope1_curve4","envelope1_curve5","envelope1_curve6","envelope1_curve7","envelope1_curve8","envelope1_curve9","envelope1_curve10","envelope1_curve11","envelope1_curve12","envelope1_curve13","envelope1_curve14","envelope1_curve15","envelope1_curve16","envelope1_curve17","envelope1_curve18","envelope1_curve19","envelope1_curve20"}
 
 -- plow2_times = {"plow2_time1","plow2_time2","plow2_time3","plow2_time4","plow2_time5","plow2_time6","plow2_time7","plow2_time8","plow2_time9","plow2_time10","plow2_time11","plow2_time12","plow2_time13","plow2_time14","plow2_time15","plow2_time16","plow2_time17","plow2_time18","plow2_time19","plow2_time20"}
 -- plow2_levels = {"plow2_level1","plow2_level2","plow2_level3","plow2_level4","plow2_level5","plow2_level6","plow2_level7","plow2_level8","plow2_level9","plow2_level10","plow2_level11","plow2_level12","plow2_level13","plow2_level14","plow2_level15","plow2_level16","plow2_level17","plow2_level18","plow2_level19","plow2_level20"}

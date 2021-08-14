@@ -1,16 +1,23 @@
-// CroneEngine_Splnkr
 // Inspirations:
 //   @infinitedigits/@schollz StoneSoup (https://github.com/schollz/stonesoup)
 //   @markeats/@markwheeler Passerby (https://github.com/markwheeler/passersby)
+//   @tyleretters Dronecaster (https://llllllll.co/t/34737)
 
 Engine_Splnkr : CroneEngine {
-  var <synth;
+  classvar maxNumVoices = 1;
+  var voiceGroup;
+  var voiceList;
+
+  // var <splnkrVoice;
   var numOutValues = 2;
   var pollFunc;
   var outArray;
   var amplitudeDetectPoll1,amplitudeDetectPoll2,amplitudeDetectPoll3,amplitudeDetectPoll4;
   var frequencyDetectPoll1, frequencyDetectPoll2, frequencyDetectPoll3, frequencyDetectPoll4;
 
+  var maxsegments = 20;
+  var numSegs, envLevels, envTimes, envCurves;
+  
   var wobble_rpm=33;
   var wobble_amp=0.05; 
   var wobble_exp=39;
@@ -40,12 +47,23 @@ Engine_Splnkr : CroneEngine {
   var filterLevel5=1,centerFrequency15=440, reciprocalQuality15=1;
   var filterLevel6=1, centerFrequency16=440, reciprocalQuality16=1;
   
+  var splnkrDef, splnkrVoice;
+  var slpnkr_audio;
+  
+  var wet, dry;
+  var h, e;
+
   *new { arg context, doneCallback;
     ^super.new(context, doneCallback);
   }
 
   alloc {
-    synth = {
+    voiceGroup = Group.new(context.xg);
+    voiceList = List.new();
+    h = Signal.hanningWindow(1000);
+    e = Buffer.loadCollection(context.server, h, 1);
+    
+    splnkrDef = SynthDef(\SplnkrSynth, {
       arg amp=1,bpm=120,drywet=1,
       ampMin=ampMinArray, ampMax=ampMaxArray, 
       freqMin=freqMinArray, freqMax=freqMaxArray,
@@ -68,65 +86,68 @@ Engine_Splnkr : CroneEngine {
       filterLevel13=1, centerFrequency13=440, reciprocalQuality13=1, 
       filterLevel14=1, centerFrequency14=440, reciprocalQuality14=1, 
       filterLevel15=1, centerFrequency15=440, reciprocalQuality15=1, 
-      filterLevel16=1, centerFrequency16=440, reciprocalQuality16=1; 
+      filterLevel16=1, centerFrequency16=440, reciprocalQuality16=1,
+      envTime1=0, envLevel1=1, envCurve1=0, 
+      envTime2=1, envLevel2=1, envCurve2=0, 
+      envTime3=1, envLevel3=1, envCurve3=0, 
+      envTime4=1, envLevel4=1, envCurve4=0, 
+      envTime5=1, envLevel5=1, envCurve5=0, 
+      envTime6=1, envLevel6=1, envCurve6=0, 
+      envTime7=1, envLevel7=1, envCurve7=0, 
+      envTime8=0, envLevel8=0, envCurve8=0,
 
-      var wet,dry,detect,detectAmp,detectFreq;
+      envBuf, enveloper = 1, trigRate = 50, overlap = 0.5, panMax = 0.5,
+      panType = 0, minGrainDur = 0.001, interpolation = 4; 
+      
+      
+
+      // var wet,dry;
+      var detect,detectAmp,detectFreq;
       
 
       var in,freq,hasFreq,out,trig,notes,noteAdder=0; // autotune vars
       var bpf1,bpf2,bpf3,bpf4,bpf5,bpf6,bpf7,bpf8,bpf9,bpf10,bpf11,bpf12,bpf13,bpf14,bpf15,bpf16;
-      
+      var env, envctl;
+
+      var inSig, numFrames, startTrig, grainDur,
+        latchedTrigRate, latchedStartTrig, latchedOverlap, pan, sig;
+
+      // env = Env.newClear(maxsegments);
+      // envctl = \env.kr(env.asArray);
+
       ampMinArray=Array.fill(4,{0.001});
       ampMaxArray=Array.fill(4,{0.999}); 
       freqMinArray=Array.fill(4,{40}); 
       freqMaxArray=Array.fill(4,{1200});
 
-
-      // alt flutter and wow code
-      // var signed_wobble = wobble_amp*(SinOsc.kr(wobble_rpm/60)**wobble_exp);
-      // var wow = Select.kr(signed_wobble > 0, signed_wobble, 0);
-      // var flutter = flutter_amp*SinOsc.kr(flutter_fixedfreq+LFNoise2.kr(flutter_variationfreq));
-      // var combined_defects = 1 + wow + flutter;
-
-      dry = SoundIn.ar([0,1]);
       wet = SoundIn.ar([0,1]);
+      dry = SoundIn.ar([0,1]);
 
-      bpf1 = SoundIn.ar([0,1]);
-      bpf2 = SoundIn.ar([0,1]);
-      bpf3 = SoundIn.ar([0,1]);
-      bpf4 = SoundIn.ar([0,1]);
-      bpf5 = SoundIn.ar([0,1]);
-      bpf6 = SoundIn.ar([0,1]);
-      bpf7 = SoundIn.ar([0,1]);
-      bpf8 = SoundIn.ar([0,1]);
-      bpf9 = SoundIn.ar([0,1]);
-      bpf10 = SoundIn.ar([0,1]);
-      bpf11 = SoundIn.ar([0,1]);
-      bpf12 = SoundIn.ar([0,1]);
-      bpf13 = SoundIn.ar([0,1]);
-      bpf14 = SoundIn.ar([0,1]);
-      bpf15 = SoundIn.ar([0,1]);
-      bpf16 = SoundIn.ar([0,1]);
-      
+      //////////////////////////////////////////
+      // bpf, pitch/amp detection
+      //////////////////////////////////////////
 
-      bpf1 = BPF.ar(wet,centerFrequency1,reciprocalQuality1);
-      bpf2 = BPF.ar(wet,centerFrequency2,reciprocalQuality2);
-      bpf3 = BPF.ar(wet,centerFrequency3,reciprocalQuality3);
-      bpf4 = BPF.ar(wet,centerFrequency4,reciprocalQuality4);
-      bpf5 = BPF.ar(wet,centerFrequency5,reciprocalQuality5);
-      bpf6 = BPF.ar(wet,centerFrequency6,reciprocalQuality6);
-      bpf7 = BPF.ar(wet,centerFrequency7,reciprocalQuality7);
-      bpf8 = BPF.ar(wet,centerFrequency8,reciprocalQuality8);
-      bpf9 = BPF.ar(wet,centerFrequency9,reciprocalQuality9);
-      bpf10 = BPF.ar(wet,centerFrequency10,reciprocalQuality10);
-      bpf11 = BPF.ar(wet,centerFrequency11,reciprocalQuality11);
-      bpf12 = BPF.ar(wet,centerFrequency12,reciprocalQuality12);
-      bpf13 = BPF.ar(wet,centerFrequency13,reciprocalQuality13);
-      bpf14 = BPF.ar(wet,centerFrequency14,reciprocalQuality14);
-      bpf15 = BPF.ar(wet,centerFrequency15,reciprocalQuality15);
-      bpf16 = BPF.ar(wet,centerFrequency16,reciprocalQuality16);
+      // amplitude compensation for lower rq of bandpass filter
+      bpf1 = BPF.ar(wet,centerFrequency1,reciprocalQuality1, (reciprocalQuality1 ** -1) * (400 / centerFrequency1 ** 0.5));
+      bpf2 = BPF.ar(wet,centerFrequency2,reciprocalQuality2, (reciprocalQuality2 ** -1) * (400 / centerFrequency2 ** 0.5));
+      bpf3 = BPF.ar(wet,centerFrequency3,reciprocalQuality3, (reciprocalQuality3 ** -1) * (400 / centerFrequency3 ** 0.5));
+      bpf4 = BPF.ar(wet,centerFrequency4,reciprocalQuality4, (reciprocalQuality4 ** -1) * (400 / centerFrequency4 ** 0.5));
+      bpf5 = BPF.ar(wet,centerFrequency5,reciprocalQuality5, (reciprocalQuality5 ** -1) * (400 / centerFrequency5 ** 0.5));
+      bpf6 = BPF.ar(wet,centerFrequency6,reciprocalQuality6, (reciprocalQuality6 ** -1) * (400 / centerFrequency6 ** 0.5));
+      bpf7 = BPF.ar(wet,centerFrequency7,reciprocalQuality7, (reciprocalQuality7 ** -1) * (400 / centerFrequency7 ** 0.5));
+      bpf8 = BPF.ar(wet,centerFrequency8,reciprocalQuality8, (reciprocalQuality8 ** -1) * (400 / centerFrequency8 ** 0.5));
+      bpf9 = BPF.ar(wet,centerFrequency9,reciprocalQuality9, (reciprocalQuality9 ** -1) * (400 / centerFrequency9 ** 0.5));
+      bpf10 = BPF.ar(wet,centerFrequency10,reciprocalQuality10, (reciprocalQuality10 ** -1) * (400 / centerFrequency10 ** 0.5));
+      bpf11 = BPF.ar(wet,centerFrequency11,reciprocalQuality11, (reciprocalQuality11 ** -1) * (400 / centerFrequency11 ** 0.5));
+      bpf12 = BPF.ar(wet,centerFrequency12,reciprocalQuality12, (reciprocalQuality12 ** -1) * (400 / centerFrequency12 ** 0.5));
+      bpf13 = BPF.ar(wet,centerFrequency13,reciprocalQuality13, (reciprocalQuality13 ** -1) * (400 / centerFrequency13 ** 0.5));
+      bpf14 = BPF.ar(wet,centerFrequency14,reciprocalQuality14, (reciprocalQuality14 ** -1) * (400 / centerFrequency14 ** 0.5));
+      bpf15 = BPF.ar(wet,centerFrequency15,reciprocalQuality15, (reciprocalQuality15 ** -1) * (400 / centerFrequency15 ** 0.5));
+      bpf16 = BPF.ar(wet,centerFrequency16,reciprocalQuality16, (reciprocalQuality16 ** -1) * (400 / centerFrequency16 ** 0.5));
+
       
       wet = (bpf1*filterLevel1)+(bpf2*filterLevel2)+(bpf3*filterLevel3)+(bpf4*filterLevel4)+(bpf5*filterLevel5)+(bpf6*filterLevel6)+(bpf7*filterLevel7)+(bpf8*filterLevel8)+(bpf9*filterLevel9)+(bpf10*filterLevel10)+(bpf11*filterLevel11)+(bpf12*filterLevel12)+(bpf13*filterLevel13)+(bpf14*filterLevel14)+(bpf15*filterLevel15)+(bpf16*filterLevel16);
+      // wet = (bpf1)+(bpf2)+(bpf3)+(bpf4)+(bpf5)+(bpf6)+(bpf7)+(bpf8)+(bpf9)+(bpf10)+(bpf11)+(bpf12)+(bpf13)+(bpf14)+(bpf15)+(bpf16);
       // wet = Mix.ar[bpf1,bpf2,bpf3,bpf4,bpf5,bpf6,bpf7,bpf8,bpf9,bpf10,bpf11,bpf12,bpf13,bpf14,bpf15,bpf16];
 
 
@@ -148,13 +169,82 @@ Engine_Splnkr : CroneEngine {
       notes = Dseq([0,4,5], inf);
     	# freq, hasFreq = Tartini.kr(wet);
 
+      // outputArray to send to polls
+      outArray = Array.fill(numOutValues, 0);
+      outArray[0] = detectAmp; // amplitude detection
+      outArray[1] = freq; // frequency
+      SendReply.kr(Impulse.kr(10), '/triggerPolls', outArray);
+      
+
+
+
+      //////////////////////////////////////////
+      // granular enveloping
+      //////////////////////////////////////////
+      
+
+      // inSig = DelayC.ar(LPF.ar(inSig.tanh, 2000), 0.1, 0.01);
+      wet = DelayC.ar(LPF.ar(wet.tanh, 2000), 0.1, 0.01);
+
+      startTrig = Impulse.ar(trigRate);
+      // why this ? - shape of envelope shouldn't be changed while application
+      
+      latchedTrigRate = Latch.ar(K2A.ar(trigRate), startTrig);
+      latchedStartTrig = Impulse.ar(latchedTrigRate);
+      latchedOverlap = Latch.ar(K2A.ar(overlap), startTrig);
+
+      latchedOverlap = max(latchedOverlap, latchedTrigRate * minGrainDur);
+      grainDur = (latchedOverlap / latchedTrigRate);
+
+      // h = Env.xyc(env).asSignal(1000);
+      // h = Env.new(levels: [1, 0, 1], times: [0.5, 0.5], curve: [5, -5]).asSignal(length:1000);
+      // h = Signal.hanningWindow(1000);
+      // e = Buffer.loadCollection(context.server, h, 1);
+      // context.server.sync;
+      envBuf = e.bufnum;
+      numFrames = BufFrames.kr(envBuf);
+      // numFrames.poll;
+
+      env = BufRd.ar(
+          1,
+          envBuf,
+          Sweep.ar(
+              latchedStartTrig,
+              latchedOverlap.reciprocal * latchedTrigRate * numFrames,
+          ).clip(0, numFrames - 1),
+          interpolation: interpolation
+      );
+
+      pan = Demand.ar(
+          latchedStartTrig,
+          0,
+          Dswitch1([
+              Dseq([1, -1], inf),
+              Dwhite(-1, 1)
+          ], panType)
+      ) * panMax * 0.999;
+
+      // wet = Pan2.ar(wet * env * amp, pan) * EnvGate.new;
+      (enveloper).poll;
+
+      if (enveloper == 1, {
+        // wet = (wet * env * amp);
+        // wet = Pan2.ar(wet, pan) * EnvGate.new;
+      },{ wet = wet });
+      wet = (Pan2.ar(wet * env * amp, pan) * EnvGate.new * enveloper) + wet;
+      //////////////////////////////////////////
+      // other effects
+      //////////////////////////////////////////
+      
       // TODO: what is a good order for these?
       // TODO: explode some options
       
       // delay 
+
+
       wet = (wet*(1-effect_delay))+(effect_delay*CombC.ar(wet,5,0.2,4));
 
-      // pitch shift
+      // // pitch shift
       wet = (wet*(1-effect_pitchshift))+(effect_pitchshift*PitchShift.ar(
         wet,
         0.1,
@@ -179,52 +269,40 @@ Engine_Splnkr : CroneEngine {
       // strobe
       wet = ((effect_strobe<1)*wet)+((effect_strobe>0)*wet*SinOsc.ar(bpm/60));
 
+            // vinyl wow + compressor
+      wet=(effect_vinyl<1*wet)+(effect_vinyl>0* Limiter.ar(Compander.ar(wet,wet,0.5,1.0,0.1,0.1,1,2),dur:0.0008));
+      wet =(effect_vinyl<1*wet)+(effect_vinyl>0* DelayC.ar(wet,0.01,VarLag.kr(LFNoise0.kr(1),1,warp:\sine).range(0,0.01)));                
+      
+      // alt flutter and wow code
+      // var signed_wobble = wobble_amp*(SinOsc.kr(wobble_rpm/60)**wobble_exp);
+      // var wow = Select.kr(signed_wobble > 0, signed_wobble, 0);
+      // var flutter = flutter_amp*SinOsc.kr(flutter_fixedfreq+LFNoise2.kr(flutter_variationfreq));
+      // var combined_defects = 1 + wow + flutter;
+
       // flutter + wow
       // wet = wet * combined_defects;
 
-
-      // vinyl wow + compressor
-      wet=(effect_vinyl<1*wet)+(effect_vinyl>0* Limiter.ar(Compander.ar(wet,wet,0.5,1.0,0.1,0.1,1,2),dur:0.0008));
-      wet =(effect_vinyl<1*wet)+(effect_vinyl>0* DelayC.ar(wet,0.01,VarLag.kr(LFNoise0.kr(1),1,warp:\sine).range(0,0.01)));                
-      // TODO: add bandpass + vinyl sound for vinyl effect?
-
-      // TODO: RLPF?
-
-      // TODO: RHPF?
-
-      // TODO: flanger?
-
-      // TODO: pitch shifter?
-
-      // TODO: greyhole?
-
-      // TOOD: stutter?
-
-      // TODO: your favorite ??????
-
       
-      // outputArray to send to polls
-      outArray = Array.fill(numOutValues, 0);
-      outArray[0] = detectAmp; // amplitude detection
-      outArray[1] = freq; // frequency
-      SendReply.kr(Impulse.kr(10), '/triggerPolls', outArray);
+      //////////////////////////////////////////
+      // apply lag, remove DC bias, and send the signal out
+      //////////////////////////////////////////
       
-      dry = dry*Lag.kr(amp*(1-drywet),1);
-      // dry = dry*(1-(drywet+0.001));
       wet = wet*Lag.kr(amp*drywet,1);
+      wet = LeakDC.ar(wet, 0.995);
+
+      dry = dry*Lag.kr(amp*(1-drywet),1);
+      // Out.ar(0,Balance2.ar(dry*0.5, wet*0.5, 0));
       // wet = wet*(drywet+0.001);
       // Out.ar(0, [detect, wet]);
       // Out.ar(0, [dry, wet]);
       // Out.ar(0, Mix.new([dry*0.5, wet*0.5]));
-      // Out.ar(0,Balance2.ar(dry*0.5, wet*0.5, 0));
-      Out.ar(0, [wet, wet]);
-    }.play( target: context.xg);
+
+      Out.ar(0,Balance2.ar(dry, wet, 0));
+    }).add;
 
     //trigger Polls
     pollFunc = OSCFunc({
       arg msg;
-      // var ampDetectVal = msg[4].snap(resolution: 0.001, margin: 0.005, strength: 1.0);
-      // var freqDetectVal = msg[5].snap(resolution: 0.001, margin: 0.005, strength: 1.0);
       var ampDetectVal = msg[4];
       var freqDetectVal = msg[3];
       
@@ -238,7 +316,6 @@ Engine_Splnkr : CroneEngine {
             {i==1} {amplitudeDetectPoll2.update(ampDetectVal)}
             {i==2} {amplitudeDetectPoll3.update(ampDetectVal)}
             {i==3} {amplitudeDetectPoll4.update(ampDetectVal)};
-
           case 
             {i==0} {frequencyDetectPoll1.update(freqDetectVal)}
             {i==1} {frequencyDetectPoll2.update(freqDetectVal)}
@@ -246,12 +323,6 @@ Engine_Splnkr : CroneEngine {
             {i==3} {frequencyDetectPoll4.update(freqDetectVal)};
         };
       });
-
-      // frequencyDetectPoll1.update(freqDetectVal);
-      // frequencyDetectPoll2.update(freqDetectVal);
-      // frequencyDetectPoll3.update(freqDetectVal);
-      // frequencyDetectPoll4.update(freqDetectVal);
-      
     }, path: '/triggerPolls', srcID: context.server.addr);
 
     // Polls
@@ -265,183 +336,261 @@ Engine_Splnkr : CroneEngine {
     frequencyDetectPoll4 = this.addPoll(name: "frequencyDetect4", periodic: false);
     
     // Commands
-    this.addCommand("amp", "f", { arg msg;
-      synth.set(\amp, msg[1]);
+    this.addCommand("start_splnkring", "f", { arg msg;
+      var voiceToRemove, newVoice;
+      var id=0;
+      var env;
+      
+      // Replace the existing voice if it exists
+      // voiceToRemove = voiceList.detect{arg item; item.id == id};
+      // if(voiceToRemove.isNil && (voiceList.size >= maxNumVoices), {
+      ([voiceList.size >= maxNumVoices]).postln;
+      if((voiceList.size >= maxNumVoices), {
+        ("remove voice").postln;
+        voiceToRemove = voiceList.detect{arg v; v.gate == 0};
+      	if(voiceToRemove.isNil, {
+      	  voiceToRemove = voiceList.last;
+      	});
+      });
+      
+      if(voiceToRemove.notNil, {
+        voiceToRemove.theSynth.set(\gate, 0);
+        voiceToRemove.theSynth.set(\killGate, 0);
+        voiceToRemove.free;
+        voiceList.remove(voiceToRemove);
+      });
+  			
+
+      // Add new voice 
+      context.server.makeBundle(nil, {
+        id = id+1;
+        newVoice = (id: id, theSynth: Synth("SplnkrSynth",
+        [
+          // \amp, amp,
+          // \env, env,
+        ],
+        target: voiceGroup).onFree({ 
+            voiceList.remove(newVoice); 
+          })
+        );
+        voiceList.addFirst(newVoice);
+        splnkrVoice = voiceList.detect({ arg item, i; item.id == id; });
+        splnkrVoice.postln;
+
+        // splnkrVoice = voiceList.detect{arg v; v.gate == 0};
+        // ("makebundle").postln;
+        // splnkrVoice = voiceList.detect{arg v; 
+        //   v.postln;
+          // v.gate == 0
+        // };
+      });
     });
 
-	
     this.addCommand("amp", "f", { arg msg;
-      synth.set(\amp, msg[1]);
+      splnkrVoice.theSynth.set(\amp, msg[1]);
+    });
+
+    this.addCommand("enveloper", "i", { arg msg;
+      splnkrVoice.theSynth.set(\enveloper, msg[1]);
+    });
+
+    this.addCommand("trig_rate", "f", { arg msg;
+      splnkrVoice.theSynth.set(\trigRate, msg[1]);
+    });
+
+    this.addCommand("overlap", "f", { arg msg;
+      splnkrVoice.theSynth.set(\overlap, msg[1]);
+    });
+    this.addCommand("pan_type", "f", { arg msg;
+      splnkrVoice.theSynth.set(\panType, msg[1]);
+    });
+    this.addCommand("pan_max", "f", { arg msg;
+      splnkrVoice.theSynth.set(\panMax, msg[1]);
     });
 
     this.addCommand("bpm", "f", { arg msg;
-      synth.set(\bpm, msg[1]);
+      splnkrVoice.theSynth.set(\bpm, msg[1]);
     });
 
     this.addCommand("drywet", "f", { arg msg;
-      synth.set(\drywet, msg[1]);
+      splnkrVoice.theSynth.set(\drywet, msg[1]);
     });
 
     this.addCommand("phaser", "f", { arg msg;
-      synth.set(\effect_phaser, msg[1]);
+      splnkrVoice.theSynth.set(\effect_phaser, msg[1]);
     });
 
     this.addCommand("distortion", "f", { arg msg;
-      synth.set(\effect_distortion, msg[1]);
+      splnkrVoice.theSynth.set(\effect_distortion, msg[1]);
     });
 
     this.addCommand("delay", "f", { arg msg;
-      (msg[1]).postln;
-      synth.set(\effect_delay, msg[1]);
+      splnkrVoice.theSynth.set(\effect_delay, msg[1]);
     });
 
     this.addCommand("strobe", "f", { arg msg;
-      synth.set(\effect_strobe, msg[1]);
+      splnkrVoice.theSynth.set(\effect_strobe, msg[1]);
     });
 
     this.addCommand("vinyl", "f", { arg msg;
-      synth.set(\effect_vinyl, msg[1]);
+      splnkrVoice.theSynth.set(\effect_vinyl, msg[1]);
     });
 
     this.addCommand("pitchshift", "f", { arg msg;
-      synth.set(\effect_pitchshift, msg[1]);
+      splnkrVoice.theSynth.set(\effect_pitchshift, msg[1]);
     });
 
     this.addCommand("bitcrush", "fff", { arg msg;
-      synth.set(
+      splnkrVoice.theSynth.set(
         \effect_bitcrush, msg[1],
         \bitcrush_bits, msg[2],
         \bitcrush_rate, msg[3],
       );
     });
 
-    this.addCommand("set_env_levels", "ffffffffffffffffffff", { arg msg;
-      // env_levels = Array.new(~numSegs);
-      // for (0, ~numSegs-1, { arg i;
-      //   var val = msg[i+1];
-      //   env_levels.insert(i,val);
-      // }); 
+    this.addCommand("set_numSegs", "f", { arg msg;
+    	numSegs = msg[1];
     });
 
-    this.addCommand("set_env_times", "ffffffffffffffffffff", { arg msg;
-      // env_times = Array.new(~numSegs);
-      // for (0, ~numSegs-1, { arg i; 
-      //   var val = msg[i+1];
-      //   env_times.insert(i,val);
-      // }); 
+    // this.addCommand("set_env_levels", "ffffffffffffffffffff", { arg msg;
+    this.addCommand("set_env_levels", "ffffffff", { arg msg;
+      envLevels = Array.new(numSegs);
+      for (0, numSegs-1, { arg i;
+        var val = msg[i+1];
+        envLevels.insert(i,val);
+      }); 
+    });
+
+    // this.addCommand("set_env_times", "ffffffffffffffffffff", { arg msg;
+    this.addCommand("set_env_times", "ffffffff", { arg msg;
+      var newEnv, envLength;
+
+      envTimes = Array.new(numSegs);
+      for (0, numSegs-1, { arg i; 
+        var val = msg[i+1];
+        envTimes.insert(i,val);
+      }); 
+      
+
+      newEnv = Array.new(numSegs-1);
+      // (["set env",envLevels, envTimes, envCurves]).postln;
+      for (0, numSegs-1, { arg i;
+        var xycSegment = Array.new(3);
+        xycSegment.insert(0, envTimes[i]);
+        xycSegment.insert(1, envLevels[i]);
+        xycSegment.insert(2, envCurves[i]);
+        newEnv.insert(i,xycSegment);
+      });
+      envLength = envTimes[numSegs-1] * 1000;
+      envLength.postln;
+      h = Env.xyc(newEnv).asSignal(envLength);
+      e.free;
+      e = Buffer.loadCollection(context.server, h, 1);
+      
     });
     
-    this.addCommand("set_env_curves", "ffffffffffffffffffff", { arg msg;
-      // env_curves = Array.new(~numSegs);
-      // for (0, ~numSegs-1, { arg i;
-      //   var val = msg[i+1];
-      //   env_curves.insert(i,val);
-      // }); 
+    // this.addCommand("set_env_curves", "ffffffffffffffffffff", { arg msg;
+    this.addCommand("set_env_curves", "ffffffff", { arg msg;
+      envCurves = Array.new(numSegs);
+      for (0, numSegs-1, { arg i;
+        var val = msg[i+1];
+        envCurves.insert(i,val);
+      }); 
     });
-
-    // var ampMinValVal1=0.1, ampMaxValVal1=0.9, freqMinVal1=40, freqMaxVal1=1200;
 
     this.addCommand("set_detect_amp_min", "if", { arg msg;
       ampMinArray.put(msg[1], msg[2]);
-      synth.set(\ampMin, ampMinArray);
-      // ([ampMinArray[msg[1]],ampMinArray[msg[1]-1],msg[1],msg[2]]).postln;
-      // ([msg[1],msg[1].isInteger,msg[2],msg[2].isInteger]).postln;
+      splnkrVoice.theSynth.set(\ampMin, ampMinArray);
     });
 
     this.addCommand("set_detect_amp_max", "ff", { arg msg;
       ampMaxArray.put(msg[1], msg[2]);
-      synth.set(\ampMax, ampMaxArray);
+      splnkrVoice.theSynth.set(\ampMax, ampMaxArray);
     });
 
     this.addCommand("set_detect_frequency_min", "ff", { arg msg;
       freqMinArray.put(msg[1], msg[2]);
-      synth.set(\freqMin, freqMinArray);
+      splnkrVoice.theSynth.set(\freqMin, freqMinArray);
     });
 
     this.addCommand("set_detect_frequency_max", "ff", { arg msg;
       freqMaxArray.put(msg[1], msg[2]);
-      synth.set(\freqMax, freqMaxArray);
+      splnkrVoice.theSynth.set(\freqMax, freqMaxArray);
     });
 
     this.addCommand("set_filter_level", "ff", { arg msg;
       var i = msg[1];
       var filterLevel = msg[2];
-      ([i,filterLevel]).postln;
-      // synth.set(\centerFrequency, msg[1]);
       case 
-        {i==1} {synth.set(\filterLevel1, filterLevel)}
-        {i==2} {synth.set(\filterLevel2, filterLevel)}
-        {i==3} {synth.set(\filterLevel3, filterLevel)}
-        {i==4} {synth.set(\filterLevel4, filterLevel)}
-        {i==5} {synth.set(\filterLevel5, filterLevel)}
-        {i==6} {synth.set(\filterLevel6, filterLevel)}
-        {i==7} {synth.set(\filterLevel7, filterLevel)}
-        {i==8} {synth.set(\filterLevel8, filterLevel)}
-        {i==9} {synth.set(\filterLevel9, filterLevel)}
-        {i==10} {synth.set(\filterLevel10, filterLevel)}
-        {i==11} {synth.set(\filterLevel11, filterLevel)}
-        {i==12} {synth.set(\filterLevel12, filterLevel)}
-        {i==13} {synth.set(\filterLevel13, filterLevel)}
-        {i==14} {synth.set(\filterLevel14, filterLevel)}
-        {i==15} {synth.set(\filterLevel15, filterLevel)}
-        {i==16} {synth.set(\filterLevel16, filterLevel)};
+        {i==1} {splnkrVoice.theSynth.set(\filterLevel1, filterLevel)}
+        {i==2} {splnkrVoice.theSynth.set(\filterLevel2, filterLevel)}
+        {i==3} {splnkrVoice.theSynth.set(\filterLevel3, filterLevel)}
+        {i==4} {splnkrVoice.theSynth.set(\filterLevel4, filterLevel)}
+        {i==5} {splnkrVoice.theSynth.set(\filterLevel5, filterLevel)}
+        {i==6} {splnkrVoice.theSynth.set(\filterLevel6, filterLevel)}
+        {i==7} {splnkrVoice.theSynth.set(\filterLevel7, filterLevel)}
+        {i==8} {splnkrVoice.theSynth.set(\filterLevel8, filterLevel)}
+        {i==9} {splnkrVoice.theSynth.set(\filterLevel9, filterLevel)}
+        {i==10} {splnkrVoice.theSynth.set(\filterLevel10, filterLevel)}
+        {i==11} {splnkrVoice.theSynth.set(\filterLevel11, filterLevel)}
+        {i==12} {splnkrVoice.theSynth.set(\filterLevel12, filterLevel)}
+        {i==13} {splnkrVoice.theSynth.set(\filterLevel13, filterLevel)}
+        {i==14} {splnkrVoice.theSynth.set(\filterLevel14, filterLevel)}
+        {i==15} {splnkrVoice.theSynth.set(\filterLevel15, filterLevel)}
+        {i==16} {splnkrVoice.theSynth.set(\filterLevel16, filterLevel)};
     });
 
     this.addCommand("set_center_frequency", "ff", { arg msg;
       var i = msg[1];
       var centerFrequency = msg[2];
-      // ([i,centerFrequency]).postln;
-      // synth.set(\centerFrequency, msg[1]);
       case 
-        {i==1} {synth.set(\centerFrequency1, centerFrequency); ([i,centerFrequency]).postln;}
-        {i==2} {synth.set(\centerFrequency2, centerFrequency); ([i,centerFrequency]).postln;}
-        {i==3} {synth.set(\centerFrequency3, centerFrequency); ([i,centerFrequency]).postln;}
-        {i==4} {synth.set(\centerFrequency4, centerFrequency); ([i,centerFrequency]).postln;}
-        {i==5} {synth.set(\centerFrequency5, centerFrequency); ([i,centerFrequency]).postln;}
-        {i==6} {synth.set(\centerFrequency6, centerFrequency); ([i,centerFrequency]).postln;}
-        {i==7} {synth.set(\centerFrequency7, centerFrequency); ([i,centerFrequency]).postln;}
-        {i==8} {synth.set(\centerFrequency8, centerFrequency); ([i,centerFrequency]).postln;}
-        {i==9} {synth.set(\centerFrequency9, centerFrequency); ([i,centerFrequency]).postln;}
-        {i==10} {synth.set(\centerFrequency10, centerFrequency); ([i,centerFrequency]).postln;}
-        {i==11} {synth.set(\centerFrequency11, centerFrequency); ([i,centerFrequency]).postln;}
-        {i==12} {synth.set(\centerFrequency12, centerFrequency); ([i,centerFrequency]).postln;}
-        {i==13} {synth.set(\centerFrequency13, centerFrequency); ([i,centerFrequency]).postln;}
-        {i==14} {synth.set(\centerFrequency14, centerFrequency); ([i,centerFrequency]).postln;}
-        {i==15} {synth.set(\centerFrequency15, centerFrequency); ([i,centerFrequency]).postln;}
-        {i==16} {synth.set(\centerFrequency16, centerFrequency); ([i,centerFrequency]).postln;};
+        {i==1} {splnkrVoice.theSynth.set(\centerFrequency1, centerFrequency); ([i,centerFrequency]);}
+        {i==2} {splnkrVoice.theSynth.set(\centerFrequency2, centerFrequency); ([i,centerFrequency]);}
+        {i==3} {splnkrVoice.theSynth.set(\centerFrequency3, centerFrequency); ([i,centerFrequency]);}
+        {i==4} {splnkrVoice.theSynth.set(\centerFrequency4, centerFrequency); ([i,centerFrequency]);}
+        {i==5} {splnkrVoice.theSynth.set(\centerFrequency5, centerFrequency); ([i,centerFrequency]);}
+        {i==6} {splnkrVoice.theSynth.set(\centerFrequency6, centerFrequency); ([i,centerFrequency]);}
+        {i==7} {splnkrVoice.theSynth.set(\centerFrequency7, centerFrequency); ([i,centerFrequency]);}
+        {i==8} {splnkrVoice.theSynth.set(\centerFrequency8, centerFrequency); ([i,centerFrequency]);}
+        {i==9} {splnkrVoice.theSynth.set(\centerFrequency9, centerFrequency); ([i,centerFrequency]);}
+        {i==10} {splnkrVoice.theSynth.set(\centerFrequency10, centerFrequency); ([i,centerFrequency]);}
+        {i==11} {splnkrVoice.theSynth.set(\centerFrequency11, centerFrequency); ([i,centerFrequency]);}
+        {i==12} {splnkrVoice.theSynth.set(\centerFrequency12, centerFrequency); ([i,centerFrequency]);}
+        {i==13} {splnkrVoice.theSynth.set(\centerFrequency13, centerFrequency); ([i,centerFrequency]);}
+        {i==14} {splnkrVoice.theSynth.set(\centerFrequency14, centerFrequency); ([i,centerFrequency]);}
+        {i==15} {splnkrVoice.theSynth.set(\centerFrequency15, centerFrequency); ([i,centerFrequency]);}
+        {i==16} {splnkrVoice.theSynth.set(\centerFrequency16, centerFrequency); ([i,centerFrequency]);};
 
     });
 
     this.addCommand("set_reciprocal_quality", "ff", { arg msg;
       var i = msg[1];
       var reciprocalQuality = msg[2];
-      ([i,reciprocalQuality]).postln;
       case 
-        {i==1} {synth.set(\reciprocalQuality1, reciprocalQuality)}
-        {i==2} {synth.set(\reciprocalQuality2, reciprocalQuality)}
-        {i==3} {synth.set(\reciprocalQuality3, reciprocalQuality)}
-        {i==4} {synth.set(\reciprocalQuality4, reciprocalQuality)}
-        {i==5} {synth.set(\reciprocalQuality5, reciprocalQuality)}
-        {i==6} {synth.set(\reciprocalQuality6, reciprocalQuality)}
-        {i==7} {synth.set(\reciprocalQuality7, reciprocalQuality)}
-        {i==8} {synth.set(\reciprocalQuality8, reciprocalQuality)}
-        {i==9} {synth.set(\reciprocalQuality9, reciprocalQuality)}
-        {i==10} {synth.set(\reciprocalQuality10, reciprocalQuality)}
-        {i==11} {synth.set(\reciprocalQuality11, reciprocalQuality)}
-        {i==12} {synth.set(\reciprocalQuality12, reciprocalQuality)}
-        {i==13} {synth.set(\reciprocalQuality13, reciprocalQuality)}
-        {i==14} {synth.set(\reciprocalQuality14, reciprocalQuality)}
-        {i==15} {synth.set(\reciprocalQuality15, reciprocalQuality)}
-        {i==16} {synth.set(\reciprocalQuality16, reciprocalQuality)};
+        {i==1} {splnkrVoice.theSynth.set(\reciprocalQuality1, reciprocalQuality)}
+        {i==2} {splnkrVoice.theSynth.set(\reciprocalQuality2, reciprocalQuality)}
+        {i==3} {splnkrVoice.theSynth.set(\reciprocalQuality3, reciprocalQuality)}
+        {i==4} {splnkrVoice.theSynth.set(\reciprocalQuality4, reciprocalQuality)}
+        {i==5} {splnkrVoice.theSynth.set(\reciprocalQuality5, reciprocalQuality)}
+        {i==6} {splnkrVoice.theSynth.set(\reciprocalQuality6, reciprocalQuality)}
+        {i==7} {splnkrVoice.theSynth.set(\reciprocalQuality7, reciprocalQuality)}
+        {i==8} {splnkrVoice.theSynth.set(\reciprocalQuality8, reciprocalQuality)}
+        {i==9} {splnkrVoice.theSynth.set(\reciprocalQuality9, reciprocalQuality)}
+        {i==10} {splnkrVoice.theSynth.set(\reciprocalQuality10, reciprocalQuality)}
+        {i==11} {splnkrVoice.theSynth.set(\reciprocalQuality11, reciprocalQuality)}
+        {i==12} {splnkrVoice.theSynth.set(\reciprocalQuality12, reciprocalQuality)}
+        {i==13} {splnkrVoice.theSynth.set(\reciprocalQuality13, reciprocalQuality)}
+        {i==14} {splnkrVoice.theSynth.set(\reciprocalQuality14, reciprocalQuality)}
+        {i==15} {splnkrVoice.theSynth.set(\reciprocalQuality15, reciprocalQuality)}
+        {i==16} {splnkrVoice.theSynth.set(\reciprocalQuality16, reciprocalQuality)};
     });
-
-
   }
 
-  
-
   free {
-    synth.free;
+    splnkrVoice.free;
+    voiceGroup.free;
+    voiceList.free;
+    wet.free;
     pollFunc.free;
   }
 }

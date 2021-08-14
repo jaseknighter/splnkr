@@ -23,6 +23,51 @@ function parameters.init()
   end
   ]]
 
+
+
+  ------------------------------
+  -- audio routing params
+  ------------------------------
+
+  params:add_separator("audio routing")
+rerouting_audio = false
+function route_audio()
+  clock.sleep(0.5)
+  local selected_route = params:get("audio_routing")
+  if rerouting_audio == true then
+    rerouting_audio = false
+    if selected_route == 1 then -- audio in + softcut output -> supercollider
+      print(1)
+      os.execute("jack_connect crone:output_5 SuperCollider:in_1;")  
+      os.execute("jack_connect crone:output_6 SuperCollider:in_2;")
+      os.execute("jack_connect softcut:output_1 SuperCollider:in_1;")  
+      os.execute("jack_connect softcut:output_2 SuperCollider:in_2;")      
+    elseif selected_route == 2 then --just audio in -> supercollider
+      print(2)
+      os.execute("jack_disconnect softcut:output_1 SuperCollider:in_1;")  
+      os.execute("jack_disconnect softcut:output_2 SuperCollider:in_2;")
+      os.execute("jack_connect crone:output_5 SuperCollider:in_1;")  
+      os.execute("jack_connect crone:output_6 SuperCollider:in_2;")
+    elseif selected_route == 3 then -- just softcut output -> supercollider
+      print(3)
+      os.execute("jack_disconnect crone:output_5 SuperCollider:in_1;")  
+      os.execute("jack_disconnect crone:output_6 SuperCollider:in_2;")
+      os.execute("jack_connect softcut:output_1 SuperCollider:in_1;")  
+      os.execute("jack_connect softcut:output_2 SuperCollider:in_2;")        
+    end
+  end
+end
+
+params:add{
+  type = "option", id = "audio_routing", name = "audio routing", 
+  options = {"in+cut->eng","in->eng","cut->eng"},
+  min = 1, max = 3, default = 1,
+  action = function(value) 
+    rerouting_audio = true
+    clock.run(route_audio)
+  end
+}
+
   ------------------------------
   -- filter params
   ------------------------------
@@ -128,35 +173,102 @@ function parameters.init()
   ------------------------------
   -- effect params
   ------------------------------
+
+  --[[
+    \trigRate, [1, 30, \lin, 0, 5],
+    \overlap, [0.01, 0.99, \lin, 0, 0.5],
+    \panType, [0, 1, \lin, 1, 0],
+    \panMax, [0, 1, \lin, 0, 0.5],
+    \amp, [0, 1, \lin, 0, 0.1]
+  ]]
+
+    trig_spec = controlspec.def{
+      min=1,
+      max=10.0,
+      warp='lin',
+      step=0.1,
+      default=2,
+      quantum=0.01,
+      wrap=false,
+      -- units='khz'
+    }
+  
   local effect_params = {
     -- {vinyl,vinyl,0,10,0,engine.vinyl}
     -- effect_name,effect_id,effect_min,effect_max,effect_default, effect_fn, effect_type
-    {"pitchshift","pitchshift",0,1,0,engine.pitchshift,"control",},
-    {"phaser","phaser",0,10,0,engine.phaser,"number",},
-    {"delay","delay",0,10,0,engine.delay,"number",},
-    {"strobe","strobe",0,5,0,engine.strobe,"number",},
     {"drywet","drywet",0,1,1,engine.drywet,"control",},
+    {"amp","amp",0,1,1,engine.amp,"control",},
+    {"pitchshift","pitchshift",0,1,0,engine.pitchshift,"control",},
+    {"phaser","phaser",0,1,0,engine.phaser,"control",},
+    {"delay","delay",0,1,0,engine.delay,"control",},
+    {"strobe","strobe",0,1,0,engine.strobe,"control",},
+    {"enveloper","enveloper",1,2,1,engine.enveloper,"option",{"off","on"},},
+    {"trig rate","trig_rate",1,20,5,engine.trig_rate,"number",},
+    {"overlap","overlap",0.01,0.99,0.5,engine.overlap,"control",},
+    {"pan_type","pan type",0,1,0,engine.pan_type,"number",},
+    {"pan_max","pan max",0,1,0.5,engine.pan_max,"control",},
   }
 
-  function parameters.add_effect_param(effect_name,effect_id,effect_min,effect_max,effect_default, effect_fn, effect_type)
-    -- print(effect_name,effect_id,effect_min,effect_max,effect_default, effect_fn, effect_type)
-    params:add{
-      type = effect_type, id = effect_id, name = effect_name, default = effect_default,
-      min=effect_min,max=effect_max,
-      action = function(x) 
+  function parameters.add_effect_param(effect_name,effect_id,effect_min,effect_max,effect_default, effect_fn, effect_type, effect_options)
+    print(effect_name,effect_id,effect_min,effect_max,effect_default, effect_fn, effect_type, effect_options)
+    if effect_id ~= "trig_rate" and effect_type ~= "option" then
+      params:add{
+        type = effect_type, id = effect_id, name = effect_name, default = effect_default,
+        min=effect_min,max=effect_max,
+        action = function(x) 
+          effect_fn(x)
+        end
+      }
+    elseif effect_id == "trig_rate" then
+      params:add_control(effect_id,effect_name,trig_spec)
+      params:set_action(effect_id,function(x) 
         effect_fn(x)
-      end
-    }
+      end)
+    else
+      params:add{
+        type = effect_type, id = effect_id, name = effect_name, default = effect_default,
+        min=effect_min,max=effect_max, options=effect_options,
+        action = function(x) 
+          print("enveloper", x)
+          x = x - 1
+          effect_fn(x)
+        end
+      }
+    end
     params:set(effect_id,effect_default)
   end
 
-  -- function parameters.set_params()
     params:add_separator("effects")
-    for i=1,#effect_params,1
+
+    -- for i=1,#effect_params,1
+    for i=1,6,1
     do
-      parameters.add_effect_param(effect_params[i][1],effect_params[i][2],effect_params[i][3],effect_params[i][4],effect_params[i][5],effect_params[i][6],effect_params[i][7])
+      parameters.add_effect_param(
+        effect_params[i][1],
+        effect_params[i][2],
+        effect_params[i][3],
+        effect_params[i][4],
+        effect_params[i][5],
+        effect_params[i][6],
+        effect_params[i][7],
+        effect_params[i][8])
     end
 
+
+    params:add_separator("enveloping")
+
+    for i=7,#effect_params,1
+    do
+      parameters.add_effect_param(
+        effect_params[i][1],
+        effect_params[i][2],
+        effect_params[i][3],
+        effect_params[i][4],
+        effect_params[i][5],
+        effect_params[i][6],
+        effect_params[i][7],
+        effect_params[i][8])
+    end
 
   -- end
 
@@ -563,11 +675,10 @@ function parameters.init()
       end
     end
 
-    local time_param = params:lookup_param("time_modulation"..envelope_id)
-    time_param.max = params:get("envelope"..envelope_id.."_max_time") * 0.1
-    local level_param = params:lookup_param("level_modulation"..envelope_id)
-    level_param.max = params:get("envelope"..envelope_id.."_max_level") * 0.1
-
+    -- local time_param = params:lookup_param("time_modulation"..envelope_id)
+    -- time_param.max = params:get("envelope"..envelope_id.."_max_time") * 0.1
+    -- local level_param = params:lookup_param("level_modulation"..envelope_id)
+    -- level_param.max = params:get("envelope"..envelope_id.."_max_level") * 0.1
     update_envelope_controls(envelope_id, x)
   end  
 
@@ -595,6 +706,7 @@ function parameters.init()
         params:hide(envelope_curves[i])
       end
     end
+    envelopes[envelope_id].update_envelope()
   end
 
   params:add_number("num_envelope1_controls", "num envelope1 controls", 3, MAX_ENVELOPE_NODES, 5)
@@ -742,7 +854,9 @@ function parameters.init()
             envelopes[envelope_id].graph:edit_graph(env_nodes)
             local num_envelope_controls = envelope_id == 1 and "num_envelope1_controls" or "num_envelope2_controls"
             local num_env_nodes = #envelopes[envelope_id].graph_nodes
+            reset_envelope_control_params(envelope_id)
             params:set(num_envelope_controls,num_env_nodes)
+            
           end
 
         }

@@ -11,12 +11,14 @@
 --[[
 
 ideas:
-* implement a bandbass filterbank 
-* preview changes in 1 channel before committing them (like dj's do...auditioning?)
 * track parameter history 
   * turn the history into a sequence 
   * reply according to the time of changes or by meter
   * delete individual events
+
+issues:
+* sound cuts out if env length is too long
+* pan_type and pan_max params don't do anything (issue with the `Out` statement in sc I think)
 ]]
 
 
@@ -57,10 +59,15 @@ function init()
   --
   -- os.execute("jack_disconnect crone:output_5 SuperCollider:in_1;")  
   -- os.execute("jack_disconnect crone:output_6 SuperCollider:in_2;")
-  os.execute("jack_connect softcut:output_1 SuperCollider:in_1;")  
-  os.execute("jack_connect softcut:output_2 SuperCollider:in_2;")
+  
+  
+  -- os.execute("jack_connect softcut:output_1 SuperCollider:in_1;")  
+  -- os.execute("jack_connect softcut:output_2 SuperCollider:in_2;")
   -- os.execute("sleep 9;")
 
+  engine.set_numSegs(4)
+  engine.start_splnkring(0)
+  
   audio.level_eng_cut(0)
   crow.output[1].action = "{to(5,0),to(0,0.25)}"
   crow.output[2].action = "{to(5,0),to(0,0.25)}"
@@ -204,25 +211,25 @@ function init()
     note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
     -- if note_num ~= last_note_num and detect_level >= 0.05 and (value > 200 and value < 1800) then 
     if note_num ~= last_note_num then 
-      externals1.note_on(1, note_num, note_num, 1, nil,"engine")
+      clock.run(externals1.note_on,1, note_num, note_num, 1, nil,"engine")
     end
   end)
   frequency_detect_poll2 = poll.set("frequencyDetect2", function(value)
     note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
     if note_num ~= last_note_num then 
-      externals1.note_on(1, note_num, note_num, 1, nil,"engine")
+      clock.run(externals1.note_on,1, note_num, note_num, 1, nil,"engine")
     end
   end)
   frequency_detect_poll3 = poll.set("frequencyDetect3", function(value)
     note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
     if note_num ~= last_note_num then 
-      externals1.note_on(1, note_num, note_num, 1, nil,"engine")
+      clock.run(externals1.note_on,1, note_num, note_num, 1, nil,"engine")
     end
   end)
   frequency_detect_poll4 = poll.set("frequencyDetect4", function(value)
     note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
     if note_num ~= last_note_num then 
-      externals1.note_on(1, note_num, note_num, 1, nil,"engine")
+      clock.run(externals1.note_on,1, note_num, note_num, 1, nil,"engine")
     end
   end)
 
@@ -232,15 +239,20 @@ function init()
       -- samples:play() 
       _grid:animate() 
     end,
-    division = 1/16,
+    division = 1/32, --1/16,
     enabled = true
   }
 
   clock.run(finish_init)
 end
 
+function new_sample_load_completed()
+  -- envelopes[1].update_envelope()
+end
+
 function finish_init()
   clock.sleep(0.2)
+  envelopes[1].update_envelope()
   amplitude_detect_poll1:start()
   amplitude_detect_poll2:start()
   amplitude_detect_poll3:start()
@@ -251,8 +263,6 @@ function finish_init()
   frequency_detect_poll4:start()
 
   splnkr_lattice:start()
-    
-
   params:bang()
   initializing = false
 end
@@ -304,14 +314,9 @@ end
 
 
 function cleanup ()
-  -- add cleanup code
-  -- os.execute("sleep 1;")
   os.execute("jack_disconnect softcut:output_1 SuperCollider:in_1;")  
   os.execute("jack_disconnect softcut:output_2 SuperCollider:in_2;")
   os.execute("jack_connect crone:output_5 SuperCollider:in_1;")  
   os.execute("jack_connect crone:output_6 SuperCollider:in_2;")
-  
-  print("cleanupupup")
-  
 end
 
