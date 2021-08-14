@@ -68,15 +68,6 @@ the envelope is used with/sent to external devices (crow, jf, midi, w/).
 
 it also sets the envelope that is built into the supercollider splnkr engine. in the params menu, use the *enveloping* param to activate live signal enveloping.
 
-## recording clips
-clips may be recorded from the PARAMETERS>EDIT menu. what gets recorded depends on the `play mode` setting:
-* *stop*: record the entire sample 
-* *full loop*: record the entire sample 
-* *all cuts*: record all sample areas set by cutters
-* *sel cut*: record the sample area set by the selected cutter
-
-*important note*: if *play mode* is set to `all cuts`, all *rate* settings must either be positive or negative. 
-
 ## filterbank/grid interface
 
 parameters for the 16 channel filterbank may be controlled via the params menu or using the grid.
@@ -112,8 +103,18 @@ current basic effects (to be enhanced) are available in the params menu: pitchsh
 
 ## outputs 
 
-midi, crow, jf, and w/ outputs are avaiable in the params menu (lots of bugs here to sort out)
+midi, crow, jf, and w/ outputs are avaiable in the params menu (lots of bugs here to sort out). 
 
+*to be documented*: explanation of how SuperCollider pitch/frequency tracking is sent to the outputs
+ 
+## recording clips
+clips may be recorded from the PARAMETERS>EDIT menu. what gets recorded depends on the `play mode` setting:
+* *stop*: record the entire sample 
+* *full loop*: record the entire sample 
+* *all cuts*: record all sample areas set by cutters
+* *sel cut*: record the sample area set by the selected cutter
+
+*important note*: if *play mode* is set to `all cuts`, all *rate* settings must either be positive or negative. 
 
 ## credits
 * splnkr leverages the [stonesoup](https://github.com/schollz/stonesoup) script developed by @infinitedigits/@schollz
