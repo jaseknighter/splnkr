@@ -19,6 +19,17 @@ features to add: convolution reverb, multitap delay, a note/drum/effect sequence
 
   ```~/norns/stop.sh; sleep 1; ~/norns/start.sh; sleep 9; jack_disconnect crone:output_5 SuperCollider:in_1; jack_disconnect crone:output_6 SuperCollider:in_2; jack_connect softcut:output_1 SuperCollider:in_1; jack_connect softcut:output_2 SuperCollider:in_2``` -->
 
+## bugs to fix (this is just a small sampling of the bugs to be found and liberated from the code)
+* enveloping: 
+** pan type and pan max don't work
+** get rid of clicks when changing the envelope size/shape
+** env length on screen 2 should change the length of the sample envelope 
+* externals
+** lots of little bugs related to just having one envelope (instead of the two from flora)
+* samples
+** sample player breaks when in `all cuts` mode and cuts have rates going in different directions (e.g. -1 and 1)
+
+
 ## norns ui: key/encoder controls
 <!-- access instructions for key/encoder controls within the script by pressing k1+e3 -->
 
