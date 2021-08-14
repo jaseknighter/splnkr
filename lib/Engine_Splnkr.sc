@@ -1,8 +1,3 @@
-// Inspirations:
-//   @infinitedigits/@schollz StoneSoup (https://github.com/schollz/stonesoup)
-//   @markeats/@markwheeler Passerby (https://github.com/markwheeler/passersby)
-//   @tyleretters Dronecaster (https://llllllll.co/t/34737)
-
 Engine_Splnkr : CroneEngine {
   classvar maxNumVoices = 1;
   var voiceGroup;
@@ -227,11 +222,7 @@ Engine_Splnkr : CroneEngine {
       // wet = Pan2.ar(wet * env * amp, pan) * EnvGate.new;
       (enveloper).poll;
 
-      if (enveloper == 1, {
-        // wet = (wet * env * amp);
-        // wet = Pan2.ar(wet, pan) * EnvGate.new;
-      },{ wet = wet });
-      wet = (Pan2.ar(wet * env * amp, pan) * EnvGate.new * enveloper) + wet;
+      wet = (Pan2.ar(wet * env * amp, pan) * EnvGate.new * enveloper) + (wet*((enveloper+1)%2));
       //////////////////////////////////////////
       // other effects
       //////////////////////////////////////////
