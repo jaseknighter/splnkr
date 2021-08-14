@@ -260,7 +260,7 @@ function Envelope:new(id, num_envelopes, env_nodes)
   end
   
   e.update_envelope = function()
-    print("update_env")
+    -- print("update_env")
     if initializing == false then
       engine.set_numSegs(#e.graph_nodes)
       
