@@ -19,7 +19,7 @@ features to add: convolution reverb, multitap delay, a note/drum/effect sequence
 
   ```~/norns/stop.sh; sleep 1; ~/norns/start.sh; sleep 9; jack_disconnect crone:output_5 SuperCollider:in_1; jack_disconnect crone:output_6 SuperCollider:in_2; jack_connect softcut:output_1 SuperCollider:in_1; jack_connect softcut:output_2 SuperCollider:in_2``` -->
 
-### norns ui: key/encoder controls
+## norns ui: key/encoder controls
 <!-- access instructions for key/encoder controls within the script by pressing k1+e3 -->
 
 *Page 1: sample selector/slicer*
@@ -68,7 +68,7 @@ the envelope is used with/sent to external devices (crow, jf, midi, w/).
 
 it also sets the envelope that is built into the supercollider splnkr engine. in the params menu, use the *enveloping* param to activate live signal enveloping.
 
-### recording clips
+## recording clips
 clips may be recorded from the PARAMETERS>EDIT menu. what gets recorded depends on the `play mode` setting:
 * *stop*: record the entire sample 
 * *full loop*: record the entire sample 
@@ -108,22 +108,17 @@ selecting button 8 on the bottom row turns overlays the values of all three filt
 
 ## effects
 
+current basic effects (to be enhanced) are available in the params menu: pitchshift, phaser, delay, strobe
 
 ## outputs 
 
-midi, crow, jf, and w/ outputs are avaiable in the params menu
+midi, crow, jf, and w/ outputs are avaiable in the params menu (lots of bugs here to sort out)
 
-## envelope
-
-the second screen (accessed with E1) provides access to an envelope that is applied to the outputs
-
-## todo
-* integrate shell commands to reconfigure norns audio signal paths into the script
-* build out a sampler sequencer
-* add a frequency follower
-* augment supercollider effects processor
-* additional features tbd
 
 ## credits
 * splnkr leverages the [stonesoup](https://github.com/schollz/stonesoup) script developed by @infinitedigits/@schollz
 * this project was inspired by the [lines discussion](https://llllllll.co/t/re-deconstructing-jan-jelineks-zwischen/46577/4) about Jan Jelinek’s album “Zwischen” initiated by Matt Lowery
+* additional inspirations:
+  * @markeats/@markwheeler Passerby (https://github.com/markwheeler/passersby)
+  * @tyleretters Dronecaster (https://llllllll.co/t/34737)
+  * @dan_derks Cheat Codes 2 (https://llllllll.co/t/38414)
