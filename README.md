@@ -123,7 +123,9 @@ in the params menu, three options may be selected for how audio is routed to the
 
 midi, crow, jf, and w/ outputs are avaiable in the params menu (lots of bugs here to sort out). 
 
-*to be documented*: explanation of how SuperCollider pitch/frequency tracking is sent to the outputs.
+*pitch/frequency tracking*
+
+after the wet signal is sent to the SuperCollider engine's bandpass filters, pitch and amplitude is tracked and sent back to norns, which passes the info on to external devices (midi, crow, jf, w/) depending on their (buggy) settings  
  
 ## recording clips
 clips may be recorded from the PARAMETERS>EDIT menu. what gets recorded depends on the `play mode` setting:
