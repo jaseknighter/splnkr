@@ -19,8 +19,12 @@ end
 -- global variables
 -------------------------------------------
 
+MAX_CUTTERS = 12
 
-NUM_PAGES = 2
+g = grid.connect()
+grid_mode = "filter"
+grid_long_press_length = 0.5
+NUM_PAGES = 3
 show_instructions = false
 updating_controls = false
 OUTPUT_DEFAULT = 4
@@ -32,7 +36,6 @@ alt_key_active = false
 screen_level_graphics = 15
 screen_size = vector:new(127,64)
 center = vector:new(screen_size.x/2, screen_size.y/2)
-num_pages = 2
 
 menu_status = norns.menu.status()
 clear_subnav = true
@@ -44,6 +47,7 @@ saving = false
 saving_elipses = ""
 pre_save_play_mode = false
 
+sequencer_playing = false
 
 midi_in_channel1_default = 1
 midi_in_command1 = 144
@@ -74,14 +78,14 @@ envelope1_curves = {"envelope1_curve1","envelope1_curve2","envelope1_curve3","en
 
 
 MAX_AMPLITUDE = 10
-MAX_ENV_LENGTH = 10
+MAX_ENV_LENGTH = 2
 CURVE_MIN = -10 -- -50
 CURVE_MAX = 10 --50
 MAX_ENVELOPE_NODES = 8
 ENV_TIME_MAX = 2 -- DO NOT CHANGE
 
-AMPLITUDE_DEFAULT = 5
-ENV_LENGTH_DEFAULT = 2
+AMPLITUDE_DEFAULT = 9
+ENV_LENGTH_DEFAULT = 0.2
 
 DEFAULT_GRAPH_NODES_P1 = {}
 DEFAULT_GRAPH_NODES_P1[1] = {}
@@ -89,32 +93,46 @@ DEFAULT_GRAPH_NODES_P1[1].time = 0.00
 DEFAULT_GRAPH_NODES_P1[1].level = 0.00
 DEFAULT_GRAPH_NODES_P1[1].curve = 0.00
 DEFAULT_GRAPH_NODES_P1[2] = {}
-DEFAULT_GRAPH_NODES_P1[2].time = 0.00
-DEFAULT_GRAPH_NODES_P1[2].level = 4.0
+DEFAULT_GRAPH_NODES_P1[2].time = 0.0
+DEFAULT_GRAPH_NODES_P1[2].level = 8.5
 DEFAULT_GRAPH_NODES_P1[2].curve = -10
 DEFAULT_GRAPH_NODES_P1[3] = {}
-DEFAULT_GRAPH_NODES_P1[3].time = 0.50
-DEFAULT_GRAPH_NODES_P1[3].level = 0.50
+DEFAULT_GRAPH_NODES_P1[3].time = 0.15
+DEFAULT_GRAPH_NODES_P1[3].level = 0.00
 DEFAULT_GRAPH_NODES_P1[3].curve = -10
-DEFAULT_GRAPH_NODES_P1[4] = {}
-DEFAULT_GRAPH_NODES_P1[4].time = 1.00
-DEFAULT_GRAPH_NODES_P1[4].level = 1.5
-DEFAULT_GRAPH_NODES_P1[4].curve = -10
-DEFAULT_GRAPH_NODES_P1[5] = {}
-DEFAULT_GRAPH_NODES_P1[5].time = 1.5
-DEFAULT_GRAPH_NODES_P1[5].level = 0.00
-DEFAULT_GRAPH_NODES_P1[5].curve = -10
 
-DEFAULT_GRAPH_NODES_P2 = {}
-DEFAULT_GRAPH_NODES_P2[1] = {}
-DEFAULT_GRAPH_NODES_P2[1].time = 0.00
-DEFAULT_GRAPH_NODES_P2[1].level = 0.00
-DEFAULT_GRAPH_NODES_P2[1].curve = 0.00
-DEFAULT_GRAPH_NODES_P2[2] = {}
-DEFAULT_GRAPH_NODES_P2[2].time = 0.00
-DEFAULT_GRAPH_NODES_P2[2].level = 4.0
-DEFAULT_GRAPH_NODES_P2[2].curve = -10
-DEFAULT_GRAPH_NODES_P2[3] = {}
-DEFAULT_GRAPH_NODES_P2[3].time = 1.5
-DEFAULT_GRAPH_NODES_P2[3].level = 0.00
-DEFAULT_GRAPH_NODES_P2[3].curve = -10
+-- DEFAULT_GRAPH_NODES_P1 = {}
+-- DEFAULT_GRAPH_NODES_P1[1] = {}
+-- DEFAULT_GRAPH_NODES_P1[1].time = 0.00
+-- DEFAULT_GRAPH_NODES_P1[1].level = 0.00
+-- DEFAULT_GRAPH_NODES_P1[1].curve = 0.00
+-- DEFAULT_GRAPH_NODES_P1[2] = {}
+-- DEFAULT_GRAPH_NODES_P1[2].time = 0.00
+-- DEFAULT_GRAPH_NODES_P1[2].level = 4.0
+-- DEFAULT_GRAPH_NODES_P1[2].curve = -10
+-- DEFAULT_GRAPH_NODES_P1[3] = {}
+-- DEFAULT_GRAPH_NODES_P1[3].time = 0.50
+-- DEFAULT_GRAPH_NODES_P1[3].level = 0.50
+-- DEFAULT_GRAPH_NODES_P1[3].curve = -10
+-- DEFAULT_GRAPH_NODES_P1[4] = {}
+-- DEFAULT_GRAPH_NODES_P1[4].time = 1.00
+-- DEFAULT_GRAPH_NODES_P1[4].level = 1.5
+-- DEFAULT_GRAPH_NODES_P1[4].curve = -10
+-- DEFAULT_GRAPH_NODES_P1[5] = {}
+-- DEFAULT_GRAPH_NODES_P1[5].time = 1.5
+-- DEFAULT_GRAPH_NODES_P1[5].level = 0.00
+-- DEFAULT_GRAPH_NODES_P1[5].curve = -10
+
+-- DEFAULT_GRAPH_NODES_P2 = {}
+-- DEFAULT_GRAPH_NODES_P2[1] = {}
+-- DEFAULT_GRAPH_NODES_P2[1].time = 0.00
+-- DEFAULT_GRAPH_NODES_P2[1].level = 0.00
+-- DEFAULT_GRAPH_NODES_P2[1].curve = 0.00
+-- DEFAULT_GRAPH_NODES_P2[2] = {}
+-- DEFAULT_GRAPH_NODES_P2[2].time = 0.00
+-- DEFAULT_GRAPH_NODES_P2[2].level = 4.0
+-- DEFAULT_GRAPH_NODES_P2[2].curve = -10
+-- DEFAULT_GRAPH_NODES_P2[3] = {}
+-- DEFAULT_GRAPH_NODES_P2[3].time = 1.5
+-- DEFAULT_GRAPH_NODES_P2[3].level = 0.00
+-- DEFAULT_GRAPH_NODES_P2[3].curve = -10

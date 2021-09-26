@@ -27,7 +27,7 @@ function externals:new(active_notes)
     midi_out_device:note_off(note_num, nil, channel)
   end
  
-  ext.note_on = function(voice_id, note_to_play, pitch_frequency, beat_frequency, envelope_time_remaining, note_source)
+  ext.note_on = function(voice_id, note_to_play, pitch_frequency, beat_frequency, envelope_time_remaining, note_source, note_target)
     -- print("note_on:",voice_id, note_to_play, pitch_frequency, beat_frequency, envelope_time_remaining, note_source)
     -- local output_bandsaw = params:get("output_bandsaw")
     local output_midi = params:get("output_midi")
@@ -106,10 +106,17 @@ function externals:new(active_notes)
     end
 
     -- note, trigger, envelope, gate check
-    if (voice_id == 1 and (note_source == "engine" and (output_crow1 == 2 or output_crow1 == 4))) or
-      (note_source == "midi" and (output_crow1 == 3 or output_crow1 == 4)) then
+    -- voice_id, note_to_play, pitch_frequency, beat_frequency, envelope_time_remaining, note_source
+    if (voice_id == 1 and ((note_source == "sequencer" or note_source == "engine") and (output_crow1 == 2 or output_crow1 == 3 or output_crow1 == 4))) or
+    (note_source == "midi" and (output_crow1 == 4 or output_crow1 == 5)) then
       -- if output_crow > 1 then
-      local volts = (note_to_play-60)/12
+      local volts
+      if note_source == "engine" then
+        volts = (note_to_play-60)/12
+      else
+        volts = note_to_play/12
+      end
+      
       crow.output[1].volts = volts
 
       local output_param = params:get("output_crow2")

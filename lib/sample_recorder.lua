@@ -1,5 +1,6 @@
 --------------------------
 -- record samples to tape 
+-- todo: set pre_save_play_mode per voice
 --------------------------
 sample_recorder = {}
 
@@ -35,7 +36,7 @@ function sample_recorder.record_to_tape_start(cutter_to_record,ending_cutter,dir
   local file = pathname.."/"..dir_name .. cutter_to_record .. ".wav"
   if pre_save_play_mode > 1 and cutter_to_record <= ending_cutter then
     audio.tape_record_open (file)
-    local rate = cutter_rates[cutter_to_record]
+    local rate = sample_player.voice_rates[cutter_to_record]
     local start = (cutters[cutter_to_record]:get_start_x()/128) * length
     local finish = (cutters[cutter_to_record]:get_finish_x()/128) * length
     for i=1,2,1
@@ -53,7 +54,7 @@ function sample_recorder.record_to_tape_start(cutter_to_record,ending_cutter,dir
     clock.run(sample_recorder.record_to_tape_next,loop_length, cutter_to_record+1, ending_cutter, dir_name, pathname)
   elseif pre_save_play_mode < 2 then
     audio.tape_record_open (file)
-    local rate = cutter_rates[1]
+    local rate = sample_player.voice_rates[1]
     local start = 0
     local finish = length
   for i=1,2,1
@@ -93,7 +94,7 @@ function sample_recorder.record_to_tape_pause(next_loop, ending_cutter, dir_name
 end
 
 function sample_recorder.record_to_tape_done()
-  print("done. reset play mode:",pre_save_play_mode)
+  -- print("done. reset play mode:",pre_save_play_mode)
   saving = false
   sample_player.set_play_mode(pre_save_play_mode)
 end

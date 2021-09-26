@@ -128,64 +128,62 @@ function Envelope:new(id, num_envelopes, env_nodes)
     end
   end
   
-  --[[
-  e.modulate_env = function()
+  -- e.modulate_env = function()
   
-    ------------------------------------
-    -- envelope randomization
-    ------------------------------------
-    local time_probability = math.floor(params:get("time_probability"..e.id))
-    local time_modulation_amount = time_probability > math.random()*100 and params:get("time_modulation"..e.id) or 0
-    local level_probability = math.floor(params:get("level_probability"..e.id))
-    local level_modulation_amount = level_probability > math.random()*100 and params:get("level_modulation"..e.id) or 0
-    local curve_probability = math.floor(params:get("curve_probability"..e.id))
-    local curve_modulation_amount = curve_probability > math.random()*100 and params:get("curve_modulation"..e.id) or 0
-    local randomize_env_probability = params:get("randomize_env_probability"..e.id) 
-    local randomize_envelopes = math.random()*100<randomize_env_probability
+  --   ------------------------------------
+  --   -- envelope randomization
+  --   ------------------------------------
+  --   local time_probability = math.floor(params:get("time_probability"..e.id))
+  --   local time_modulation_amount = time_probability > math.random()*100 and params:get("time_modulation"..e.id) or 0
+  --   local level_probability = math.floor(params:get("level_probability"..e.id))
+  --   local level_modulation_amount = level_probability > math.random()*100 and params:get("level_modulation"..e.id) or 0
+  --   local curve_probability = math.floor(params:get("curve_probability"..e.id))
+  --   local curve_modulation_amount = curve_probability > math.random()*100 and params:get("curve_modulation"..e.id) or 0
+  --   local randomize_env_probability = params:get("randomize_env_probability"..e.id) 
+  --   local randomize_envelopes = math.random()*100<randomize_env_probability
     
-    if randomize_envelopes == true then
-      local env_nodes = envelopes[e.id].graph_nodes
-      for i=1,#env_nodes,1
-      do
-        local param_id_name, param_name, get_control_value_fn, min_val, max_val
+  --   if randomize_envelopes == true then
+  --     local env_nodes = envelopes[e.id].graph_nodes
+  --     for i=1,#env_nodes,1
+  --     do
+  --       local param_id_name, param_name, get_control_value_fn, min_val, max_val
   
-        -- update times
-        param_id_name = "envelope".. e.id.."_time" .. i
-        param_name = "envelope".. e.id.."-control" .. i .. "-time"
+  --       -- update times
+  --       param_id_name = "envelope".. e.id.."_time" .. i
+  --       param_name = "envelope".. e.id.."-control" .. i .. "-time"
         
-        local current_val = (env_nodes[1] and env_nodes[i].time) or 0
-        local prev_val = (env_nodes[i-1] and env_nodes[i-1].time) or 0
-        local next_val = env_nodes[i+1] and env_nodes[i+1].time or envelopes[e.id].env_time_max
-        local control_range = next_val - prev_val
-        local control_value = control_range*math.random(-1,1) * time_modulation_amount + current_val
-        control_value = util.clamp(control_value,prev_val, next_val)
-        local controlspec = cs.new(prev_val,next_val,'lin',0,control_value,'')
-        if env_nodes[i] then
-          local param = params:lookup_param(param_id_name)
-          param.controlspec = controlspec
-          params:set(param.id, control_value) 
-        end
+  --       local current_val = (env_nodes[1] and env_nodes[i].time) or 0
+  --       local prev_val = (env_nodes[i-1] and env_nodes[i-1].time) or 0
+  --       local next_val = env_nodes[i+1] and env_nodes[i+1].time or envelopes[e.id].env_time_max
+  --       local control_range = next_val - prev_val
+  --       local control_value = control_range*math.random(-1,1) * time_modulation_amount + current_val
+  --       control_value = util.clamp(control_value,prev_val, next_val)
+  --       local controlspec = cs.new(prev_val,next_val,'lin',0,control_value,'')
+  --       if env_nodes[i] then
+  --         local param = params:lookup_param(param_id_name)
+  --         param.controlspec = controlspec
+  --         params:set(param.id, control_value) 
+  --       end
   
-        -- update levels
-        if i > 1 and i < #env_nodes then
-          local current_val = (env_nodes[1] and env_nodes[i].level) or 0
-          local new_value = current_val + (level_modulation_amount * math.random(-1,1))
-          new_value = util.clamp(new_value, 0, MAX_AMPLITUDE)
-          params:set("envelope".. e.id .. "_level"..i, new_value)
-        end        
+  --       -- update levels
+  --       if i > 1 and i < #env_nodes then
+  --         local current_val = (env_nodes[1] and env_nodes[i].level) or 0
+  --         local new_value = current_val + (level_modulation_amount * math.random(-1,1))
+  --         new_value = util.clamp(new_value, 0, MAX_AMPLITUDE)
+  --         params:set("envelope".. e.id .. "_level"..i, new_value)
+  --       end        
   
-        -- update curves
-        if i > 1 then
+  --       -- update curves
+  --       if i > 1 then
           
-          local new_value = params:get("envelope".. e.id .. "_curve"..i) + (curve_modulation_amount* math.random()*math.random(-1,1)*10)
-          new_value = util.clamp(new_value, -10, 10)
-          params:set("envelope".. e.id .. "_curve"..i, new_value)
-          -- params:set("envelope".. e.id .. "_curve"..i, math.random()*math.random(-10,10))
-        end        
-      end
-    end
-  end
-  ]]
+  --         local new_value = params:get("envelope".. e.id .. "_curve"..i) + (curve_modulation_amount* math.random()*math.random(-1,1)*10)
+  --         new_value = util.clamp(new_value, -10, 10)
+  --         params:set("envelope".. e.id .. "_curve"..i, new_value)
+  --         -- params:set("envelope".. e.id .. "_curve"..i, math.random()*math.random(-10,10))
+  --       end        
+  --     end
+  --   end
+  -- end
 
   --------------------------
   -- init
@@ -207,6 +205,21 @@ function Envelope:new(id, num_envelopes, env_nodes)
 
     e.graph:set_position_and_size(graph_x, graph_y, graph_width, graph_height)
     e.graph:set_active(false)
+
+
+    engine.set_numSegs(#e.graph_nodes)
+    local env_arrays = e.get_envelope_arrays()
+    -- note: to prevent warning messages when changing the number of envelope segments 
+    --        (warnings like: "warning: wrong count of arguments for command 'set_env_levels'")
+    --        the envelope arrays are filled in  with zeros.
+    --        these zero values will be ignored by the engine
+    add_nil_values_to_array(env_arrays.levels,MAX_ENVELOPE_NODES)
+    add_nil_values_to_array(env_arrays.times,MAX_ENVELOPE_NODES)
+    add_nil_values_to_array(env_arrays.curves,MAX_ENVELOPE_NODES)
+    engine.set_env_levels(table.unpack(env_arrays.levels))
+    engine.set_env_curves(table.unpack(env_arrays.curves))
+    engine.set_env_times(table.unpack(env_arrays.times))
+    
   end
   
   
@@ -263,8 +276,19 @@ function Envelope:new(id, num_envelopes, env_nodes)
     -- print("update_env")
     if initializing == false then
       engine.set_numSegs(#e.graph_nodes)
-      
       local env_arrays = e.get_envelope_arrays()
+
+      -- note: to prevent clicking when two node times are the same, 
+      -- the second node will be nudged forward by 0.005 
+      -- before sending the data to supercollider
+      for i=#env_arrays.times,2,-1
+      do
+        if env_arrays.times[i] == env_arrays.times[i-1] then
+          print("equal",i)
+          env_arrays.times[i] = env_arrays.times[i] + 0.001
+        end
+      end
+
       -- note: to prevent warning messages when changing the number of envelope segments 
       --        (warnings like: "warning: wrong count of arguments for command 'set_env_levels'")
       --        the envelope arrays are filled in  with zeros.
@@ -273,9 +297,10 @@ function Envelope:new(id, num_envelopes, env_nodes)
       add_nil_values_to_array(env_arrays.times,MAX_ENVELOPE_NODES)
       add_nil_values_to_array(env_arrays.curves,MAX_ENVELOPE_NODES)
       engine.set_env_levels(table.unpack(env_arrays.levels))
-      engine.set_env_times(table.unpack(env_arrays.times))
       engine.set_env_curves(table.unpack(env_arrays.curves))
-
+      engine.set_env_times(table.unpack(env_arrays.times))
+      engine.start_splnkring(0)
+      
       set_dirty = true
     end
 

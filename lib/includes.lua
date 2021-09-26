@@ -6,26 +6,43 @@ UI = require "ui"
 fileselect = require "fileselect"
 textentry= require "textentry"
 cs = require "controlspec"
-lattice = require "lattice"
+Lattice = require "lattice"
+Sequins = include "splnkr/lib/Sequins"
 
-_grid = include "lib/_grid"
-
+vector = include "splnkr/lib/vector"
+globals = include "splnkr/lib/globals"
+grid_filter = include "lib/grid_filter"
+grid_sequencer = include "lib/grid_sequencer"
+sequencer_controller = include "lib/sequencer_controller"
 w_slash = include "flora/lib/w_slash"
 include "splnkr/lib/midi_helper"
 
-vector = include "flora/lib/vector"
 ArbGraph = include "flora/lib/ArbitraryGraph"
 
 
 envelope = include "splnkr/lib/envelope"
 
 externals = include "splnkr/lib/externals"
-globals = include "splnkr/lib/globals"
 encoders_and_keys = include "splnkr/lib/encoders_and_keys"
 controller = include "splnkr/lib/controller"
 sample_player = include "splnkr/lib/sample_player"
 sample_recorder = include "splnkr/lib/sample_recorder"
 
-include "clipper/lib/Cutter"
+devices_processor = include "splnkr/lib/sequin_processors/devices_processor"
+devices_crow_processor = include "splnkr/lib/sequin_processors/devices_crow_processor"
+softcut_processor = include "splnkr/lib/sequin_processors/softcut_processor"
+sequin_processor = include "splnkr/lib/sequin_processor"
+
+
+Sequin = include "splnkr/lib/Sequin"
+Sequinset = include "splnkr/lib/Sequinset"
+Sequencer= include "splnkr/lib/Sequencer"
+sequencer_screen = include "splnkr/lib/sequencer_screen"
+
+
+-- sequencer_lattice = include "splnkr/lib/sequencer_lattice"
+
+include "splnkr/lib/Cutter"
+cut_detector = include("splnkr/lib/cut_detector")
 
 parameters = include("splnkr/lib/parameters")

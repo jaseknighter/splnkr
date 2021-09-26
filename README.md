@@ -1,5 +1,5 @@
 # splnkr
-this script is something like an amplitude/frequency tracking sequencer/sampler/effects processor for monome norns with a set of 16 grid-controlled bandpass filters. 
+this script is modething like an amplitude/frequency tracking sequencer/sampler/effects processor for monome norns with a set of 16 grid-controlled bandpass filters. 
 
 features to add: convolution reverb, multitap delay, a note/drum/effect sequencer.
 
@@ -130,7 +130,7 @@ after the wet signal is sent to the SuperCollider engine's bandpass filters, pit
 ## recording clips
 clips may be recorded from the PARAMETERS>EDIT menu. what gets recorded depends on the `play mode` setting:
 * *stop*: record the entire sample 
-* *full loop*: record the entire sample 
+* *loop all*: record the entire sample 
 * *all cuts*: record all sample areas set by cutters
 * *sel cut*: record the sample area set by the selected cutter
 

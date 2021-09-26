@@ -5,42 +5,14 @@ page_scroll = function (delta)
   screen_dirty = true
 end
 
-
---[[
 local draw_top_nav = function()
+  -- if nav_off == false then
+  -- print("red")
   screen.level(15)
   screen.stroke()
   screen.rect(0,0,screen_size.x,10)
   screen.fill()
   screen.level(0)
-  screen.move(4,7)
-
-  if pages.index == 1 then
-      screen.text("page 1: rate/length" )
-  elseif pages.index == 2 then
-    screen.text("page 2: waveform")
-  elseif pages.index == 3 then
-    screen.text("page 3: effects")
-  -- elseif pages.index == 4 then
-  --   screen.text("page 4")
-  -- elseif pages.index == 5 then
-  --   screen.text("page 5")
-  end
-  -- navigation marks
-  -- screen.level(0)
-  screen.rect(0,(pages.index-1)/5*10,2,2)
-  screen.fill()
-  -- screen.update()
-end
-]]
-local draw_top_nav = function()
-  -- if nav_off == false then
-    -- print("red")
-    screen.level(15)
-    screen.stroke()
-    screen.rect(0,0,screen_size.x,10)
-    screen.fill()
-    screen.level(0)
   -- end
   screen.move(4,7)
   
@@ -80,6 +52,10 @@ local draw_top_nav = function()
     end
     screen.text("plow " .. env_nav_text)
   elseif pages.index == 3 then
+    local bcrumbs = sequencer_screen.get_control_bcrumbs() 
+    local sequencer_screen_label = "sqncr "
+    sequencer_screen_label = bcrumbs and sequencer_screen_label .. bcrumbs or sequencer_screen_label
+    screen.text(sequencer_screen_label)
   elseif pages.index == 4 then
   elseif pages.index == 5 then
   end
@@ -108,6 +84,12 @@ local update_pages = function()
       envelopes[1].redraw()
       draw_top_nav()
     elseif pages.index == 3 then
+      -- if screen_dirty == true then
+        screen.clear()
+        draw_top_nav()
+        sequencer_screen.update()
+        -- screen_dirty = false
+      -- end
       -- screen.move(10,20)
       -- screen.level(p3_index == 1 and 15 or 5)
       -- -- screen.text("vinyl: ")

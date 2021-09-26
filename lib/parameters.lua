@@ -2,35 +2,15 @@
 local parameters = {}
 
 function parameters.init()
-  --[[
-  if p3_index==1 then
-    -- vinyl = util.clamp(d_mul + vinyl,0,10)
-    -- engine.vinyl(vinyl)
-    pitchshift = util.clamp(d_mul + pitchshift,0,10)
-    engine.pitchshift(pitchshift)
-  elseif p3_index==2 then
-    phaser = util.clamp(d_mul + phaser,0,10)
-    engine.phaser(phaser)
-  elseif p3_index==3 then
-    delay = util.clamp(d_mul + delay,0,10)
-    engine.delay(delay)
-  elseif p3_index==4 then
-    strobe = util.clamp(d_mul + strobe,0,5)
-    engine.strobe(strobe)
-  elseif p3_index==5 then
-    drywet = util.clamp(d_mul + drywet,0,1)
-    engine.drywet(drywet)
-  end
-  ]]
-
-
-
+  
   ------------------------------
   -- audio routing params
   ------------------------------
 
-  params:add_separator("audio routing")
+params:add_separator("audio routing")
+
 rerouting_audio = false
+
 function route_audio()
   clock.sleep(0.5)
   local selected_route = params:get("audio_routing")
@@ -61,13 +41,35 @@ end
 params:add{
   type = "option", id = "audio_routing", name = "audio routing", 
   options = {"in+cut->eng","in->eng","cut->eng"},
-  min = 1, max = 3, default = 1,
+  -- min = 1, max = 3, 
+  default = 1,
   action = function(value) 
     rerouting_audio = true
     clock.run(route_audio)
   end
 }
 
+  ------------------------------
+  -- sequencing
+  ------------------------------
+
+  params:add_separator("sequencing")
+
+  params:add{
+    type = "option", id = "play_sequencer", name = "play sequencer", 
+    options = {"off", "on"},
+    default = 1,
+    action = function(value) 
+      if value == 1 then
+        sequencer_playing = false 
+        -- sample_player.set_play_mode(sample_player.selected_voice,5)
+      else
+        sequencer_playing= true
+        -- sample_player.set_play_mode(3)
+      end
+      ur_position = sample_player.sample_positions[sample_player.selected_voice]
+    end
+  }
   ------------------------------
   -- filter params
   ------------------------------
@@ -76,7 +78,7 @@ params:add{
 
   -- filter level
   params:add_group("level",16)
-  local filter_level_grid_view = 1
+  local filter_levelgrid_view = 1
   cs_level = controlspec.AMP:copy()
   cs_level.maxval = 1.6
   for i=1,16,1 do
@@ -88,15 +90,17 @@ params:add{
     params:set("filter_level"..i,default_val, false)
     params:set_action("filter_level"..i,function(x) 
       -- update engine
-      engine.set_filter_level(i,x)
+        engine.set_filter_level(i-1,x)
       -- update grid
-      if _grid.last_known_height > 0 then
+      -- print(grid_filter,grid_filter.last_known_height)
+      -- if grid_filter and grid_filter.last_known_height > 0 then
+      if grid_filter and grid_filter.last_known_height then
         local j = i
         local l =math.floor(util.linlin(cs_level.minval,cs_level.maxval,8,1,x))
-        _grid.solids[filter_level_grid_view][j] = {}
+        grid_filter.solids[filter_levelgrid_view][j] = {}
         for k=7,l,-1
         do
-          _grid:register_solid_at(j, k, l, filter_level_grid_view)
+          grid_filter:register_solid_at(j, k, l, filter_levelgrid_view)
         end
       end
     end)  
@@ -104,7 +108,7 @@ params:add{
 
   -- reciprocal quality
   params:add_group("reciprocal quality",16)
-  local filter_rq_grid_view = 2
+  local filter_rqgrid_view = 2
   cs_rq = controlspec.AMP:copy()
   for i=1,16,1 do
     params:add_control("reciprocal_quality"..i,"reciprocal q"..i,cs_rq)
@@ -117,19 +121,20 @@ params:add{
         x = 0.1
         params:set("reciprocal_quality"..i,0.1, false)
       end
-      engine.set_reciprocal_quality(i,x)
+        engine.set_reciprocal_quality(i-1,x)
       -- update grid
-      if _grid.last_known_height > 0 then
-        local j = i
+      -- if grid_filter.last_known_height > 0 then
+      if grid_filter.last_known_height then
+          local j = i
         -- local l =math.floor(util.linlin(cs_rq.minval,cs_rq.maxval,8,1,x))
         local l =math.floor(util.linlin(cs_rq.minval,cs_rq.maxval,1,8,x))
         -- print("l",cs_rq.minval,cs_rq.maxval,x,l)
 
-        _grid.solids[filter_rq_grid_view][j] = {}
+        grid_filter.solids[filter_rqgrid_view][j] = {}
         for k=7,l,-1
         do
-          -- print(j, k, l, filter_rq_grid_view)
-          _grid:register_solid_at(j, k, l, filter_rq_grid_view)
+          -- print(j, k, l, filter_rqgrid_view)
+          grid_filter:register_solid_at(j, k, l, filter_rqgrid_view)
         end
       end
     end)  
@@ -137,16 +142,17 @@ params:add{
 
   -- center frequency
   params:add_group("center frequency",16)
-  local filter_cf_grid_view = 3
+  local filter_cfgrid_view = 3
   cs_cf = controlspec.MIDFREQ:copy()
   cs_cf.maxval = 1200
   for i=1,16,1 do
     params:add_control("center_frequency"..i,"center freq"..i,cs_cf)
     params:set_action("center_frequency"..i,function(x) 
       -- update engine
-      engine.set_center_frequency(i,x)
+      engine.set_center_frequency(i-1,x)
+
       -- update grid
-      if _grid.last_known_height > 0 then
+      if grid_filter.last_known_height then
         local j = i
         -- local l =math.floor(util.linexp(cs_cf.minval,cs_cf.maxval,8,1,x))
         local l = 
@@ -159,10 +165,10 @@ params:add{
           x < 900 and 2 or
           1
 
-        _grid.solids[filter_cf_grid_view][j] = {}
+        grid_filter.solids[filter_cfgrid_view][j] = {}
         for k=7,l,-1
         do
-          _grid:register_solid_at(j, k, l, filter_cf_grid_view)
+          grid_filter:register_solid_at(j, k, l, filter_cfgrid_view)
         end
       end
     end)  
@@ -174,21 +180,15 @@ params:add{
   -- effect params
   ------------------------------
 
-  --[[
-    \trigRate, [1, 30, \lin, 0, 5],
-    \overlap, [0.01, 0.99, \lin, 0, 0.5],
-    \panType, [0, 1, \lin, 1, 0],
-    \panMax, [0, 1, \lin, 0, 0.5],
-    \amp, [0, 1, \lin, 0, 0.1]
-  ]]
+  
 
     trig_spec = controlspec.def{
-      min=1,
-      max=10.0,
-      warp='lin',
-      step=0.1,
-      default=2,
-      quantum=0.01,
+      min=-0.0,
+      max=50.0,
+      warp='linear',
+      step=0.001,
+      default=5,
+      quantum=0.0001,
       wrap=false,
       -- units='khz'
     }
@@ -196,12 +196,15 @@ params:add{
   local effect_params = {
     -- {vinyl,vinyl,0,10,0,engine.vinyl}
     -- effect_name,effect_id,effect_min,effect_max,effect_default, effect_fn, effect_type
-    {"drywet","drywet",0,1,1,engine.drywet,"control",},
+
     {"amp","amp",0,1,1,engine.amp,"control",},
+    {"drywet","drywet",0,1,1,engine.drywet,"control",},
     {"pitchshift","pitchshift",0,1,0,engine.pitchshift,"control",},
+    {"pitchshift offset","pitchshift_midi_offset",-100,100,0,engine.pitchshift_midi_offset,"number",},
     {"phaser","phaser",0,1,0,engine.phaser,"control",},
     {"delay","delay",0,1,0,engine.delay,"control",},
-    {"strobe","strobe",0,1,0,engine.strobe,"control",},
+    -- {"strobe","strobe",0,1,0,engine.strobe,"control",},
+    {"flutter and wow","flutter_and_wow",0,1,0,engine.flutter_and_wow,"control",},
     {"enveloper","enveloper",1,2,1,engine.enveloper,"option",{"off","on"},},
     {"trig rate","trig_rate",1,20,5,engine.trig_rate,"number",},
     {"overlap","overlap",0.01,0.99,0.5,engine.overlap,"control",},
@@ -238,26 +241,114 @@ params:add{
     params:set(effect_id,effect_default)
   end
 
-    params:add_separator("effects")
+  params:add_separator("effects")
 
-    -- for i=1,#effect_params,1
-    for i=1,6,1
-    do
-      parameters.add_effect_param(
-        effect_params[i][1],
-        effect_params[i][2],
-        effect_params[i][3],
-        effect_params[i][4],
-        effect_params[i][5],
-        effect_params[i][6],
-        effect_params[i][7],
-        effect_params[i][8])
+  for i=1,7,1
+  do
+    parameters.add_effect_param(
+    effect_params[i][1],
+    effect_params[i][2],
+    effect_params[i][3],
+    effect_params[i][4],
+    effect_params[i][5],
+    effect_params[i][6],
+    effect_params[i][7],
+    effect_params[i][8])
+  end
+
+  --------------------------------
+  -- wow and flutter parameters
+  --------------------------------
+  params:add_separator("")
+
+  -- params:add_group("wow and flutter",6)
+  
+  WOBBLE_AMP = cs.def{
+                      min=0,
+                      max=0.20,
+                      warp='lin',
+                      step=0.01,
+                      default=0.05,
+                      wrap=false,
+                    }
+
+  FLUTTER_AMP = cs.def{
+                      min=0,
+                      max=0.20,
+                      warp='lin',
+                      step=0.01,
+                      default=0.02,
+                      wrap=false,
+                    }
+
+  -- params:add{type = "option", id = "enable_wow_flutter", name = "enable wow and flutter",
+  --   options = {"off","on"}, default=2,
+  --   action = function(value)
+  --     if value == 1 then
+  --       engine.wobble_amp(0) 
+  --       engine.flutter_amp(0) 
+  --     else
+  --       engine.wobble_amp(params:get("wobble_amp"))
+  --       engine.wobble_amp(params:get("flutter_amp")) 
+  --     end
+  --   end
+  -- }
+
+  params:add{
+    type = "number", id = "wobble_rpm", name = "wobble rpm", min=1, max=1000, default=33,
+    action=function(x)
+      engine.wobble_rpm(x) 
     end
+  }
 
+  params:add{
+    type = "control", id = "wobble_amp", name = "wobble amp", controlspec = WOBBLE_AMP,
+    action=function(x)
+      engine.wobble_amp(x) 
+      -- if params:get("enable_wow_flutter") == 1 then
+      --   engine.wobble_amp(0) 
+      -- else
+      --   engine.wobble_amp(x) 
+      -- end
+    end
+  }
+
+  params:add{
+    type = "number", id = "wobble_exp", name = "wobble exp", min=1, max=1000, default=39,
+    action=function(x)
+      engine.wobble_exp(x) 
+    end
+  }
+  
+  params:add{
+    type = "control", id = "flutter_amp", name = "flutter amp", controlspec = FLUTTER_AMP,
+    action=function(x)
+      engine.flutter_amp(x) 
+      -- if params:get("enable_wow_flutter") == 1 then
+      --   engine.flutter_amp(0) 
+      -- else
+      --   engine.flutter_amp(x) 
+      -- end
+    end
+  }
+
+  params:add{
+    type = "number", id = "flutter_fixedfreq", name = "flutter fixed freq", min=1, max=100, default=6,
+    action=function(x)
+      engine.flutter_fixedfreq(x) 
+    end
+  }
+
+  params:add{
+    type = "number", id = "flutter_variationfreq", name = "flutter variation freq", min=1, max=1000, default=6,
+    action=function(x)
+      engine.flutter_variationfreq(x) 
+    end
+  }
 
     params:add_separator("enveloping")
 
-    for i=7,#effect_params,1
+    for i=8,#effect_params,1
     do
       parameters.add_effect_param(
         effect_params[i][1],
@@ -373,11 +464,12 @@ params:add{
     {"frequency_max","freq max",controlspec.FREQ:copy(),engine.set_detect_frequency_max,800,true},
   }
 
+  --[[
   params:add_group("amp detection",8)
   parameters.create_amp_freq_params(amp_params)
   params:add_group("freq detection",8)
   parameters.create_amp_freq_params(freq_params)
-
+  ]]
 
 
   --------------------------------
@@ -394,14 +486,12 @@ params:add{
 
   params:add_group("midi",8)
 
-  --[[
-  params:add{type = "option", id = "midi_engine_control", name = "midi engine control",
-    options = {"off","on"},
-    default = 2,
-    -- action = function(value)
-    -- end
-  }
-  ]]
+  -- params:add{type = "option", id = "midi_engine_control", name = "midi engine control",
+  --   options = {"off","on"},
+  --   default = 2,
+  --   -- action = function(value)
+  --   -- end
+  -- }
 
   local midi_devices = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 
@@ -511,8 +601,8 @@ params:add{
 
   params:add{type = "option", id = "output_crow1", name = "crow out1 mode",
     -- options = {"off","on"},
-    options = {"off","engine", "midi", "engine + midi", "clock"},
-    default = 2,
+    options = {"off","engine", "sequencer", "midi", "engine + midi", "clock"},
+    default = 3,
     action = function(value)
       if value == 5 then 
         crow.output[1].action = "{to(5,0),to(5,0.05),to(0,0)}"
@@ -534,8 +624,8 @@ params:add{
 
   params:add{type = "option", id = "output_crow3", name = "crow out3 mode",
     -- options = {"off","on"},
-    options = {"off","engine", "midi", "engine + midi", "clock"},
-    default = 2,
+    options = {"off","engine", "sequencer", "midi", "engine + midi", "clock"},
+    default = 3,
     action = function(value)
       if value == 5 then 
         crow.output[3].action = "{to(5,0),to(5,0.05),to(0,0)}"
@@ -559,9 +649,11 @@ params:add{
   params:add_group("just friends",2)
   params:add{type = "option", id = "output_jf", name = "just friends",
     options = {"off","engine", "midi", "engine + midi"},
-    default = 3,
+    default = 1,
     action = function(value)
       if value > 1 then 
+        print("value",value
+      )
         -- crow.output[2].action = "{to(5,0),to(0,0.25)}"
         crow.ii.pullup(true)
         crow.ii.jf.mode(1)
@@ -733,6 +825,7 @@ params:add{
 
   add_remove_nodes = function(envelope_id, num_nodes)
     if num_nodes < envelopes[envelope_id].get_num_nodes() then
+      print("add_remove1")
       local num_controls_to_remove = #envelopes[envelope_id].graph_nodes - num_nodes
       for i=1,num_controls_to_remove,1
       do
@@ -743,6 +836,7 @@ params:add{
         reset_envelope_control_params(envelope_id)
       end
     else
+      print("add_remove2")
       local num_controls_to_add = num_nodes - #envelopes[envelope_id].graph_nodes
       for i=1,num_controls_to_add,1
       do
@@ -750,8 +844,8 @@ params:add{
           envelopes[envelope_id].set_active_node(1)
         end
         envelopes[envelope_id].add_node()
-        reset_envelope_control_params(envelope_id)
       end
+      reset_envelope_control_params(envelope_id)
     end
     
     local num_envelope_controls = envelope_id == 1 and "num_envelope1_controls" or "num_envelope2_controls"
@@ -782,6 +876,7 @@ params:add{
       controlspec=PLOW_LEVEL,
       action=function(x) 
         if initializing == false then envelopes[envelope_id].set_env_level(x) end
+        screen_dirty = true
       end
     }
   
@@ -793,6 +888,7 @@ params:add{
       controlspec=PLOW_TIME,
       action=function(x) 
         if initializing == false then envelopes[envelope_id].set_env_time(x) end
+        screen_dirty = true
       end
     }  
     for i=1, MAX_ENVELOPE_NODES, 1
@@ -829,34 +925,37 @@ params:add{
           name = param_name,
           controlspec = cs.new(min_val,max_val,'lin',0,control_value,''),
           action=function(x) 
-            local control_value = get_control_value_fn(envelope_id,i) or 1
-            local param = params:lookup_param(param_id_name)
-            local new_val = x
-            local env_nodes = envelopes[envelope_id].graph_nodes
-            if envelope_control_type == "time" and initializing == false then
-              local prev_val = (env_nodes[i-1] and env_nodes[i-1][envelope_control_type]) or 0
-              local next_val = (env_nodes[i+1] and env_nodes[i+1][envelope_control_type]) or envelopes[envelope_id].get_env_time()
-              new_val = util.clamp(new_val, prev_val, next_val)
-              if env_nodes[i] and x ~= control_value then
-                env_nodes[i][envelope_control_type] = new_val
-                param.controlspec.minval = prev_val
-                param.controlspec.maxval = next_val
-              end
-            elseif initializing == false then
-              if envelope_control_type == "level" and env_nodes[i] then
-                if (i ~= 1 and i ~= #envelopes[envelope_id].graph_nodes) then
+            if envelopes[envelope_id].active_node == i then
+              local control_value = get_control_value_fn(envelope_id,i) or 1
+              local param = params:lookup_param(param_id_name)
+              local new_val = x
+              local env_nodes = envelopes[envelope_id].graph_nodes
+              if envelope_control_type == "time" and initializing == false then
+                local prev_val = (env_nodes[i-1] and env_nodes[i-1][envelope_control_type]) or 0
+                local next_val = (env_nodes[i+1] and env_nodes[i+1][envelope_control_type]) or envelopes[envelope_id].get_env_time()
+                new_val = util.clamp(new_val, prev_val, next_val)
+                if env_nodes[i] and x ~= control_value then
+                  env_nodes[i][envelope_control_type] = new_val
+                  param.controlspec.minval = prev_val
+                  param.controlspec.maxval = next_val
+                end
+              elseif initializing == false then
+                if envelope_control_type == "level" and env_nodes[i] then
+                  if (i ~= 1 and i ~= #envelopes[envelope_id].graph_nodes) then
+                    env_nodes[i][envelope_control_type] = new_val
+                  end
+                elseif env_nodes[i] then
                   env_nodes[i][envelope_control_type] = new_val
                 end
-              elseif env_nodes[i] then
-                env_nodes[i][envelope_control_type] = new_val
               end
+              envelopes[envelope_id].graph:edit_graph(env_nodes)
+              local num_envelope_controls = envelope_id == 1 and "num_envelope1_controls" or "num_envelope2_controls"
+              local num_env_nodes = #envelopes[envelope_id].graph_nodes
+              -- print("reset_envelope_control_params",envelope_id,i)
+              reset_envelope_control_params(envelope_id)
+              params:set(num_envelope_controls,num_env_nodes)
             end
-            envelopes[envelope_id].graph:edit_graph(env_nodes)
-            local num_envelope_controls = envelope_id == 1 and "num_envelope1_controls" or "num_envelope2_controls"
-            local num_env_nodes = #envelopes[envelope_id].graph_nodes
-            reset_envelope_control_params(envelope_id)
-            params:set(num_envelope_controls,num_env_nodes)
-            
+            screen_dirty = true
           end
 
         }

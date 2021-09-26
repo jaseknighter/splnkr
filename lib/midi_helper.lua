@@ -236,47 +236,46 @@ midi.add = function(device)
   device.event = midi_event
 end
 
---[[
-  -- MIDI input
-  local function midi_event(data)
+  -- -- MIDI input
+  -- local function midi_event(data)
     
-    local msg = midi.to_msg(data)
-    local channel_param = params:get("midi_channel")
+  --   local msg = midi.to_msg(data)
+  --   local channel_param = params:get("midi_channel")
     
-    if channel_param == 1 or (channel_param > 1 and msg.ch == channel_param - 1) then
+  --   if channel_param == 1 or (channel_param > 1 and msg.ch == channel_param - 1) then
       
-      -- Note off
-      if msg.type == "note_off" then
-        note_off(msg.note)
+  --     -- Note off
+  --     if msg.type == "note_off" then
+  --       note_off(msg.note)
       
-      -- Note on
-      elseif msg.type == "note_on" then
-        note_on(msg.note, msg.vel / 127)
+  --     -- Note on
+  --     elseif msg.type == "note_on" then
+  --       note_on(msg.note, msg.vel / 127)
         
-      -- Key pressure
-      elseif msg.type == "key_pressure" then
-        set_pressure(msg.note, msg.val / 127)
+  --     -- Key pressure
+  --     elseif msg.type == "key_pressure" then
+  --       set_pressure(msg.note, msg.val / 127)
         
-      -- Channel pressure
-      elseif msg.type == "channel_pressure" then
-        set_pressure_all(msg.val / 127)
+  --     -- Channel pressure
+  --     elseif msg.type == "channel_pressure" then
+  --       set_pressure_all(msg.val / 127)
         
-      -- Pitch bend
-      elseif msg.type == "pitchbend" then
-        local bend_st = (util.round(msg.val / 2)) / 8192 * 2 -1 -- Convert to -1 to 1
-        local bend_range = params:get("bend_range")
-        set_pitch_bend_all(bend_st * bend_range)
+  --     -- Pitch bend
+  --     elseif msg.type == "pitchbend" then
+  --       local bend_st = (util.round(msg.val / 2)) / 8192 * 2 -1 -- Convert to -1 to 1
+  --       local bend_range = params:get("bend_range")
+  --       set_pitch_bend_all(bend_st * bend_range)
         
-      -- CC
-      elseif msg.type == "cc" then
-        -- Mod wheel
-        if msg.cc == 1 then
-          set_timbre_all(msg.val / 127)
-        end
+  --     -- CC
+  --     elseif msg.type == "cc" then
+  --       -- Mod wheel
+  --       if msg.cc == 1 then
+  --         set_timbre_all(msg.val / 127)
+  --       end
         
-      end
+  --     end
     
-    end
+  --   end
     
-  end
-]]
+  -- end
+
