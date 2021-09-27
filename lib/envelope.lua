@@ -284,7 +284,7 @@ function Envelope:new(id, num_envelopes, env_nodes)
       for i=#env_arrays.times,2,-1
       do
         if env_arrays.times[i] == env_arrays.times[i-1] then
-          print("equal",i)
+          -- print("equal",i)
           env_arrays.times[i] = env_arrays.times[i] + 0.001
         end
       end

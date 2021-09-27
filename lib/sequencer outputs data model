@@ -1,0 +1,83 @@
+1. sample (softcut voice) 
+output_type: 1
+outputs: 6
+output_modes: {nil}
+output_params: 
+    {
+      {4},    -- sample_cut_num,rate,rate_direction,level
+      {4},    -- sample_cut_num,rate,rate_direction,level
+      {4},    -- sample_cut_num,rate,rate_direction,level
+      {4},    -- sample_cut_num,rate,rate_direction,level
+      {4},    -- sample_cut_num,rate,rate_direction,level
+      {4},    -- sample_cut_num,rate,rate_direction,level
+    }
+
+    play_voice (suboptions 1-6)
+  params for each voice
+    sample_cut_num
+    rate
+    rate_direction
+    level
+  NOTES: 
+    if the value type is a number, only 1 suboption may be chosen
+    if the value type is an array, multiple suboptions may be chosen
+2. device (synth) outputs: 
+
+output_type:  2
+outputs:      4
+output_modes:  
+    {    
+      nil,  -- midi out (nil),
+      2,    -- crow(2): pitch, drum
+      5,    -- jf(5): play_note, play_voice, pitch, geode play_voice, geode_play_note
+      2     -- w/ (2): w_syn, w_del (karplus)
+    }
+output_params: 
+    {  
+      nil,      -- midi value
+      { {1},    -- crow osc: pitch
+        {1}},   -- crow drum: num ????
+      { {2},     -- jf play_note: pitch, level
+        {3},     -- jf play_voice: channel, pitch, level
+        {2},     -- jf pitch portamento: channel, pitch
+      },
+      {
+        {1},     -- w/ w_syn: pitch
+        {1},     -- w/ w_del karplus: pitch
+      }
+    }
+
+3. effects
+output_params: 
+    {
+      {1},      -- amp 0-1
+      {1},      -- drywet 0-1
+      {1},      -- pitchshift 0-1
+      {1},      -- pitchshift offset 0-100
+      {8},      -- pitshift array -24 - 24 ????
+      {1},      -- phaser 0-1
+      {1}       -- delay 0-1
+    }
+4. enveloper
+output_params: 
+    {
+      {1},      -- enveloper on/off
+      {1},      -- enveloper trig_rate 0.01-50.00 ????
+      {1},      -- enveloper overlap 0-1
+    }
+5. pattern
+output_params: 
+    {
+      {1},      -- division fraction X / Y
+      {3},      -- stop,start,toggle 0-1 (1 triggers stop)
+    }
+6. lattice
+output_params
+    {
+      {3},      -- stop,start,toggle 0-1 (1 triggers stop)
+      {1},      -- set_meter quarter notes per measure (defaults to 4) 1-18
+      {1},      -- auto_pulse(s)
+      {1},      -- pulse (NOTE: setting is ignored if auto_pulse is enabled)
+      {1},      -- ppqn 1-???? defaults to 96    
+      {1},      -- reset, hard_reset
+    }

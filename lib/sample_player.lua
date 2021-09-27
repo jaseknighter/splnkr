@@ -100,7 +100,6 @@ end
 function sample_player.load_file(file)
   selecting = false
   if file ~= "cancel" then
-    print(file)
     file_selected = true
     sample_player_nav_labels[1] = "select/play voice: " .. 1
 
@@ -125,7 +124,7 @@ function sample_player.load_file(file)
     new_sample_load_completed()
   else
     -- sample_player.update()
-    print("cancel")
+    -- print("cancel")
   end
 end
 

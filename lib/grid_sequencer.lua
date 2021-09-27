@@ -34,8 +34,8 @@ based on tyler etter's code: https://gist.github.com/tyleretters/a62a27e22dc7021
       enabled = true
       1 sequins set
         each sequins set contains 0-4 sequins sub sets (variations on the main sequins set)
-        each sequins set contains 1-9 sequins
-          each of the 1-9 sequins can contain 1-7 output typess or nested sequins
+        each sequins set contains up to 9 sequins
+          each of the up to 9 sequins can contain 1-7 output typess or nested sequins
             NOTE: IF NESTED SEQUINS ARE SELECTED, THE VALUE SET BUTTON WILL FLICKER
             OUTPUTS:            
               1. sample (softcut voice) with suboptions:
@@ -182,7 +182,6 @@ function grid_sequencer.init()
   grid_sequencer.frame = 0
   grid_sequencer.last_known_width = g.cols
   grid_sequencer.last_known_height = g.rows
-  print("init")
   for i=1,#grid_sequencer.grid_views, 1 do
     -- grid_sequencer.flickers[i] = {}
     grid_sequencer.solids[i] = {}
@@ -704,6 +703,26 @@ function grid_sequencer:get_height()
 end
 
 -- local long_presses = {}
+
+function grid_sequencer:copy_paste(first_press,second_press)
+  -- print(first_press[1],first_press[2],second_press[1],second_press[2])
+  if (first_press[1] < 6 and second_press[1] < 6 ) and (first_press[2] == 1 and second_press[2] == 1 ) then
+    -- copy/paste sequinsets
+    print("copy/paste sequinsets")
+    sequencer_controller.copy_paste_sequinsets(first_press[1], second_press[1])
+  elseif (first_press[1] < 15 and second_press[1] < 15 ) and (first_press[2] == 1 and second_press[2] == 1 ) then
+    -- copy/paste indivdual sequins
+    print("copy/paste individual sequin")
+    sgp = sequencer_controller.selected_sequin_groups
+    ssg = 1  
+    local data_path = {sgp,ssg}
+    local source_id = first_press[1]-5
+    local target_id = second_press[1]-5
+    local end_node = "sqn"
+    sequencer_controller.copy_paste_sequence_data(source_id, target_id, data_path, end_node)
+  end
+end
+
 function grid_sequencer:set_long_press(bool,x,y)
   -- self.long_press = bool
   
@@ -723,15 +742,15 @@ function grid_sequencer:set_long_press(bool,x,y)
       long_presses = {}
     elseif #long_presses == 3 then
       table.remove(long_presses)
-      ------------------------
-      -- todo: implement two_key_presses function
-      -- grid_sequencer:two_key_presses(long_presses[1],long_presses[2], 1, "long")
-      ------------------------
+      local first_press = long_presses[1]
+      local second_press = long_presses[2]
       long_presses = {}
+      grid_sequencer:copy_paste(first_press,second_press)
     else 
       long_presses = {}
     -- elseif #long_presses == 0 then
       grid_sequencer:key_press(x, y, 1, "long")
+      print("long")
       -- unflickered,send long pressed keys to controller
       long_presses = {}
     end

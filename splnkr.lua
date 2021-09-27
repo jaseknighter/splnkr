@@ -297,7 +297,8 @@ function finish_init()
   -- sequencer_lattice.init()
   params:bang()
   
-  -- sequins test
+  --[[
+    -- sequins test
   mys = Sequins{0,2,4,7,9}
   myt = Sequins{1,1,1,1/2,1/2}
   crow.ii.pullup(true)
@@ -313,7 +314,8 @@ function finish_init()
   -- function time_fn() while true do crow.clock.sync(myt()) crow.ii.wsyn.play_note(mys()/12,0.9) end end
 
   clock.run(time_fn)
-  
+  ]]
+
   -- engine.set_numSegs(4)
   envelopes[1].update_envelope()
   initializing = false

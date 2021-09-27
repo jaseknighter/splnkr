@@ -14,7 +14,7 @@ globals = include "splnkr/lib/globals"
 grid_filter = include "lib/grid_filter"
 grid_sequencer = include "lib/grid_sequencer"
 sequencer_controller = include "lib/sequencer_controller"
-w_slash = include "flora/lib/w_slash"
+w_slash = include "splnkr/lib/w_slash"
 include "splnkr/lib/midi_helper"
 
 ArbGraph = include "flora/lib/ArbitraryGraph"

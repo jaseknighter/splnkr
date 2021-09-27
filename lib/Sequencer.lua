@@ -24,7 +24,14 @@ function Sequencer:new(lattice,id)
   }
 
   function s:pattern_event()
-    s.next_sequin = s.sequins()
+    -- print("s.sequins.ix",s.sequins.ix,params:get("num_sequin"))
+    
+    if s.sequins.ix < params:get("num_sequin") then
+      s.next_sequin = s.sequins()
+    else
+      s.sequins:select(1)
+      s.next_sequin = s.sequins()
+    end
     -- print("pattern event")
     if sequencer_controller.sequencers and sequencer_controller.sequencers[1] and sequencer_controller.sequencers[1].next_sequin then
       -- print("next_sequin",sequencer_controller.sequencers[1].next_sequin.id)
@@ -36,12 +43,10 @@ function Sequencer:new(lattice,id)
   end
   
   function s:start()
-    print("start")
     sample_player.set_play_mode(1,1)
   end
   
   function s:stop()
-    print("stop")
     sample_player.set_play_mode(0,1)
   end
 

@@ -55,6 +55,15 @@ params:add{
 
   params:add_separator("sequencing")
 
+  
+  params:add{
+    type = "number", id = "num_sequin", name = "num sequin", min=1, max=9, default=9,
+    -- action=function(x)
+      
+    -- end
+  }
+
+
   params:add{
     type = "option", id = "play_sequencer", name = "play sequencer", 
     options = {"off", "on"},
@@ -213,7 +222,6 @@ params:add{
   }
 
   function parameters.add_effect_param(effect_name,effect_id,effect_min,effect_max,effect_default, effect_fn, effect_type, effect_options)
-    print(effect_name,effect_id,effect_min,effect_max,effect_default, effect_fn, effect_type, effect_options)
     if effect_id ~= "trig_rate" and effect_type ~= "option" then
       params:add{
         type = effect_type, id = effect_id, name = effect_name, default = effect_default,
@@ -232,7 +240,6 @@ params:add{
         type = effect_type, id = effect_id, name = effect_name, default = effect_default,
         min=effect_min,max=effect_max, options=effect_options,
         action = function(x) 
-          print("enveloper", x)
           x = x - 1
           effect_fn(x)
         end
@@ -502,8 +509,6 @@ params:add{
     type = "option", id = "midi_in_device", name = "in device", options = midi_devices, 
     min = 1, max = 16, default = 1, 
     action = function(value)
-
-      print("set midi in",value)
       midi_in_device.event = nil
       midi_in_device = midi.connect(value)
       midi_in_device.event = midi_event
@@ -652,8 +657,6 @@ params:add{
     default = 1,
     action = function(value)
       if value > 1 then 
-        print("value",value
-      )
         -- crow.output[2].action = "{to(5,0),to(0,0.25)}"
         crow.ii.pullup(true)
         crow.ii.jf.mode(1)
@@ -825,7 +828,6 @@ params:add{
 
   add_remove_nodes = function(envelope_id, num_nodes)
     if num_nodes < envelopes[envelope_id].get_num_nodes() then
-      print("add_remove1")
       local num_controls_to_remove = #envelopes[envelope_id].graph_nodes - num_nodes
       for i=1,num_controls_to_remove,1
       do
@@ -836,7 +838,6 @@ params:add{
         reset_envelope_control_params(envelope_id)
       end
     else
-      print("add_remove2")
       local num_controls_to_add = num_nodes - #envelopes[envelope_id].graph_nodes
       for i=1,num_controls_to_add,1
       do

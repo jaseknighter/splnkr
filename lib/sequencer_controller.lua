@@ -8,7 +8,7 @@
 -- ui groups heirarchy
 --  sequins group[1-5]:     each group defines contains a pattern and a sequins sequence
 --  sequins subgroup[a-d]:  details TBD (general idea: each sub group is a copy of group above it)
---  sequin selector:        selects a sequin for editing (1-9 sequin(s) per sequins group)
+--  sequin selector:        selects a sequin for editing up to 9 sequin(s) per sequins group)
 --  output type:            a type of output (e.g. softcut, device, effect, etc.)
 --  output:                 examples: softcut voice 1, just friends, delay effect, etc.
 --  output mode:            some outputs have modes (e.g. just friends play_note, w/ delay mode, etc.
@@ -75,49 +75,85 @@ function sequencer_controller.init()
   sequencer_controller.lattice:start()
 end
 
+function sequencer_controller.copy_paste_sequinsets(source_sequinset, target_sequinset)
+  print("copy/paste",source_sequinset, target_sequinset)
+  sequencer_controller.sequins_outputs_table[target_sequinset] = fn.deep_copy(sequencer_controller.sequins_outputs_table[source_sequinset])
+  clock.run(sequencer_controller.activate_sequinset,target_sequinset)
+end
+
+function sequencer_controller.activate_sequinset(target_sequinset)
+  sequencer_controller.reset_sequinset_value_heirarcy(target_sequinset)
+  clock.sleep(0.2)
+  print("activate",target_sequinset)
+  clock.run(grid_sequencer.activate_grid_key_at,target_sequinset,1,0.2)
+end
+
+function sequencer_controller.reset_sequinset_value_heirarcy(sgp,inner_table)
+  local tab = inner_table and inner_table or sequencer_controller.sequins_outputs_table[sgp]
+  -- local table_type
+  for k, v in pairs(tab) do 
+    if type(v) == "table" then
+      sequencer_controller.reset_sequinset_value_heirarcy(sgp,v)
+    end
+    if k == "value_heirarchy" then
+      v.sgp = sgp
+    end
+  end
+end
+
+-----------------------
+
+function sequencer_controller.copy_paste_sequence_data(source_id, target_id, data_path, end_node)
+  -- source_table = sequencer_controller.sequins_outputs_table
+  -- target_table = sequencer_controller.sequins_outputs_table
+  -- for i=1,#data_path,1 do
+  --   source_table = source_table[data_path[i]]
+  --   -- target_table = target_table[data_path[i]]
+  -- end
+  -- source_table = source_table[source_id]
+  -- target_table = target_table[target_id]
+  local target_table
+  if #data_path == 2 then
+    local source_table = sequencer_controller.sequins_outputs_table[data_path[1]][data_path[2]][source_id]
+    -- target_table = sequencer_controller.sequins_outputs_table[data_path[1]][data_path[2]][target_id]
+    sequencer_controller.sequins_outputs_table[data_path[1]][data_path[2]][target_id] = fn.deep_copy(source_table)
+    target_table = sequencer_controller.sequins_outputs_table[data_path[1]][data_path[2]][target_id]
+  end
+  sequencer_controller.update_value_heirarcy(end_node, target_id, target_table)
+  clock.run(sequencer_controller.activate_target,target_id)
+end
+
+function sequencer_controller.activate_target(target_id)
+  clock.sleep(0.2)
+  clock.run(grid_sequencer.activate_grid_key_at,target_id+5,1,0.1)
+end
+
+function sequencer_controller.update_value_heirarcy(end_node,end_node_value, output_data_table)
+  -- local tab = inner_table and inner_table or sequencer_controller.sequins_outputs_table[sgp][ssg][target_id]
+  -- local table_type
+  for k, v in pairs(output_data_table) do 
+    if type(v) == "table" then
+      sequencer_controller.update_value_heirarcy(end_node,end_node_value,v)
+    end
+    if k == "value_heirarchy" then
+      print("found value heirarchy before", v[end_node],end_node_value)
+      v[end_node] = end_node_value
+      print("found value heirarchy after", v[end_node],end_node_value)
+    end
+  end
+end
+
+-----------------------
 function sequencer_controller.reset_active_sequin_value()
   sequencer_controller.active_sequin_value = {}
   -- if sequencer_controller.sequin_output_types then sequencer_controller:unregister_ui_group(6,2) end
 end
 
-function sequencer_controller.reset_place_values(exception)
-  -- print("exception, = =tenths", exception, exception == "tenths",sequencer_controller.active_sequin_value.place_values.tenths)
-  -- sequencer_controller.active_sequin_value.place_values = {}
-  sequencer_controller.active_sequin_value.place_values.ten_thousands   = (exception == "ten_thousands")  and  sequencer_controller.active_sequin_value.place_values.ten_thousands or  0
-  sequencer_controller.active_sequin_value.place_values.thousands       = (exception == "thousands")      and  sequencer_controller.active_sequin_value.place_values.thousands     or  0
-  sequencer_controller.active_sequin_value.place_values.hundreds        = (exception == "hundreds")       and  sequencer_controller.active_sequin_value.place_values.hundreds      or  0
-  sequencer_controller.active_sequin_value.place_values.ones            = (exception == "ones")           and  sequencer_controller.active_sequin_value.place_values.ones          or  0
-  sequencer_controller.active_sequin_value.place_values.tens            = (exception == "tens")           and  sequencer_controller.active_sequin_value.place_values.tens          or  0
-  sequencer_controller.active_sequin_value.place_values.tenths          = (exception == "tenths")         and  sequencer_controller.active_sequin_value.place_values.tenths        or  0
-  sequencer_controller.active_sequin_value.place_values.hundredths      = (exception == "hundredths")     and  sequencer_controller.active_sequin_value.place_values.hundredths    or  0
-  sequencer_controller.active_sequin_value.place_values.thousandths     = (exception == "thousandths")    and  sequencer_controller.active_sequin_value.place_values.thousandths   or  0
-end
 
-function sequencer_controller.set_active_sequin_value_type(value_type)
-  if value_type == "number" and sequencer_controller.active_sequin_value.place_values == nil then
-    sequencer_controller.reset_place_values()
-  elseif value_type == "option" and sequencer_controller.active_sequin_value == nil then
-    -- do something here?
-    sequencer_controller.active_sequin_value.place_values = nil
-  end
-  sequencer_controller.active_sequin_value.value_type = value_type
-end
--- sequencer_controller.reset_active_sequin_value()
 
 -- set in update_value_place_integers and update_value_place_decimals
 sequencer_controller.active_value_selector_place = nil 
 
-sequencer_controller.sequin_value_tables = {}
-sequencer_controller.sequin_value_tables[1] = {}
-sequencer_controller.sequin_value_tables[1][1] = {}
-sequencer_controller.sequin_value_tables[2] = {}
-sequencer_controller.sequin_value_tables[2][1] = {}
-sequencer_controller.sequin_value_tables[3] = {}
-sequencer_controller.sequin_value_tables[3][1] = {}
-sequencer_controller.sequin_value_tables[4] = {}
-sequencer_controller.sequin_value_tables[4][1] = {}
-sequencer_controller.sequin_value_tables[5] = {}
-sequencer_controller.sequin_value_tables[5][1] = {}
 
 -- utilities
 function sequencer_controller.print_svt()
@@ -132,9 +168,14 @@ function sequencer_controller.print_outputs_table(inner_table)
     if type(v) == "table" then
       sequencer_controller.print_outputs_table(v)
     end
+    if k == "value_heirarchy" then
+      -- tab.print(v)
+      -- print(">>>>>")
+    end
     if k == "output_data" then
       -- do something???
       tab.print(v)
+      
     end
   end
   -- debug = 0
@@ -199,17 +240,17 @@ function sequencer_controller.refresh_output_control_specs_map()
       --    rate_direction: -1, 1
       --    level: 0-1
       {
+        {"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"v_mode","v_mode"},      -- play mode
         {"option",cutters,nil,"cutter","cutter"},  -- cutter
-        {"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"mode","mode"},      -- play mode
         {"number","0.00",20.00,1,"rate","rate"},    -- rate
         {"option",{-1,1},2,nil,"direction","direction"},      -- direction
         {"number",'0.00',10,0.20,"level","level"}         -- level (amp)
       },  
-      {{"option",cutters,nil,"cutter","cutter"},{"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"mode","mode"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
-      {{"option",cutters,nil,"cutter","cutter"},{"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"mode","mode"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
-      {{"option",cutters,nil,"cutter","cutter"},{"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"mode","mode"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
-      {{"option",cutters,nil,"cutter","cutter"},{"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"mode","mode"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
-      {{"option",cutters,nil,"cutter","cutter"},{"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"mode","mode"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
+      {{"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
+      {{"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
+      {{"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
+      {{"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
+      {{"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
     }, 
     { -- device (, crow(2), just_friends(3),w/(2))
       {"number",-24,36,nil,"midi_note","midi note"}, -- midi out
@@ -340,12 +381,12 @@ function sequencer_controller.set_selected_sequin_groups(index,state)
     sequencer_controller.selected_sequin_groups = index or nil
     sequencer_controller.selected_sequin_subgroups = 1
     sequencer_controller.set_ui_sequin_selector()
-    print(sequencer_controller.lattice.enabled)
+    -- print(sequencer_controller.lattice.enabled)
     if sequencer_controller.lattice.enabled == false then 
       sequencer_controller.lattice:start()
     end
   else
-    print(sequencer_controller.lattice.enabled)
+    -- print(sequencer_controller.lattice.enabled)
     if sequencer_controller.lattice.enabled == true then 
       sequencer_controller.lattice:stop()
     end
@@ -732,7 +773,6 @@ end
 
 function sequencer_controller.activate_grid_key_at(x,y)
   clock.sleep(0.5)
-  print("<<<>>>existing_output_value",x,y)
   grid_sequencer.activate_grid_key_at(x,y)    
   grid_sequencer.activate_grid_key_at(x,y)
 end
@@ -903,7 +943,6 @@ end
 
 function sequencer_controller.update_value_polarity(x, y, state)
     sequencer_controller.value_polarity = x == 4 and -1 or 1
-    print(x,y,"state pol")
     -- sequencer_controller.unregister_value_selectors()
     sequencer_controller.set_sequin_output_value_controls()
 end
@@ -965,6 +1004,19 @@ end
 
 
 ---------------- THE SEQUIN GETS SET HERE ---------------
+function sequencer_controller.reset_place_values(exception)
+  -- print("exception, = =tenths", exception, exception == "tenths",sequencer_controller.active_sequin_value.place_values.tenths)
+  -- sequencer_controller.active_sequin_value.place_values = {}
+  sequencer_controller.active_sequin_value.place_values.ten_thousands   = (exception == "ten_thousands")  and  sequencer_controller.active_sequin_value.place_values.ten_thousands or  0
+  sequencer_controller.active_sequin_value.place_values.thousands       = (exception == "thousands")      and  sequencer_controller.active_sequin_value.place_values.thousands     or  0
+  sequencer_controller.active_sequin_value.place_values.hundreds        = (exception == "hundreds")       and  sequencer_controller.active_sequin_value.place_values.hundreds      or  0
+  sequencer_controller.active_sequin_value.place_values.ones            = (exception == "ones")           and  sequencer_controller.active_sequin_value.place_values.ones          or  0
+  sequencer_controller.active_sequin_value.place_values.tens            = (exception == "tens")           and  sequencer_controller.active_sequin_value.place_values.tens          or  0
+  sequencer_controller.active_sequin_value.place_values.tenths          = (exception == "tenths")         and  sequencer_controller.active_sequin_value.place_values.tenths        or  0
+  sequencer_controller.active_sequin_value.place_values.hundredths      = (exception == "hundredths")     and  sequencer_controller.active_sequin_value.place_values.hundredths    or  0
+  sequencer_controller.active_sequin_value.place_values.thousandths     = (exception == "thousandths")    and  sequencer_controller.active_sequin_value.place_values.thousandths   or  0
+end
+
 function sequencer_controller.get_previous_active_sequin_value(selected_sequin)
   -- selected_control_indices = sequencer_controller.get_selected_indices()
   local active_output_values = sequencer_controller.get_active_output_values()
@@ -1033,7 +1085,6 @@ function sequencer_controller.update_sequin_output_value(x, y, state, press_type
       
     end                    
     
-    print("output_value",output_value)
     sequencer_controller.active_output_value_text = output_value
   elseif sequencer_controller.active_sequin_value.value_type == "option" then
     if press_type == "long" then
@@ -1049,15 +1100,17 @@ function sequencer_controller.update_sequin_output_value(x, y, state, press_type
   -- update the ouptut table
   sequencer_controller.update_outputs_table(output_value)
   
-  sequencer_controller.update_sequin(x-5)
+  -- sequencer_controller.update_sequin(x-5)
+  sequencer_controller.update_sequin()
 end
 
 -- todo: implement subgroups
-function sequencer_controller.update_sequin()
+
+function sequencer_controller.update_sequin(sequin)
   local selected_indices = sequencer_controller.get_selected_indices()
   local sgp = selected_indices.selected_sequin_groups
   local ssg = selected_indices.selected_sequin_subgroups
-  local sqn = selected_indices.selected_sequin
+  local sqn = sequin and sequin or selected_indices.selected_sequin
   local sequin_to_update = sequencer_controller.sequencers[sgp].sequin_set[sqn]
   sequin_to_update.set_output_table(sequencer_controller.sequins_outputs_table)
 end
@@ -1240,20 +1293,12 @@ end
 function sequencer_controller.get_active_output_values()
   sequencer_controller.update_active_value_heirarchy()
   local vh = sequencer_controller.active_value_heirarchy
-  -- print("get_active_output_values")
-  -- if vh then
-  --   local output_data_path
-  --   for k, v in pairs(vh) do 
-  --     print(k,v)
-  --   end
-  -- end
-  -- print("vh",vh)
   if vh then
     -- print(vh,vh.sgp,vh.ssg, vh.mod, vh.par)
   end
   local outputs_table = {}
   if vh and vh.par then
-    for i=1,9,1 do
+    for i=1,params:get("num_sequin"),1 do
       local sqn_index = i
       local sgp = sequencer_controller.sequins_outputs_table[vh.sgp]
       local ssg = sgp and sequencer_controller.sequins_outputs_table[vh.sgp][vh.ssg]
@@ -1273,7 +1318,7 @@ function sequencer_controller.get_active_output_values()
       -- print("par i",i, #outputs_table)
     end
   elseif vh and vh.mod then
-    for i=1,9,1 do
+    for i=1,params:get("num_sequin"),1 do
       local sqn_index = i
       local sgp = sequencer_controller.sequins_outputs_table[vh.sgp]
       local ssg = sgp and sequencer_controller.sequins_outputs_table[vh.sgp][vh.ssg]
@@ -1310,6 +1355,16 @@ function sequencer_controller:get_active_ui_group()
   -- group_name = string.sub(group_name,1,13) == "sequin_groups" and "sequin_groups" or group_name
   group_name = group_name:gsub("_"," ")
   return group_name
+end
+
+function sequencer_controller.set_active_sequin_value_type(value_type)
+  if value_type == "number" and sequencer_controller.active_sequin_value.place_values == nil then
+    sequencer_controller.reset_place_values()
+  elseif value_type == "option" and sequencer_controller.active_sequin_value == nil then
+    -- do something here?
+    sequencer_controller.active_sequin_value.place_values = nil
+  end
+  sequencer_controller.active_sequin_value.value_type = value_type
 end
 
 function sequencer_controller:update_group(group_name,x, y, state, press_type)

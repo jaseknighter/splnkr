@@ -1,11 +1,9 @@
 # splnkr
-this script is modething like an amplitude/frequency tracking sequencer/sampler/effects processor for monome norns with a set of 16 grid-controlled bandpass filters. 
-
-features to add: convolution reverb, multitap delay, a note/drum/effect sequencer.
+this script is something like an amplitude/frequency tracking sequencer/sampler/effects processor for monome norns with a set of 16 grid-controlled bandpass filters. 
 
 *additional documentation in progress*
 
-*IMPORTANT WARNING*: animating the center frequency with the grid interface can result in loud percussive sounds. use caution!
+*IMPORTANT WARNING*: animating the center frequency of the bandpass filterbank with the grid interface can result in loud percussive sounds. use caution!
 
 ## installation from maiden
 `;install https://github.com/jaseknighter/splnkr`
@@ -38,9 +36,9 @@ features to add: convolution reverb, multitap delay, a note/drum/effect sequence
   * e1: previous page 
   * e2: next/prev control
 * Screen 1: select/play sample 
-  * k2: select sample to slice up
-  * e3: incr/decr playhead
-  * k3: start/stop playhead
+  * k2: select audio sample
+  * e3: select softcut voice
+  * k1 + e3: scrub playhead
 * Screen 2: play mode
   * k2/k3: delete/add cutter
   * e3: change play mode
@@ -69,7 +67,8 @@ features to add: convolution reverb, multitap delay, a note/drum/effect sequence
   * k1 + e3: autogenerate clips with even spacing (up to 20)
 
 *Page 2: envelope*
-* e1: previous page 
+*NOTE:* the envelope controls are pretty, pretty, pretty buggy and need work (requires improvements in the SuperCollider engine)
+* e1: previous/next page 
 <!-- * k1 + e1: select active plant   -->
 * e2: select envelope control  
 * e3: change envelope control value  
@@ -77,9 +76,14 @@ features to add: convolution reverb, multitap delay, a note/drum/effect sequence
 
 the envelope is used with/sent to external devices (crow, jf, midi, w/). 
 
-it also sets the envelope that is built into the supercollider splnkr engine. in the params menu, use the *enveloping* param to activate live signal enveloping.
+the envelope controls also update the granular envelope that is built into the supercollider splnkr engine. in the params menu, use the *enveloping* param to activate live-signal enveloping.
 
-## filterbank/grid interface
+*Page 3: sequencer*
+* e1: previous page
+
+todo: enable updates to the sequencer via the norns ui
+
+## filterbank
 
 parameters for the 16 channel filterbank may be controlled via the params menu or using the grid.
 
@@ -88,11 +92,11 @@ each filter "channel" has three parameters:
 * reciprocal quality (rq)
 * center frequency (cf)
 
-### grid controls
+### filterbank grid controls
 *parameter adjustment*
-the top 7 buttons in each row indicate the intensity of the setting for the specified parameter (i.e. none of the top 7 buttons are lit indicates lowest intensity and all 7 buttons lit means indicates highest intensity.)
+the top 7 buttons in each row indicate the intensity of the setting for the filterbank parameter. if none of the top 7 buttons are lit in one of the grid's 16 columns, the filter at the selected slot is at its lowest intensity. if all 7 buttons lit, the filter at the selected slot is at its highest intensity.
 
-selecting a button sets the intensity for the active  parameter. selecting a button that is already lit sets the parameter to its lowest value.
+selecting a button that is already lit sets the parameter to its lowest value.
 
 *toggling between parameters*
 each of the three parameters listed above may be controled via the grid by toggling between first three buttons on the grid's bottom row.
@@ -106,11 +110,112 @@ the 5th and 6th buttons on the grid's bottom row control animation options for e
 selecting a buttons 5 or 6 when they are already lit turns off the animation for the selected filter parameter
 
 *parameter overlay*
-selecting button 8 on the bottom row turns overlays the values of all three filter parameters over one another, making it easier to see how they interact, especially with animation turned on.
+selecting button 8 on the bottom row turns overlays the values of all three filter parameters over one another, making it easier to see how they interact with animation turned on.
+
+## sequencer interfaces
+
+selecting the third screen (*sqncr*) using norns encoder *e1* brings up the sequencer, which is controllable with a grid. the norns ui provides information about the sequencer's state. the sequencer is built around the Lattice library and Tyler Etter's [port of Sequins](https://mapcorps.net/university/#12). 
+
+### sequencer grid controls
+
+![](images/sequencer_grid_overview.svg)
+
+the grid ui is organized into multiple ui groups:
+
+* (1) *sequencer mode* selector: selecting grid key 15,8 brings up the grid controls for the sequencer. selecting the key to the right (key 14,8) returns the the bandpass filter controls
+* (A) *sequinsets*: there are 5 sets of sequins. each set defines a unique sequence
+* (B) *sequin(s)*: each sequinset contains up to 9 sequence steps defined with the Sequins port referenced above. At each sequence step, multiple types of outputs may be sequenced
+  * the number of active steps may be controlled with from the params menu by updating the *num sequin* parameter
+  * todo: allow each sequinset to have their own *num sequin* step value
+* (C) *output types*: at each step of the sequence, one or more *output types* may be selected. 
+  * there are 7 *output types*
+    * softcut (sc): 6 voice sampler
+    * devices (dev): 4 devices are currently supported 
+    * effects (eff): 6 effects are currently defined (see *outputs* below)
+    * enveloper (env): this is an envelope applied to the live signal passed into norns and generated by the sequencer
+    * pattern (pat): each sequinset runs according to its own lattice pattern
+    * lattice (lat): there is one lattice running that triggers the selected sequinset but each sequinset can individually control the lattice parameters
+  * NOTE: currently, only settings for the softcut and devices/crow *output types* are processed. the others are still yet to be developed.
+* (D) *outputs*
+  * 3 of the 7 *output types* allow for multiple *outputs* to be sequenced:
+    * softcut (sc): outputs 1-6 correspond to a softcut voice. 
+    * devices (dev): midi, crow, just friends, w/
+    * effects (eff): level, drywet, pitchshifter (pshift), p_offset, phaser, delay
+* (E) *modes*
+  * some of the *output types* and *outputs* have multiple *modes*:
+    * dev/crow modes: *volts* and *drum*
+    * dev/just friends modes: *play_note*, *play_voice*, *portamento*
+    * dev/w/ modoes: *w_syn pitch* and *w_del karplus pitch*
+* (F) *params*
+  * some of the *output types* *outputs* and *modes* have multiple *params*: 
+    * sc/voice[1-6] params: 
+      * *voice_mode*: 
+        * *stop*: stop the *voice*
+        * *loop all*: loops through the whole sequence
+        * *all cuts*: loop between active *cutters*
+        * *sel cut*: loop within the *cutter* assigned to the *voice*
+      * *cutter*: select the *cutter* assigned to the *voice*
+      * *rate*: the speed of the *voice*
+      * *direction*: the direction of the *voice*
+      * *level*: the amplitude of the *voice*
+    * *dev*/*just friends*: TBD
+* (J) option/place value selection: depending on the configuration of the selected option/mode/param, this ui group is used to ether select from a list of options or a place value (see *number selection* ui groups below for details about place values.). 
+* number selection ui groups: 
+  * (G) *decimal place value* selectors: one or more decimal place number selection may be assigned to a sequencer value. decimal place values are defined going from left to right from the *decimal point* button (*I*):
+    * tenths, hundredths, thousandths, etc
+  * (H) *integer place value* selectors: one or more integer place number selection may be assigned to a sequencer value. integer place values are defined going from right to left from the *decimal point* button (*I*):
+    * ones, tens, hundres, thousands, etc.
+  * (I) *decimal point* button: this button separates *integer place value* selectors from *decimal place value* selectors does nothing function
+  * (J) *place value* selector: sets the place value. For example, if the *integer place value* is set to `3` and the *place value* selector is selected, the place value will be set to 0.3. This value will be added to the other selected place values (with exceptions noted below) 
+    * note: if 
+  * (K) *number sequence mode* selector (on/off): if a number is set to *relative*, its value is added to the previous value. the *number sequence mode* selector is turned to *absolute* for each value by default (meaning, the value selected will be the value used, irrespective of the prior value).
+  * (L) *polarity* selector: sets the value to positive or negative. the *polarity* selector is set to positive by default.
+  * (M) *number* selector: this button evaluates the value of the other number selection UI groups (G-K) and sets the value of the selected output device/mode/param.
+  * notes about number selection: 
+    * number selection occurs by first selecting a place value (ui groups *G* and/or *H*) and then selecting a number (ui group *J*).   
+    * if mulitple place values are set, they are added together. For example, if the *ones integer place value* is set to `5` and the *tenths integer place value* is set to `4`  
+    * if a *decimal place* value or *integer place* value is set with a short press with nothing selected in the number row (*J*), the value is set to 0 at that place
+    * if a *decimal place* value or *integer place* value is set with a long press and nothing selected in the number row (*J*), the value for the selected output/mode/param is set to nil and will be skipped
+    * if a place value is set with a long press with a number selected in the number row (*J*), only the selected place value is used and other place values are cleared. 
+
+### sequencer/norns interface
+the third screen of the norns ui displays the current state of the grid when the grid is set to *sequencer mode*. 
+![](images/sequencer_screen_overview1.png)
+the screenshot above shows the norns ui when a sequin output is being setup, prior to the value being set:
+* (A) *breadcrumbs*: displays the following details: *sequinset number, sequin number, output type, output, output mode, output param*
+  * The breadcrumb in the screenshot above indicates the following has been selected on the grid: *sequinset (5), sequin (1), output type (softcut), output(voice 1)*
+* (B) *active ui group*: displays the currently selected ui group
+  * The screenshot above shows the *output params* ui group has been selected
+* (C) ui group values: the 12 'chicklets' display the current values assigned to each ui group:
+  * sgp: selected sequins group (aka sequinsets)
+  * sqn: selected sequin
+  * typ: selected output type
+  * out: selected output
+  * mod: selected output mode
+  * par: selected output param
+  * opt: selected value option 
+  * sqm: selected number sequence mode (*relative* or *absolute*)
+  * pol: selected number polarity (*negative* or *positive*) 
+  * int: selected integer place (ones, tens, hundreds, etc.)
+  * dec: selected decimal place (tenths, hundredths, etc.)
+  * num: selected number (calculated according to the integer/decimal place value(s) selected)
+* (D) selection values: displays the values available based on the ui group selected 
+  * in the example above, the values shown are the parameters available for the softcut output types (i.e., *cutter, mode, rate, direction, level*)
+
+
+![](images/sequencer_screen_overview2.png)
+  the image above shows the values set for a given output/mode/param for a single sequin (sequence step) for a selected sequinset. Three rows of three values are displayed representing each step of the sequence (going left to right, top to bottom) 
+
+  section *D* in the image above shows: 
+    * the steps are shown for sequinset 1, sequin (step) 1, softcut voice 1 rate
+    * steps 2,3,4,6,7,8 have an *x* assigned to them, indicating nothing is happening at this step with regards to softcut voice 1's rate for this sequinset
+    * step 1 is set to *1*, meaning at the first step, the rate of the softcut voice is set to 1
+    * step 5 is set to *2.4r*, which means the value at this step is relative to the prior step(s). in this case, since there is just 1 prior step, set at one and the *relative* value at step 5 is 2.4, this the rate value sent to the softcut engine at this step will be 3.4 (1+2.4).
+    * step 9 is set to *2.1r*. Like the prior step it is a relative step. The value sent to the softcut engine at this step will be 5.1 (1+2.4+2.1)
 
 ## effects
 
-current basic effects (to be enhanced) are available in the params menu: pitchshift, phaser, delay, strobe
+current basic effects (to be enhanced) are available in the params menu: pitchshift, phaser, delay, strobe, enveloper
 
 ## audio routing
 in the params menu, three options may be selected for how audio is routed to the supercollider engine:
@@ -137,9 +242,9 @@ clips may be recorded from the PARAMETERS>EDIT menu. what gets recorded depends 
 *important note*: if *play mode* is set to `all cuts`, all *rate* settings must either be positive or negative. 
 
 ## credits
+* this project was inspired by the [lines discussion](https://llllllll.co/t/re-deconstructing-jan-jelineks-zwischen/46577/4) about Jan Jelinek’s album “Zwischen” initiated by Matt Lowery. 
 * splnkr leverages the [stonesoup](https://github.com/schollz/stonesoup) script developed by @infinitedigits/@schollz
-* this project was inspired by the [lines discussion](https://llllllll.co/t/re-deconstructing-jan-jelineks-zwischen/46577/4) about Jan Jelinek’s album “Zwischen” initiated by Matt Lowery
 * additional inspirations:
   * @markeats/@markwheeler Passerby (https://github.com/markwheeler/passersby)
-  * @tyleretters Dronecaster (https://llllllll.co/t/34737)
+  * @tyleretters Dronecaster (https://llllllll.co/t/34737) and Arcologies (https://llllllll.co/t  /35752)
   * @dan_derks Cheat Codes 2 (https://llllllll.co/t/38414)

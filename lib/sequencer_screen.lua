@@ -144,7 +144,7 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
   if active_ui_group_name == "sequin groups" then
     control_labels = {"group 1-5"}
   elseif active_ui_group_name == "sequin selector" then
-    control_labels = {"sequin 1-9"}
+    control_labels = {"sequin 1-" .. params:get("num_sequin")}
   elseif active_ui_group_name == "sequin output types" then
     control_labels = {"sc dev eff", "env pat", "lat"}
   elseif active_ui_group_name == "sequin outputs" then
@@ -295,7 +295,7 @@ function sequencer_screen.check_for_active_chicklet(acronym)
   elseif active_ui_group_name == "value place decimals" and acronym == "dec" then
     active_chicklet = true
   elseif active_ui_group_name == "number_sequence_mode" and acronym == "sqm" then
-    print("sqm")
+    -- print("sqm")
     active_chicklet = true
   elseif active_ui_group_name == "value selector polarity" and acronym == "pol" then
     active_chicklet = true
@@ -334,7 +334,9 @@ function sequencer_screen.draw_chicklets(selected_control_indices)
     screen.move(c_loc[1]+22,c_loc[2]+8)
     local selected_index = acnym_map[ui_group_acnyms[i]]
     selected_index = selected_index and selected_index or ""
-    screen.text_right(selected_index)
+    if ui_group_acnyms[i] ~= "mod" or (ui_group_acnyms[i] == "mod" and sequencer_controller.sequin_output_modes) then
+      screen.text_right(selected_index)
+    end
     screen.move(c_loc[1],c_loc[2])
     local chick_space = 5
     if chicklet_direction == "lr" and ui_group_acnyms[i+1] then

@@ -86,10 +86,7 @@ function softcut_processor.update_rate(voice, rate)
 end
 
 function softcut_processor.update_mode(voice, mode)
-  -- print("update mode",voice, mode)
-  -- direction = direction == 1 and -1 or 1
   sample_player.set_play_mode(voice,mode-1)
-  -- sample_player.set_direction(voice,direction)
 end
 
 function softcut_processor.update_direction(voice, direction)
