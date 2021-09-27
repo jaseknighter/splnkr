@@ -206,7 +206,7 @@ the screenshot above shows the norns ui when a sequin output is being setup, pri
   * in the example above, the values shown are the parameters available for the softcut output types (i.e., *cutter, mode, rate, direction, level*)
 
 
-![](images/sequencer_screen_overview2.png)
+![](images/sequencer_screen_overview_2.png)
 
 
   the image above shows the values set for a given output/mode/param for a single sequin (sequence step) for a selected sequinset. Three rows of three values are displayed representing each step of the sequence (going left to right, top to bottom) 
