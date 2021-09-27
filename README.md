@@ -118,7 +118,7 @@ selecting the third screen (*sqncr*) using norns encoder *e1* brings up the sequ
 
 ### sequencer grid controls
 
-![](images/sequencer_grid_overview.svg)
+![](images/sequencer_grid_overview.png)
 
 the grid ui is organized into multiple ui groups:
 
