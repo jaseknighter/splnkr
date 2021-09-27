@@ -47,13 +47,13 @@
      showgrid="false"
      showguides="true"
      inkscape:guide-bbox="true"
-     inkscape:zoom="1.3243171"
-     inkscape:cx="300.48425"
-     inkscape:cy="199.78433"
+     inkscape:zoom="9.0005432"
+     inkscape:cx="485.35722"
+     inkscape:cy="125.05596"
      inkscape:window-x="0"
      inkscape:window-y="25"
      inkscape:window-maximized="0"
-     inkscape:current-layer="layer10">
+     inkscape:current-layer="layer12">
     <sodipodi:guide
        position="261.71209,327.8407"
        orientation="0,-1"
@@ -61,31 +61,37 @@
   </sodipodi:namedview>
   <g
      inkscape:groupmode="layer"
-     id="layer8"
-     inkscape:label="background"
-     style="display:inline"
+     id="layer13"
+     inkscape:label="bottom"
      sodipodi:insensitive="true">
     <rect
-       style="vector-effect:non-scaling-stroke;fill:#e6e6e6;stroke:#000000;stroke-width:0.096;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:5.89723;stroke-opacity:0;paint-order:stroke fill markers;stop-color:#000000"
+       style="display:inline;vector-effect:non-scaling-stroke;fill:#e6e6e6;stroke:#000000;stroke-width:0.096;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:5.89723;stroke-opacity:0;paint-order:stroke fill markers;stop-color:#000000"
        id="rect33204"
        width="600.96851"
        height="399.56866"
-       x="0"
-       y="0" />
+       x="4.1723253e-10"
+       y="-4.5511983e-06" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer8"
+     inkscape:label="background"
+     style="display:inline">
     <rect
        style="vector-effect:non-scaling-stroke;fill:#000000;stroke:#000000;stroke-width:0.0619738;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:5.89723;stroke-opacity:0;paint-order:stroke fill markers;stop-color:#000000"
        id="rect33204-9"
        width="452.03775"
        height="221.3819"
        x="57.113205"
-       y="90.449135" />
+       y="90.449135"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
   </g>
   <g
      inkscape:groupmode="layer"
      inkscape:label="screen grab 2"
      id="g32638"
-     style="display:inline"
-     sodipodi:insensitive="true">
+     style="display:inline">
     <image
        width="417.33334"
        height="204"
@@ -591,14 +597,15 @@ pwAAAABJRU5ErkJggg==
 "
        id="image32640"
        x="91.817581"
-       y="97.784332" />
+       y="97.784332"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
   </g>
   <g
      inkscape:groupmode="layer"
      id="layer10"
      inkscape:label="screen grab 1"
-     style="display:none;opacity:1"
-     sodipodi:insensitive="true">
+     style="display:none;opacity:1">
     <image
        width="413.96677"
        height="212.63362"
@@ -1058,7 +1065,9 @@ fVTcabW6AAAAAElFTkSuQmCC
 "
        id="image33717"
        x="93.057541"
-       y="99.197411" />
+       y="99.197411"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
   </g>
   <g
      inkscape:groupmode="layer"
@@ -1066,12 +1075,14 @@ fVTcabW6AAAAAElFTkSuQmCC
      inkscape:label="background (cover)"
      style="display:inline">
     <rect
-       style="display:inline;vector-effect:non-scaling-stroke;fill:#ffffff;stroke:#000000;stroke-width:0.00390438;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:5.89723;stroke-opacity:0;paint-order:stroke fill markers;stop-color:#000000"
+       style="display:inline;vector-effect:non-scaling-stroke;fill:#ffffff;stroke:#000000;stroke-width:0.00370689;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:5.89723;stroke-opacity:0;paint-order:stroke fill markers;stop-color:#000000"
        id="rect33204-9-6"
-       width="12.633991"
-       height="31.438643"
-       x="479.04022"
-       y="111.33664" />
+       width="11.189804"
+       height="31.996136"
+       x="479.04013"
+       y="109.77917"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
   </g>
   <g
      inkscape:groupmode="layer"
