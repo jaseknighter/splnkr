@@ -180,7 +180,10 @@ the grid ui is organized into multiple ui groups:
 
 ### sequencer/norns interface
 the third screen of the norns ui displays the current state of the grid when the grid is set to *sequencer mode*. 
+
 ![](images/sequencer_screen_overview1.png)
+
+
 the screenshot above shows the norns ui when a sequin output is being setup, prior to the value being set:
 * (A) *breadcrumbs*: displays the following details: *sequinset number, sequin number, output type, output, output mode, output param*
   * The breadcrumb in the screenshot above indicates the following has been selected on the grid: *sequinset (5), sequin (1), output type (softcut), output(voice 1)*
@@ -204,6 +207,8 @@ the screenshot above shows the norns ui when a sequin output is being setup, pri
 
 
 ![](images/sequencer_screen_overview2.png)
+
+
   the image above shows the values set for a given output/mode/param for a single sequin (sequence step) for a selected sequinset. Three rows of three values are displayed representing each step of the sequence (going left to right, top to bottom) 
 
   section *D* in the image above shows: 
