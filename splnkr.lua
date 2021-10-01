@@ -77,6 +77,7 @@ function init()
   -- os.execute("jack_disconnect crone:output_5 SuperCollider:in_1;")  
   -- os.execute("jack_disconnect crone:output_6 SuperCollider:in_2;")
   
+
   
   os.execute("jack_connect softcut:output_1 SuperCollider:in_1;")  
   os.execute("jack_connect softcut:output_2 SuperCollider:in_2;")
@@ -176,7 +177,7 @@ function init()
 
   active_notes = {}
   externals1 = externals:new(active_notes)
-  externals2 = externals:new(active_notes)
+  -- externals2 = externals:new(active_notes)
 
   for i=1,num_envelopes,1
   do
@@ -187,6 +188,8 @@ function init()
   end
   
   parameters.init()
+  build_scale()
+
   parameters.init_envelope_controls(1)
 
 
@@ -227,25 +230,25 @@ function init()
   frequency_detect_poll1 = poll.set("frequencyDetect1", function(value)
     note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
     -- if note_num ~= last_note_num and detect_level >= 0.05 and (value > 200 and value < 1800) then 
-    if note_num ~= last_note_num then 
+    if note_num and note_num ~= last_note_num then 
       clock.run(externals1.note_on,1, note_num, note_num, 1, nil,"engine")
     end
   end)
   frequency_detect_poll2 = poll.set("frequencyDetect2", function(value)
     note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
-    if note_num ~= last_note_num then 
+    if note_num and note_num ~= last_note_num then 
       clock.run(externals1.note_on,1, note_num, note_num, 1, nil,"engine")
     end
   end)
   frequency_detect_poll3 = poll.set("frequencyDetect3", function(value)
     note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
-    if note_num ~= last_note_num then 
+    if note_num and note_num ~= last_note_num then 
       clock.run(externals1.note_on,1, note_num, note_num, 1, nil,"engine")
     end
   end)
   frequency_detect_poll4 = poll.set("frequencyDetect4", function(value)
     note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
-    if note_num ~= last_note_num then 
+    if note_num and note_num ~= last_note_num then 
       clock.run(externals1.note_on,1, note_num, note_num, 1, nil,"engine")
     end
   end)
@@ -375,26 +378,6 @@ function set_redraw_timer()
   -- screen.update()
 
 end
-
-------------------------------
--- global functions
-------------------------------
-fn = {}
-function fn.deep_copy(orig)
-  local orig_type = type(orig)
-  local copy
-  if orig_type == "table" then
-    copy = {}
-    for orig_key, orig_value in next, orig, nil do
-        copy[fn.deep_copy(orig_key)] = fn.deep_copy(orig_value)
-    end
-    setmetatable(copy, fn.deep_copy(getmetatable(orig)))
-  else -- number, string, boolean, etc
-    copy = orig
-  end
-  return copy
-end
-
 
 function cleanup ()
   if _print then print = _print end

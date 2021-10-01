@@ -707,17 +707,16 @@ end
 function grid_sequencer:copy_paste(first_press,second_press)
   -- print(first_press[1],first_press[2],second_press[1],second_press[2])
   if (first_press[1] < 6 and second_press[1] < 6 ) and (first_press[2] == 1 and second_press[2] == 1 ) then
-    -- copy/paste sequinsets
-    print("copy/paste sequinsets")
+    -- copy/paste sequinsets to selected set from pressed set
+    -- print("copy/paste sequinsets")
     sequencer_controller.copy_paste_sequinsets(first_press[1], second_press[1])
   elseif (first_press[1] < 15 and second_press[1] < 15 ) and (first_press[2] == 1 and second_press[2] == 1 ) then
     -- copy/paste indivdual sequins
-    print("copy/paste individual sequin")
-    sgp = sequencer_controller.selected_sequin_groups
-    ssg = 1  
+    local sgp = sequencer_controller.selected_sequin_group
+    local ssg = 1  
     local data_path = {sgp,ssg}
-    local source_id = first_press[1]-5
-    local target_id = second_press[1]-5
+    local target_id = first_press[1]-5
+    local source_id = second_press[1]-5
     local end_node = "sqn"
     sequencer_controller.copy_paste_sequence_data(source_id, target_id, data_path, end_node)
   end

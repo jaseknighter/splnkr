@@ -49,8 +49,10 @@ function Sequin:new(id)
   end
 
   function sq.set_output_table(output_table)
-    table.insert(sq.active_outputs,output_table)
-    -- print(">>>>>>>>update sequin",sq.active_outputs)
+    -- table.insert(sq.active_outputs,output_table)
+    sq.active_outputs[1] = output_table
+    -- print(">>>update sequin",#sq.active_outputs)
+    sqao = sq.active_outputs
     
   end
 

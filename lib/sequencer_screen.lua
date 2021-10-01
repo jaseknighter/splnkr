@@ -57,8 +57,8 @@ end
 
 --[[
   local indices = {
-  selected_sequin_groups        = sequencer_controller.selected_sequin_groups,         -- selected_sequin_groups:  value table level 1
-  selected_sequin_subgroups     = sequencer_controller.selected_sequin_subgroups,      -- selected_sequin_groups:  value table level 2
+  selected_sequin_group        = sequencer_controller.selected_sequin_group,         -- selected_sequin_group:  value table level 1
+  selected_sequin_subgroups     = sequencer_controller.selected_sequin_subgroups,      -- selected_sequin_group:  value table level 2
   selected_sequin               = sequencer_controller.selected_sequin,          -- selected_sequin:  value table level 3
   selected_sequin_output_type   = sequencer_controller.selected_sequin_output_type,    -- output_type_selected:  value table level 4
   selected_sequin_output        = sequencer_controller.selected_sequin_output,         -- output_selected:  value table level 5
@@ -70,7 +70,6 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
   local active_ui_group_name = sequencer_controller:get_active_ui_group()
   active_ui_group_name = (string.sub(active_ui_group_name,1,13) == "sequin groups") and "sequin groups" or active_ui_group_name
   specs_map = sequencer_controller.get_output_control_specs_map()
-  -- print(specs_map)
 
   local output_type = selected_control_indices.selected_sequin_output_type
   local output_index = selected_control_indices.selected_sequin_output
@@ -80,11 +79,13 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
   local control_labels = {"","",""}
   local control_bcrumbs = ""
   local sequence_values = {}
-  
+  -- local sequin_values = {}
+
   -- set control breadcrumbs
-  if sequencer_controller.selected_sequin_groups then
-    control_bcrumbs = control_bcrumbs .. sequencer_controller.selected_sequin_groups
+  if sequencer_controller.selected_sequin_group then
+    control_bcrumbs = control_bcrumbs .. sequencer_controller.selected_sequin_group
     sequence_values = sequencer_screen.get_sequence_values()
+    -- sequin_values   = sequencer_screen.get_selected_sequin_values() 
   end
   if sequencer_controller.selected_sequin then
     control_bcrumbs = control_bcrumbs .. "-" .. sequencer_controller.selected_sequin .. " "
@@ -178,52 +179,13 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
     end
   elseif active_ui_group_name == "sequin output modes" then
     if output_type == 2 then -- devices
-      -- if output_index == 2 then -- crow
-      --   control_bcrumbs = "dev crow"
-      --   local label_pos = 1
-      --   for i=1,#specs_map[2][2],1 do
-      --     control_labels[label_pos] = control_labels[label_pos] .. specs_map[2][2][i][5] .. " "
-      --     label_pos = i%3 == 0 and label_pos + 1 or label_pos
-      --   end
-      -- elseif output_index == 3 then -- just friends
-      --   control_bcrumbs = "dev jf"
-      --   control_labels[1] = "play_note play_voice"
-      --   control_labels[2] = "portamento"
-      -- elseif output_index == 4 then -- w/
-      --   control_bcrumbs = "dev w/"
-      --   control_labels[1] = "w_syn pitch"
-      --   control_labels[2] = "w_del karplus pitch"
-      -- end
     elseif output_type == 3 then
       -- if output_index ~=5 then
 
     end
   elseif active_ui_group_name == "sequin output params" then
     if output_type == 1 then --softcut params (cutter mode direction level)
-      -- control_bcrumbs = "softcut voice" .. output_index
-      -- local label_pos = 1
-      -- for i=1,#specs_map[1][1],1 do
-      --   control_labels[label_pos] = control_labels[label_pos] .. specs_map[1][1][i][5] .. " "
-      --   label_pos = i%3 == 0 and label_pos + 1 or label_pos
-      -- end
     elseif output_type == 2 then
-      -- control_bcrumbs = "dev" 
-      -- if output_index == 1 then 
-      --   control_bcrumbs = control_bcrumbs .. " "
-        
-      -- elseif output_index == 3 then 
-      --   control_bcrumbs = control_bcrumbs .. " jf"
-      --   if output_mode == 1 then
-      --     control_bcrumbs = control_bcrumbs .. " play_note"
-      --   elseif output_mode == 2 then
-      --     control_bcrumbs = control_bcrumbs .. " play_voice"
-      --   end
-      -- end
-      -- local label_pos = 1
-      -- for i=1,#specs_map[output_type][output_index][output_mode],1 do
-      --   control_labels[label_pos] = control_labels[label_pos] .. specs_map[output_type][output_index][output_mode][i][5] .. " "
-      --   label_pos = i%3 == 0 and label_pos + 1 or label_pos
-      -- end
     end
   elseif active_ui_group_name == "value place integers" then
     control_labels = {}
@@ -239,34 +201,24 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
     control_labels = {}
   end
   
-  -- local s_vals = (sequence_values and sequence_values[1]) and sequence_values[1] or nil
-  -- local calculated_absolute_values = (sequence_values and sequence_values[2]) and sequence_values[2] or nil
-  -- return control_labels, control_bcrumbs, s_vals, calculated_absolute_values
-  return control_labels, control_bcrumbs, sequence_values
+  local sequin_values = {}
+  sequin_values = sequencer_screen.get_selected_sequin_values() 
+  return control_labels, control_bcrumbs, sequence_values, sequin_values
 end
 
 function sequencer_screen.get_sequence_values()
   local vals = sequencer_controller.get_active_output_values()
-  -- local formatted_vals = vals[1] and sequencer_screen.format_active_output_values(vals[1]) or {}
-  -- local formatted_calculated_absolute_vals = vals[2] and sequencer_screen.format_active_output_values(vals[2]) or {}
-  -- return {formatted_vals,formatted_calculated_absolute_vals}
   return vals
 end
 
---[[
-  sgp =
-  sqn =
-  typ =
-  out =
-  mod =
-  par =
-  int = value place integers
-  dec = value place decimals 
-  pol = value selector polarity
-  num = value selector numbers
-  opt = value selector options
-  val = sequin output values
-]]
+function sequencer_screen.get_selected_sequin_values()
+  local vals
+  if sequencer_controller.selected_sequin_group and sequencer_controller.selected_sequin then
+    sequencer_controller.get_selected_sequin_values(sequencer_controller.selected_sequin_group,sequencer_controller.selected_sequin)
+    vals = sequencer_controller.selected_sequin_values
+  end
+  return vals
+end
 local ui_group_acnyms =   { "sgp","sqn","typ","out","mod",
                             "par","opt","sqm","pol",
                             "int","dec","num",
@@ -295,7 +247,6 @@ function sequencer_screen.check_for_active_chicklet(acronym)
   elseif active_ui_group_name == "value place decimals" and acronym == "dec" then
     active_chicklet = true
   elseif active_ui_group_name == "number_sequence_mode" and acronym == "sqm" then
-    -- print("sqm")
     active_chicklet = true
   elseif active_ui_group_name == "value selector polarity" and acronym == "pol" then
     active_chicklet = true
@@ -383,7 +334,7 @@ function sequencer_screen.update()
     -- screen.move(1,62)
     -- screen.rect(1,62,127,2)
 
-    local control_labels, control_bcrumbs, sequence_values = sequencer_screen.update_screen_instructions(selected_control_indices)
+    local control_labels, control_bcrumbs, sequence_values, sequin_values = sequencer_screen.update_screen_instructions(selected_control_indices)
     sequencer_screen.set_control_bcrumbs(control_bcrumbs)
     -- if sequencer_controller.active_output_value_text then
     --   screen.font_size(16)
@@ -397,11 +348,12 @@ function sequencer_screen.update()
                                   active_control ==   "value place integers"  or
                                   active_control ==   "value place digits"
 
-      
     if show_sequence_values and sequence_values then
+      -------------------------
+      --  active sequence values for all sequin(s)
+      -------------------------
       -- screen.move(5,32)
       -- screen.text(sequence_values)
-
       local lx,ly = 5,32
       local screen_text = ""
       -- local output_labels = {"(1/3) ","(4/6) ","(7/9) "}
@@ -423,12 +375,13 @@ function sequencer_screen.update()
             local empty_decimal = string.find(calculated_absolute_val,"%.0") - 1
             calculated_absolute_val = string.sub(calculated_absolute_val,1,empty_decimal)
           end
-          screen_text = val.."/".. calculated_absolute_val .. "  " 
+          -- screen_text = val .."/".. calculated_absolute_val .. "  " 
+          screen_text = calculated_absolute_val .. "  " 
         else
           if val == "nil" then 
             -- screen_text = screen_text .. "x" .. "  "
             screen_text = "x" .. "  "
-          else
+          else -- show option text
             -- screen_text = screen_text .. val .. "  "
             -- check if the value needs to be shown as an option value vs a num
             local options = sequencer_controller.get_options_text()
@@ -445,6 +398,32 @@ function sequencer_screen.update()
         -- screen.text(val)
         if i%3 == 0 then
           lx = 5
+          ly = ly+7
+        end
+      end
+
+      -------------------------
+      --  all sequence values for the selected sequin
+      -------------------------
+      local lx,ly = 50,32
+      local screen_text = ""
+      local selected_sequin_index = sequencer_controller.selected_sequin_ix
+      -- local output_labels = {"(1/3) ","(4/6) ","(7/9) "}
+      -- local line_num = 1
+      for i=1,5,1 do
+        screen.move(lx,ly)
+        local val = (sequin_values and #sequin_values > 0) and sequin_values[i] or val
+        val = val ~= "" and val or "-"
+        screen_text = screen_text .. val .. "  "
+        local screen_level = selected_sequin_index == i and 15 or 5
+        screen.level(screen_level)
+        screen.text(screen_text)
+        screen.level(screen_level)
+        lx = lx + screen.text_extents(screen_text) + 5
+        screen_text = ""
+        -- screen.text(val)
+        if i%2 == 0 then
+          lx = 50
           ly = ly+7
         end
       end

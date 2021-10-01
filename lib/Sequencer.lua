@@ -9,13 +9,13 @@ function Sequencer:new(lattice,id)
 
   s.sequin_set = Sequinset.new(9)
 
-  s.sequins = Sequins{table.unpack(s.sequin_set)}
+  s.seq = Sequins{table.unpack(s.sequin_set)}
 
   s.division = 1
   s.enabled = true
   s.pattern = lattice:new_pattern{
     action = function(t) 
-      if s.id == sequencer_controller.get_active_sequin_groups() then
+      if s.id == sequencer_controller.get_active_sequinset() then
         s:pattern_event(t)
       end
     end,
@@ -24,22 +24,27 @@ function Sequencer:new(lattice,id)
   }
 
   function s:pattern_event()
-    -- print("s.sequins.ix",s.sequins.ix,params:get("num_sequin"))
-    
-    if s.sequins.ix < params:get("num_sequin") then
-      s.next_sequin = s.sequins()
+    -- print("s.seq.ix",s.seq.ix,params:get("num_sequin"))
+    local starting_sequin = params:get("starting_sequin")
+    if s.seq.ix < starting_sequin then
+      s.next_sequin = starting_sequin
+    -- else
+    --   s.seq:select(1)
+    --   s.next_sequin = s.seq()
+    end
+
+    local last_sequin = params:get("num_sequin") + params:get("starting_sequin") - 1
+    if s.seq.ix < last_sequin  then
+      s.next_sequin = s.seq()
     else
-      s.sequins:select(1)
-      s.next_sequin = s.sequins()
+      s.seq:select(starting_sequin)
+      s.next_sequin = s.seq()
     end
-    -- print("pattern event")
-    if sequencer_controller.sequencers and sequencer_controller.sequencers[1] and sequencer_controller.sequencers[1].next_sequin then
-      -- print("next_sequin",sequencer_controller.sequencers[1].next_sequin.id)
-    end
+    -- if sequencer_controller.sequencers and sequencer_controller.sequencers[1] and sequencer_controller.sequencers[1].next_sequin then
+    -- end
     local flicker_time = 1/16 
     grid_sequencer:register_flicker_at(5+s.next_sequin.id, 1, flicker_time)
     sequin_processor.process(s.next_sequin)
-    -- print("next_sequin",next_sequin)
   end
   
   function s:start()

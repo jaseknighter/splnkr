@@ -30,6 +30,12 @@ function externals:new(active_notes)
   ext.note_on = function(voice_id, note_to_play, pitch_frequency, beat_frequency, envelope_time_remaining, note_source, note_target)
     -- print("note_on:",voice_id, note_to_play, pitch_frequency, beat_frequency, envelope_time_remaining, note_source)
     -- local output_bandsaw = params:get("output_bandsaw")
+    note_to_play = notes[note_to_play+params:get("note_center_frequency")]
+    if note_to_play == nil then
+      return
+    end
+    
+    -- print("note_to_play",note_to_play)
     local output_midi = params:get("output_midi")
 
     local output_crow1 = params:get("output_crow1")
@@ -45,8 +51,9 @@ function externals:new(active_notes)
     local output_wdel_ks = params:get("output_wdel_ks")
     
     local midi_out_channel = voice_id == 1 and midi_out_channel1 or midi_out_channel2
-    local envelope_length = envelopes[voice_id].get_env_time()
-    
+    -- local envelope_length = envelopes[voice_id].get_env_time()
+    local envelope_length = envelopes[1].get_env_time()
+
     -- MIDI out
     -- if (note_source == "engine" and output_bandsaw == 4) or output_midi > 1 then
     if (note_source == "engine" and (output_midi == 2 or output_midi == 4)) or
@@ -62,7 +69,7 @@ function externals:new(active_notes)
     
     -- crow out
     local asl_generator = function(env_length)
-      local envelope_data = envelopes[voice_id].get_envelope_arrays()
+      local envelope_data = envelopes[1].get_envelope_arrays()
       local asl_envelope = ""
       for i=2, envelope_data.segments, 1
       do
@@ -107,14 +114,23 @@ function externals:new(active_notes)
 
     -- note, trigger, envelope, gate check
     -- voice_id, note_to_play, pitch_frequency, beat_frequency, envelope_time_remaining, note_source
-    if (voice_id == 1 and ((note_source == "sequencer" or note_source == "engine") and (output_crow1 == 2 or output_crow1 == 3 or output_crow1 == 4))) or
-    (note_source == "midi" and (output_crow1 == 4 or output_crow1 == 5)) then
+    if (voice_id == 1 and 
+          (
+            (
+              ( note_source == "sequencer" and note_target == "crow") or 
+                note_source == "engine"
+            ) and 
+            (output_crow1 == 2 or output_crow1 == 3 or output_crow1 == 4)
+        )) or
+        (note_source == "midi" and (output_crow1 == 4 or output_crow1 == 5)
+      ) then
       -- if output_crow > 1 then
       local volts
       if note_source == "engine" then
         volts = (note_to_play-60)/12
       else
-        volts = note_to_play/12
+        -- volts = note_to_play/12
+        volts = (note_to_play-60)/12
       end
       
       crow.output[1].volts = volts
@@ -139,32 +155,49 @@ function externals:new(active_notes)
       if output_param > 1 then crow.output[2]() end
     end
 
-    
-    if (voice_id == 2 and (note_source == "engine" and (output_crow3 == 2 or output_crow3 == 4))) or
-      (note_source == "midi" and (output_crow3 == 3 or output_crow3 == 4)) then
-      -- if output_crow > 1 then
-      local volts = (note_to_play-60)/12
-      crow.output[3].volts = volts
-      local output_param = params:get("output_crow4")
-      if output_param == 2 then -- envelope
-        local asl_envelope = asl_generator(envelopes[2].get_env_time())
-        -- print("2",asl_envelope)
-        crow.output[4].action = tostring(asl_envelope)
-      elseif output_param == 3 then -- trigger
-        local time = crow_trigger_4
-        local level = params:get("envelope2_max_level")
-        local polarity = 1
-        crow.output[4].action = "pulse(" .. time ..",".. level .. "," .. polarity .. ")"
-      elseif output_param == 4 then -- gate
-        -- local time = params:get("envelope2_max_time")
-        local num_env_controls = params:get("num_envelope2_controls")
-        local time = envelopes[2].get_envelope_arrays().times[num_env_controls]
-        local level = params:get("envelope2_max_level")
-        local polarity = 1
-        crow.output[4].action = "pulse(" .. time ..",".. level .. "," .. polarity .. ")"
-      end
-      if output_param > 1 then crow.output[4]() end
-    end
+
+    -- if (voice_id == 2 and (note_source == "engine" and (output_crow3 == 2 or output_crow3 == 4))) or
+    -- (note_source == "midi" and (output_crow3 == 3 or output_crow3 == 4)) then
+
+    if (voice_id == 3 and 
+          (
+            (
+              ( note_source == "sequencer" and note_target == "crow") or 
+                note_source == "engine"
+            ) and 
+            (output_crow1 == 2 or output_crow3 == 3 or output_crow3 == 4)
+        )) or
+        (note_source == "midi" and (output_crow3 == 4 or output_crow3 == 5)
+      ) then
+        local volts
+        if note_source == "engine" then
+          volts = (note_to_play-60)/12
+        else
+          -- volts = note_to_play/12
+          volts = (note_to_play-60)/12
+        end
+        
+        crow.output[3].volts = volts
+  
+        local output_param = params:get("output_crow2")
+        if output_param == 2 then -- envelope
+          local asl_envelope = asl_generator(envelopes[1].get_env_time())
+          crow.output[4].action = tostring(asl_envelope)
+        elseif output_param == 3 then -- trigger
+          local time = 0.01 --crow_trigger_2
+          local level = params:get("envelope1_max_level")
+          local polarity = 1
+          crow.output[4].action = "pulse(" .. time ..",".. level .. "," .. polarity .. ")"
+        elseif output_param == 4 then -- gate
+          local num_env_controls = params:get("num_envelope1_controls")
+          local time = envelopes[1].get_envelope_arrays().times[num_env_controls]
+          -- local time = params:get("envelope1_max_time")
+          local level = params:get("envelope1_max_level")
+          local polarity = 1
+          crow.output[4].action = "pulse(" .. time ..",".. level .. "," .. polarity .. ")"
+        end
+        if output_param > 1 then crow.output[4]() end
+      end  
 
 
     -- just friends out

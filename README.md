@@ -31,7 +31,7 @@ this script is something like an amplitude/frequency tracking sequencer/sampler/
 ## norns ui: key/encoder controls
 <!-- access instructions for key/encoder controls within the script by pressing k1+e3 -->
 
-*Page 1: sample selector/slicer*
+### Page 1: sample selector/slicer*
 * All screens
   * e1: previous page 
   * e2: next/prev control
@@ -66,7 +66,7 @@ this script is something like an amplitude/frequency tracking sequencer/sampler/
   * e3: autogenerate clips by level (up to 20)
   * k1 + e3: autogenerate clips with even spacing (up to 20)
 
-*Page 2: envelope*
+### Page 2: envelope*
 *NOTE:* the envelope controls are pretty, pretty, pretty buggy and need work (requires improvements in the SuperCollider engine)
 * e1: previous/next page 
 <!-- * k1 + e1: select active plant   -->
@@ -78,7 +78,7 @@ the envelope is used with/sent to external devices (crow, jf, midi, w/).
 
 the envelope controls also update the granular envelope that is built into the supercollider splnkr engine. in the params menu, use the *enveloping* param to activate live-signal enveloping.
 
-*Page 3: sequencer*
+### Page 3: sequencer*
 * e1: previous page
 
 todo: enable updates to the sequencer via the norns ui
@@ -118,7 +118,7 @@ selecting the third screen (*sqncr*) using norns encoder *e1* brings up the sequ
 
 ### sequencer grid controls
 
-![](images/sequencer_grid_overview.png)
+![](images/sequencer_grid_overview_1.png)
 
 the grid ui is organized into multiple ui groups:
 
@@ -159,7 +159,7 @@ the grid ui is organized into multiple ui groups:
       * *direction*: the direction of the *voice*
       * *level*: the amplitude of the *voice*
     * *dev*/*just friends*: TBD
-* (J) option/place value selection: depending on the configuration of the selected option/mode/param, this ui group is used to ether select from a list of options or a place value (see *number selection* ui groups below for details about place values.). 
+* (J) option/place value selection: depending on the configuration of the selected option/mode/param, this ui group is used to ether select from a list of options or a place value (see *number selection* ui groups below for details about place values). 
 * number selection ui groups: 
   * (G) *decimal place value* selectors: one or more decimal place number selection may be assigned to a sequencer value. decimal place values are defined going from left to right from the *decimal point* button (*I*):
     * tenths, hundredths, thousandths, etc
@@ -177,11 +177,22 @@ the grid ui is organized into multiple ui groups:
     * if a *decimal place* value or *integer place* value is set with a short press with nothing selected in the number row (*J*), the value is set to 0 at that place
     * if a *decimal place* value or *integer place* value is set with a long press and nothing selected in the number row (*J*), the value for the selected output/mode/param is set to nil and will be skipped
     * if a place value is set with a long press with a number selected in the number row (*J*), only the selected place value is used and other place values are cleared. 
+* duplicating values (copy/paste)
+
+### copy/paste sequence data
+copy paste is available in a number of areas:
+
+* sequinset: copy all the sequence/output settings from one sequinset to another
+  * press the grid key representing the target sequinset (the sequinset you want to copy to) so it is activated (blinking). for example, to copy to the first sequinset, press grid key 1,1
+  * again, press the grid key representing the target sequinset, this time holding the key down
+  * with the target sequinset key pressed, also press the key representing the source sequinset you want to copy from
+  * release the target sequinset key
+* sequin: to copy from one sequin (sequence step) to another follow the directions above for sequinset copying, pressing the target and source sequin keys you want to copy/paste to/from
 
 ### sequencer/norns interface
 the third screen of the norns ui displays the current state of the grid when the grid is set to *sequencer mode*. 
 
-![](images/sequencer_screen_overview1.png)
+![](images/sequencer_screen_1.png)
 
 
 the screenshot above shows the norns ui when a sequin output is being setup, prior to the value being set:
@@ -206,18 +217,23 @@ the screenshot above shows the norns ui when a sequin output is being setup, pri
   * in the example above, the values shown are the parameters available for the softcut output types (i.e., *cutter, mode, rate, direction, level*)
 
 
-![](images/sequencer_screen_overview_2.png)
+![](images/sequencer_screen_2.png)
 
+  the image above shows the values set for a given output/mode/param for a single sequin (sequence step) for a selected sequinset. 
 
-  the image above shows the values set for a given output/mode/param for a single sequin (sequence step) for a selected sequinset. Three rows of three values are displayed representing each step of the sequence (going left to right, top to bottom) 
-
-  section *D* in the image above shows: 
-    * the steps are shown for sequinset 1, sequin (step) 1, softcut voice 1 rate
+  * (A)-(C) sections (A) through (C) in the above screenshot display the same information as in the prior screenshot (see above for details).
+  * (D) sequence step: three rows of three values are displayed representing the current value at each step of the sequence (going left to right, top to bottom). section *D* in the image above shows: 
+    * the steps are shown for sequinset 5, sequin (step) 1, softcut voice 1, rate parameter
     * steps 2,3,4,6,7,8 have an *x* assigned to them, indicating nothing is happening at this step with regards to softcut voice 1's rate for this sequinset
-    * step 1 is set to *1*, meaning at the first step, the rate of the softcut voice is set to 1
+    * step 1 is set to *1*, meaning at the first step, the rate of the softcut voice is set to 1. it is brighter than the other step indicators, showing it is currently the active value being processed by the script.
     * step 5 is set to *2.4r*, which means the value at this step is relative to the prior step(s). in this case, since there is just 1 prior step, set at one and the *relative* value at step 5 is 2.4, this the rate value sent to the softcut engine at this step will be 3.4 (1+2.4).
     * step 9 is set to *2.1r*. Like the prior step it is a relative step. The value sent to the softcut engine at this step will be 5.1 (1+2.4+2.1)
-
+  * (E) sub-sequence values: the value at each step of the sequence (for each output type, output, mode/param, etc.) is selected from one of five *sub-sequence values*. in other words, for each individual output type, output, mode/param, etc. at each step of a sequence there is a five step sub-sequence (implemented as sequins nested within sequins). the screenshot above shows:
+    * for sequins group 5, step 1, softcut voice 1's rate parameter:
+      * three of the five sub-sequence step's have no value
+      * the first sub-sequence step has a value of one, meaning that when this value is active in the sub-sequence, the voice's rate will be set to one
+      * the third sub-sequence step has a value of two, meaning that when this value is active in the sub-sequence, the voice's rate will be set to two
+      
 ## effects
 
 current basic effects (to be enhanced) are available in the params menu: pitchshift, phaser, delay, strobe, enveloper

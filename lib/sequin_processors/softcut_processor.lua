@@ -5,7 +5,7 @@ softcut_processor.controls = {}
 function softcut_processor.init()
   softcut_processor.controls = {
     cutter = softcut_processor.assign_sample_to_cutter,
-    mode = softcut_processor.update_mode,
+    v_mode = softcut_processor.update_voice_mode,
     rate = softcut_processor.update_rate,
     direction = softcut_processor.update_direction,
     level = softcut_processor.update_level
@@ -19,10 +19,10 @@ function softcut_processor.process(output_table)
   -- tab.print(output_table.value_heirarchy)
   local control_to_update = softcut_processor.controls[output_table.control_id]
   local voice = output_table.value_heirarchy.out
-  -- print("control_to_update, voice",control_to_update, voice)
   
   -- sub sequin gets called here--
   local value = output_table.calculated_absolute_value and output_table.calculated_absolute_value or output_table.value
+  -- print("control_to_update, voice, value",control_to_update, voice, value)
   control_to_update(voice,value) -- update control
 end
 
@@ -85,7 +85,7 @@ function softcut_processor.update_rate(voice, rate)
   sample_player.set_rate(voice,rate)
 end
 
-function softcut_processor.update_mode(voice, mode)
+function softcut_processor.update_voice_mode(voice, mode)
   sample_player.set_play_mode(voice,mode-1)
 end
 

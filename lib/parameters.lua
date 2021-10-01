@@ -3,51 +3,72 @@ local parameters = {}
 
 function parameters.init()
   
-  ------------------------------
-  -- audio routing params
-  ------------------------------
+  --------------------------------
+  -- note params
+  -- scale: the scale to use
+  -- scale lengt: the number of notes in the scale, centered around the `note_center_frequency`
+  -- root note: the lowest note in the scale
+  -- note_center_frequency: the note to use as "1" in the sequencer
+  --------------------------------
 
-params:add_separator("audio routing")
 
-rerouting_audio = false
+  params:add{type = "option", id = "scale_mode", name = "scale mode",
+  options = scale_names, default = 5,
+  action = function() build_scale() end}
 
-function route_audio()
-  clock.sleep(0.5)
-  local selected_route = params:get("audio_routing")
-  if rerouting_audio == true then
-    rerouting_audio = false
-    if selected_route == 1 then -- audio in + softcut output -> supercollider
-      print(1)
-      os.execute("jack_connect crone:output_5 SuperCollider:in_1;")  
-      os.execute("jack_connect crone:output_6 SuperCollider:in_2;")
-      os.execute("jack_connect softcut:output_1 SuperCollider:in_1;")  
-      os.execute("jack_connect softcut:output_2 SuperCollider:in_2;")      
-    elseif selected_route == 2 then --just audio in -> supercollider
-      print(2)
-      os.execute("jack_disconnect softcut:output_1 SuperCollider:in_1;")  
-      os.execute("jack_disconnect softcut:output_2 SuperCollider:in_2;")
-      os.execute("jack_connect crone:output_5 SuperCollider:in_1;")  
-      os.execute("jack_connect crone:output_6 SuperCollider:in_2;")
-    elseif selected_route == 3 then -- just softcut output -> supercollider
-      print(3)
-      os.execute("jack_disconnect crone:output_5 SuperCollider:in_1;")  
-      os.execute("jack_disconnect crone:output_6 SuperCollider:in_2;")
-      os.execute("jack_connect softcut:output_1 SuperCollider:in_1;")  
-      os.execute("jack_connect softcut:output_2 SuperCollider:in_2;")        
+  params:add{type = "number", id = "root_note", name = "root note",
+  min = 0, max = 127, default = root_note_default, formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end,
+  action = function() build_scale() end}
+
+  params:add{type = "number", id = "note_center_frequency", name = "note center frequency",
+  min = 0, max = 127, default = note_center_frequency_default, formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end,
+  action = function() build_scale() end}
+  -----------------
+    ------------------------------
+    -- audio routing params
+    ------------------------------
+
+  params:add_separator("audio routing")
+
+  rerouting_audio = false
+
+  function route_audio()
+    clock.sleep(0.5)
+    local selected_route = params:get("audio_routing")
+    if rerouting_audio == true then
+      rerouting_audio = false
+      if selected_route == 1 then -- audio in + softcut output -> supercollider
+        print(1)
+        os.execute("jack_connect crone:output_5 SuperCollider:in_1;")  
+        os.execute("jack_connect crone:output_6 SuperCollider:in_2;")
+        os.execute("jack_connect softcut:output_1 SuperCollider:in_1;")  
+        os.execute("jack_connect softcut:output_2 SuperCollider:in_2;")      
+      elseif selected_route == 2 then --just audio in -> supercollider
+        print(2)
+        os.execute("jack_disconnect softcut:output_1 SuperCollider:in_1;")  
+        os.execute("jack_disconnect softcut:output_2 SuperCollider:in_2;")
+        os.execute("jack_connect crone:output_5 SuperCollider:in_1;")  
+        os.execute("jack_connect crone:output_6 SuperCollider:in_2;")
+      elseif selected_route == 3 then -- just softcut output -> supercollider
+        print(3)
+        os.execute("jack_disconnect crone:output_5 SuperCollider:in_1;")  
+        os.execute("jack_disconnect crone:output_6 SuperCollider:in_2;")
+        os.execute("jack_connect softcut:output_1 SuperCollider:in_1;")  
+        os.execute("jack_connect softcut:output_2 SuperCollider:in_2;")        
+      end
     end
   end
-end
 
-params:add{
-  type = "option", id = "audio_routing", name = "audio routing", 
-  options = {"in+cut->eng","in->eng","cut->eng"},
-  -- min = 1, max = 3, 
-  default = 1,
-  action = function(value) 
-    rerouting_audio = true
-    clock.run(route_audio)
-  end
-}
+  params:add{
+    type = "option", id = "audio_routing", name = "audio routing", 
+    options = {"in+cut->eng","in->eng","cut->eng"},
+    -- min = 1, max = 3, 
+    default = 1,
+    action = function(value) 
+      rerouting_audio = true
+      clock.run(route_audio)
+    end
+  }
 
   ------------------------------
   -- sequencing
@@ -58,9 +79,37 @@ params:add{
   
   params:add{
     type = "number", id = "num_sequin", name = "num sequin", min=1, max=9, default=9,
-    -- action=function(x)
-      
-    -- end
+    action=function(x)
+      if initializing == false then
+        local selected_sequin = sequencer_controller.selected_sequin and sequencer_controller.selected_sequin or 1
+        for i=x,9,1 do
+          sequencer_controller.update_sequin_selector(5+selected_sequin,1,"off")
+          grid_sequencer:solid_off(5+i,1, 1)
+          grid_sequencer:unregister_solid_at(5+i,1, 1)
+        end
+        local starting_sequin = 5+params:get("starting_sequin")
+        local last_sequin = starting_sequin+x-1
+        last_sequin = last_sequin <= 14 and last_sequin or 14
+        sequencer_controller.sequin_selector = grid_sequencer:register_ui_group("sequin_selector",starting_sequin,1,last_sequin,1,2,3)
+      end
+    end
+  }
+
+  params:add{
+    type = "number", id = "starting_sequin", name = "starting sequin", min=1, max=9, default=1,
+    action=function(x)
+      if initializing == false then
+        for i=1,x-1,1 do
+          sequencer_controller.update_sequin_selector(5+i,1,"off")
+          grid_sequencer:solid_off(5+i,1, 1)
+          grid_sequencer:unregister_solid_at(5+i,1, 1)
+        end
+        local starting_sequin = 5+x
+        local last_sequin = 5+x+params:get("num_sequin")
+        last_sequin = last_sequin <= 14 and last_sequin or 14
+        sequencer_controller.sequin_selector = grid_sequencer:register_ui_group("sequin_selector",starting_sequin,1,last_sequin,1,2,3)
+      end
+    end
   }
 
 
@@ -155,8 +204,8 @@ params:add{
   cs_cf = controlspec.MIDFREQ:copy()
   cs_cf.maxval = 1200
   for i=1,16,1 do
-    params:add_control("center_frequency"..i,"center freq"..i,cs_cf)
-    params:set_action("center_frequency"..i,function(x) 
+    params:add_control("filter_center_frequency"..i,"center freq"..i,cs_cf)
+    params:set_action("filter_center_frequency"..i,function(x) 
       -- update engine
       engine.set_center_frequency(i-1,x)
 
@@ -182,7 +231,7 @@ params:add{
       end
     end)  
     local c_freq = util.linexp(20,cs_cf.maxval,20,cs_cf.maxval,(i/16)*cs_cf.maxval)
-    params:set("center_frequency"..i, c_freq, false)
+    params:set("filter_center_frequency"..i, c_freq, false)
   end
 
   ------------------------------
@@ -370,14 +419,6 @@ params:add{
 
   -- end
 
-  function build_scale()
-    notes = {}
-    notes = MusicUtil.generate_scale_of_length(params:get("root_note"), params:get("scale_mode"), scale_length)
-    local num_to_add = scale_length - #notes
-    for i = 1, num_to_add do
-      table.insert(notes, notes[scale_length - num_to_add])
-    end
-  end
 
   -- function set_scale_length()
   --   scale_length = params:get("scale_length")

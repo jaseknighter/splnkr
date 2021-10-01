@@ -7,7 +7,7 @@ function grid_filter.dirtygrid(bool)
 end
 
 function grid_filter.init()
-  grid_filter.grid_views = {'level','center_frequency','recoprocal_quality'}
+  grid_filter.grid_views = {'level','filter_center_frequency','recoprocal_quality'}
   grid_filter.active_view = 1
   grid_filter.long_press = false
   grid_filter.counter = {}
@@ -84,11 +84,11 @@ function grid_filter:short_press(x, y, from_view)
       if clear_col ~= true then
         local cf = util.linexp(1,8,cs_cf.minval,cs_cf.maxval,y)
         cf = util.expexp(cs_cf.minval,cs_cf.maxval,cs_cf.maxval,cs_cf.minval,cf)
-        params:set("center_frequency"..x,cf)
+        params:set("filter_center_frequency"..x,cf)
       else 
         -- local cf = util.linexp(1,8,cs_cf.minval,cs_cf.maxval,(x/16)*8)
         local cf = cs_cf.minval
-        params:set("center_frequency"..x,cf)
+        params:set("filter_center_frequency"..x,cf)
       end
     end
     self.solids[from_view][x] = {}
