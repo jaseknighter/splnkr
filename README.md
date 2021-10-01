@@ -245,6 +245,13 @@ in the params menu, three options may be selected for how audio is routed to the
 * audio in only -> engine
 * softcut out only -> engine
 
+## quantizing notes
+notes are quantized. quantization settings can be adjusted with three settings in the params menu:
+
+* scale mode
+* root note
+* note center frequency
+
 ## outputs 
 
 midi, crow, jf, and w/ outputs are avaiable in the params menu (lots of bugs here to sort out). 
