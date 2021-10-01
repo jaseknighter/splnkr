@@ -19,14 +19,13 @@ this script is something like an amplitude/frequency tracking sequencer/sampler/
 
 ## bugs to fix (this is just a small sampling of the bugs to be found and liberated from the code)
 * enveloping: 
-  * pan type and pan max don't work
-  * get rid of clicks when changing the envelope size/shape
-  * env length on screen 2 should change the length of the sample envelope 
+** pan type and pan max don't work
+** get rid of clicks when changing the envelope size/shape
+** env length on screen 2 should change the length of the sample envelope 
 * externals
-  * lots of little bugs related to just having one envelope (instead of the two from flora)
-* sample player
-  * sample player breaks when in `all cuts` mode and cuts have rates going in different directions (e.g. -1 and 1)
-  
+** lots of little bugs related to just having one envelope (instead of the two from flora)
+* samples
+** sample player breaks when in `all cuts` mode and cuts have rates going in different directions (e.g. -1 and 1)
 
 
 ## norns ui: key/encoder controls
@@ -119,7 +118,7 @@ selecting the third screen (*sqncr*) using norns encoder *e1* brings up the sequ
 
 ### sequencer grid controls
 
-![](images/sequencer_grid_overview_1.png)
+![](images/sequencer_grid.png)
 
 the grid ui is organized into multiple ui groups:
 
@@ -227,7 +226,7 @@ the screenshot above shows the norns ui when a sequin output is being setup, pri
     * the steps are shown for sequinset 5, sequin (step) 1, softcut voice 1, rate parameter
     * steps 2,3,4,6,7,8 have an *x* assigned to them, indicating nothing is happening at this step with regards to softcut voice 1's rate for this sequinset
     * step 1 is set to *1*, meaning at the first step, the rate of the softcut voice is set to 1. it is brighter than the other step indicators, showing it is currently the active value being processed by the script.
-    * step 5 is set to *2.4r*, which means the value at this step is relative to the prior step(s). in this case, since there is just 1 prior step, set at one and the *relative* value at step 5 is 2.4, this the rate value sent to the softcut engine at this step will be 3.4 (1+2.4).
+    * step 5 is set to *2.4r*, which means the value at this step is relative to the prio.pr step(s). in this case, since there is just 1 prior step, set at one and the *relative* value at step 5 is 2.4, this the rate value sent to the softcut engine at this step will be 3.4 (1+2.4).
     * step 9 is set to *2.1r*. Like the prior step it is a relative step. The value sent to the softcut engine at this step will be 5.1 (1+2.4+2.1)
   * (E) sub-sequence values: the value at each step of the sequence (for each output type, output, mode/param, etc.) is selected from one of five *sub-sequence values*. in other words, for each individual output type, output, mode/param, etc. at each step of a sequence there is a five step sub-sequence (implemented as sequins nested within sequins). the screenshot above shows:
     * for sequins group 5, step 1, softcut voice 1's rate parameter:
