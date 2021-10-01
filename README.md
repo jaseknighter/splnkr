@@ -18,9 +18,10 @@ this script is something like an amplitude/frequency tracking sequencer/sampler/
   ```~/norns/stop.sh; sleep 1; ~/norns/start.sh; sleep 9; jack_disconnect crone:output_5 SuperCollider:in_1; jack_disconnect crone:output_6 SuperCollider:in_2; jack_connect softcut:output_1 SuperCollider:in_1; jack_connect softcut:output_2 SuperCollider:in_2``` -->
 
 ## bugs to fix (this is just a small sampling of the bugs to be found and liberated from the code)
+* wobble and flutter aren't working yet
 * enveloping: 
 ** pan type and pan max don't work
-** get rid of clicks when changing the envelope size/shape
+** get rid of minor clicks when changing the envelope size/shape
 ** env length on screen 2 should change the length of the sample envelope 
 * externals
 ** lots of little bugs related to just having one envelope (instead of the two from flora)
@@ -67,7 +68,6 @@ this script is something like an amplitude/frequency tracking sequencer/sampler/
   * k1 + e3: autogenerate clips with even spacing (up to 20)
 
 ### Page 2: envelope*
-*NOTE:* the envelope controls are pretty, pretty, pretty buggy and need work (requires improvements in the SuperCollider engine)
 * e1: previous/next page 
 <!-- * k1 + e1: select active plant   -->
 * e2: select envelope control  

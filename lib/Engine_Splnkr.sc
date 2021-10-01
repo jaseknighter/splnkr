@@ -43,7 +43,7 @@ Engine_Splnkr : CroneEngine {
   var filterLevel3=1,centerFrequency13=440, reciprocalQuality13=1;
   var filterLevel4=1,centerFrequency14=440, reciprocalQuality14=1;
   var filterLevel5=1,centerFrequency15=440, reciprocalQuality15=1;
-
+  var combBuf1, combBuf2;
 
   *new { arg context, doneCallback;
     ^super.new(context, doneCallback);
@@ -53,6 +53,7 @@ Engine_Splnkr : CroneEngine {
     voiceGroup = Group.new(context.xg);
     voiceList = List.new();
 
+    
 
     // envSig = Signal.hanningWindow(1000);
     // envBuf = Buffer.loadCollection(context.server, envSig, 1).bufnum;
@@ -211,7 +212,8 @@ Engine_Splnkr : CroneEngine {
       // TODO: explode mode options
 
       // delay
-      wet = (wet*(1-effect_delay))+(effect_delay*CombC.ar(wet,5,0.2,4));
+      combBuf1 = Buffer.alloc(context.server,48000,2);
+      wet = (wet*(1-effect_delay))+(effect_delay*BufCombC.ar(combBuf1,wet,5,0.2,4));
 
       // flutter + wow
       signed_wobble = wobble_amp*(SinOsc.kr(wobble_rpm/60)**wobble_exp);
@@ -239,7 +241,8 @@ Engine_Splnkr : CroneEngine {
 
       // phaser
       // wet = (wet*(1-effect_phaser))+(effect_phaser*CombC.ar(wet,1,SinOsc.kr(1/7).range(500,1000).reciprocal,0.05*SinOsc.kr(1/7.1).range(-1,1)));
-      wet = (wet*(1-effect_phaser))+(effect_phaser*CombC.ar(wet,1,SinOsc.kr(1/7).range(500,550).reciprocal,0.05*SinOsc.kr(1/7.1).range(-1,1)));
+      combBuf2 = Buffer.alloc(context.server,48000,2);
+      wet = (wet*(1-effect_phaser))+(effect_phaser*BufCombC.ar(combBuf2,wet,1,SinOsc.kr(1/7).range(500,550).reciprocal,0.05*SinOsc.kr(1/7.1).range(-1,1)));
 
       // distortion
       effect_distortion = Lag.kr(effect_distortion,0.5);
@@ -328,20 +331,23 @@ Engine_Splnkr : CroneEngine {
 
       // Free the existing voice if it exists
       if((voiceList.size > 0), {
+        ("free").postln;
         voiceList.do{ arg v,i; 
+          i.postln;
           v.theSynth.set(\gate, 0);
-          // v.theSynth.free;
-        };
-      });
-      if((voiceList.size > 2), {
-        voiceList.do{ arg v,i; 
-          // v.theSynth.set(\gate, 0);
           v.theSynth.free;
         };
       });
 
+      // if((voiceList.size > 0), {
+      //   voiceList.do{ arg v,i; 
+      //     v.theSynth.set(\gate, 0);
+      //     v.theSynth.free;
+      //   };
+      // });
 
-      if (voiceList.size < 3){
+
+      // if (voiceList.size < 3){
 
         context.server.makeBundle(nil, {
           //free the envBuf and create a new one to go with the new Synth
@@ -396,7 +402,7 @@ Engine_Splnkr : CroneEngine {
           splnkrVoice = voiceList.detect({ arg item, i; item.id == id; });
           id = id+1;
         });
-      };
+      // };
     });
 
     //////////////////////////////////////////
