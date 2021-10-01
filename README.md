@@ -170,7 +170,7 @@ the grid ui is organized into multiple ui groups:
     * note: if 
   * (K) *number sequence mode* selector (on/off): if a number is set to *relative*, its value is added to the previous value. the *number sequence mode* selector is turned to *absolute* for each value by default (meaning, the value selected will be the value used, irrespective of the prior value).
   * (L) *polarity* selector: sets the value to positive or negative. the *polarity* selector is set to positive by default.
-  * (M) *number* selector: this button evaluates the value of the other number selection UI groups (G-K) and sets the value of the selected output device/mode/param.
+  * (M) *sub-sequins* selector: sets the values at each step of a five step sub-sequence based on the option selected (UI group J) or the number selected (UI groups (G-L)). When a value is active within this five step sub-sequence, this value is used to set the value of the selected output/mode/param.
   * notes about number selection: 
     * number selection occurs by first selecting a place value (ui groups *G* and/or *H*) and then selecting a number (ui group *J*).   
     * if mulitple place values are set, they are added together. For example, if the *ones integer place value* is set to `5` and the *tenths integer place value* is set to `4`  
