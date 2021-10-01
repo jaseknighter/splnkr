@@ -274,5 +274,5 @@ clips may be recorded from the PARAMETERS>EDIT menu. what gets recorded depends 
 * splnkr leverages the [stonesoup](https://github.com/schollz/stonesoup) script developed by @infinitedigits/@schollz
 * additional inspirations:
   * @markeats/@markwheeler Passerby (https://github.com/markwheeler/passersby)
-  * @tyleretters Dronecaster (https://llllllll.co/t/34737) and Arcologies (https://llllllll.co/t  /35752)
+  * @tyleretters Dronecaster (https://llllllll.co/t/34737) and Arcologies (https://llllllll.co/t /35752)
   * @dan_derks Cheat Codes 2 (https://llllllll.co/t/38414)
