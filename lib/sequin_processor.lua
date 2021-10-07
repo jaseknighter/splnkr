@@ -75,7 +75,7 @@ function sequin_processor.find_outputs(output_table, sequin_id)
                 -- figure out the current relative value to output
                 local calculated_absolute_value = previous_absolute_value
                 for i=previous_absolute_value_index,selected_sequin,1 do
-                  if output_table[i][1] ~= "nil" then
+                  if (output_table[i] and output_table[i][1] ~= "nil") then
                     local val
                     if string.find(next_output_value,"r") then
                       local number_end = string.find(next_output_value,"r") - 1
