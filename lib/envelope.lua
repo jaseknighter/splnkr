@@ -455,7 +455,7 @@ function Envelope:new(id, num_envelopes, env_nodes)
         elseif e.active_node_param == 3 then
           local incr = alt_key_active and util.clamp(delta, -1, 1) * 0.1 or util.clamp(delta, -1, 1) * e.time_incr
           local new_val = e.graph_nodes[graph_active_node].curve + incr
-          new_val = round_decimals(new_val, 2, "down")
+          new_val = fn.round_decimals(new_val, 2, "down")
           new_val = util.clamp(new_val, e.curve_min, e.curve_max)
           e.graph_nodes[graph_active_node].curve = new_val
           local param_id = id == 1 and envelope1_curves[graph_active_node] or envelope2_curves[graph_active_node]

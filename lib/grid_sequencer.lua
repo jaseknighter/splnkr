@@ -486,6 +486,7 @@ function grid_sequencer:register_ui_group(group_name,x1,y1,x2, y2, off_level, se
   grid_data.x2=x2 
   grid_data.y2=y2 
   grid_data.active_item = nil
+  grid_data.default_value = default_value
   grid_data.group_name = group_name
   -- print(group_name,x1,y1,x2, y2, off_level, selection_mode, control_spec, default_value)
   local ol = off_level

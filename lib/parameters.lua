@@ -14,15 +14,15 @@ function parameters.init()
 
   params:add{type = "option", id = "scale_mode", name = "scale mode",
   options = scale_names, default = 5,
-  action = function() build_scale() end}
+  action = function() fn.build_scale() end}
 
   params:add{type = "number", id = "root_note", name = "root note",
   min = 0, max = 127, default = root_note_default, formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end,
-  action = function() build_scale() end}
+  action = function() fn.build_scale() end}
 
   params:add{type = "number", id = "note_center_frequency", name = "note center frequency",
   min = 0, max = 127, default = note_center_frequency_default, formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end,
-  action = function() build_scale() end}
+  action = function() fn.build_scale() end}
   -----------------
     ------------------------------
     -- audio routing params
@@ -38,19 +38,16 @@ function parameters.init()
     if rerouting_audio == true then
       rerouting_audio = false
       if selected_route == 1 then -- audio in + softcut output -> supercollider
-        print(1)
         os.execute("jack_connect crone:output_5 SuperCollider:in_1;")  
         os.execute("jack_connect crone:output_6 SuperCollider:in_2;")
         os.execute("jack_connect softcut:output_1 SuperCollider:in_1;")  
         os.execute("jack_connect softcut:output_2 SuperCollider:in_2;")      
       elseif selected_route == 2 then --just audio in -> supercollider
-        print(2)
         os.execute("jack_disconnect softcut:output_1 SuperCollider:in_1;")  
         os.execute("jack_disconnect softcut:output_2 SuperCollider:in_2;")
         os.execute("jack_connect crone:output_5 SuperCollider:in_1;")  
         os.execute("jack_connect crone:output_6 SuperCollider:in_2;")
       elseif selected_route == 3 then -- just softcut output -> supercollider
-        print(3)
         os.execute("jack_disconnect crone:output_5 SuperCollider:in_1;")  
         os.execute("jack_disconnect crone:output_6 SuperCollider:in_2;")
         os.execute("jack_connect softcut:output_1 SuperCollider:in_1;")  
@@ -420,18 +417,18 @@ function parameters.init()
   -- end
 
 
-  -- function set_scale_length()
+  -- function fn.set_scale_length()
   --   scale_length = params:get("scale_length")
   -- end
 
 
   -- params:add{type = "option", id = "scale_mode", name = "scale mode",
   -- options = scale_names, default = 5,
-  -- action = function() build_scale() end}
+  -- action = function() fn.build_scale() end}
 
   -- params:add{type = "number", id = "root_note", name = "root note",
   -- min = 0, max = 127, default = root_note_default, formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end,
-  -- action = function() build_scale() end}
+  -- action = function() fn.build_scale() end}
 
   ------------------------------
   -- amplitude/frequency detection params

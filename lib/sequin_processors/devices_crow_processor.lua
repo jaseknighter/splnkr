@@ -35,7 +35,7 @@ function devices_crow_processor.play_note3(value)
 end
 
 function devices_crow_processor.play_drum(value)
-
+  externals1.note_on(1,value,1,1,1,"sequencer", "crow_drum")
 end
 
 return devices_crow_processor

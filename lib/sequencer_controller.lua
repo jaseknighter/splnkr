@@ -17,46 +17,47 @@
 --  value controlspec:      a "controlspec" for each output/output mode param
 
 local sequencer_controller = {}
-sqc = sequencer_controller
+sc = sequencer_controller
 
 -- placeholder until views are implemented for the sequencer controller
-sequencer_controller.from_view = 1
+sc.from_view = 1
 
 -- UI data
-sequencer_controller.selected_sequin_group = nil
-sequencer_controller.selected_sequin_subgroup = nil 
-sequencer_controller.selected_sequin = nil
-sequencer_controller.selected_sequin_output_type = nil
-sequencer_controller.selected_sequin_output = nil
-sequencer_controller.selected_sequin_output_mode = nil
-sequencer_controller.selected_sequin_output_param = nil
-sequencer_controller.value_place_integer = nil
-sequencer_controller.value_place_decimal = nil
--- sequencer_controller.value_polarity = nil
-sequencer_controller.number_sequence_mode = nil
-sequencer_controller.value_number = nil
-sequencer_controller.value_option = nil
+sc.selected_sequin_group = nil
+sc.selected_sequin_subgroup = nil 
+sc.selected_sequin = nil
+sc.selected_sequin_output_type = nil
+sc.selected_sequin_output = nil
+sc.selected_sequin_output_mode = nil
+sc.selected_sequin_output_param = nil
+sc.value_place_integer = nil
+sc.value_place_decimal = nil
+sc.sequence_mode = nil
+sc.value_number = nil
+sc.value_option = nil
+sc.value_note_num = nil
+sc.value_octave = nil
 
-sequencer_controller.selectors_x_offset = 5
-sequencer_controller.value_polarity = 1
+sc.selectors_x_offset = 5
+sc.value_polarity = 1
 -- value data 
-sequencer_controller.sequins_outputs_table = {}
+sc.sequins_outputs_table = {}
 
-sequencer_controller.grid_input_processors = {}
+sc.grid_input_processors = {}
 
-sequencer_controller.active_sequin_value = {}
-sequencer_controller.active_sequin_value.place_values = {}
-sequencer_controller.active_sequin_value.place_values.ten_thousands  =  0
-sequencer_controller.active_sequin_value.place_values.thousands      =  0
-sequencer_controller.active_sequin_value.place_values.hundreds       =  0
-sequencer_controller.active_sequin_value.place_values.tens           =  0
-sequencer_controller.active_sequin_value.place_values.ones           =  0
-sequencer_controller.active_sequin_value.place_values.tenths         =  0
-sequencer_controller.active_sequin_value.place_values.hundredths     =  0
-sequencer_controller.active_sequin_value.place_values.thousandths    =  0
+sc.active_sequin_value = {}
+sc.active_sequin_value.place_values = {}
+sc.active_sequin_value.place_values.ten_thousands  =  0
+sc.active_sequin_value.place_values.thousands      =  0
+sc.active_sequin_value.place_values.hundreds       =  0
+sc.active_sequin_value.place_values.tens           =  0
+sc.active_sequin_value.place_values.ones           =  0
+sc.active_sequin_value.place_values.tenths         =  0
+sc.active_sequin_value.place_values.hundredths     =  0
+sc.active_sequin_value.place_values.thousandths    =  0
 
-function sequencer_controller.init()
-  sequencer_controller.lattice = Lattice:new{
+function sc.init()
+  sc.lattice = Lattice:new{
     auto = true,
     meter = 1/4,
     ppqn = 96
@@ -65,64 +66,64 @@ function sequencer_controller.init()
   sequin_processor.init()
   devices_crow_processor.init()
   
-  sequencer_controller.refresh_output_control_specs_map()
-  sequencer_controller.sequencers = {}
-  sequencer_controller.sequencers[1] = Sequencer:new(sequencer_controller.lattice,1)
-  sequencer_controller.sequencers[2] = Sequencer:new(sequencer_controller.lattice,2)
-  sequencer_controller.sequencers[3] = Sequencer:new(sequencer_controller.lattice,3)
-  sequencer_controller.sequencers[4] = Sequencer:new(sequencer_controller.lattice,4)
-  sequencer_controller.sequencers[5] = Sequencer:new(sequencer_controller.lattice,5)
-  sequencer_controller.lattice:start()
+  sc.refresh_output_control_specs_map()
+  sc.sequencers = {}
+  sc.sequencers[1] = Sequencer:new(sc.lattice,1)
+  sc.sequencers[2] = Sequencer:new(sc.lattice,2)
+  sc.sequencers[3] = Sequencer:new(sc.lattice,3)
+  sc.sequencers[4] = Sequencer:new(sc.lattice,4)
+  sc.sequencers[5] = Sequencer:new(sc.lattice,5)
+  sc.lattice:start()
 end
 
-function sequencer_controller.copy_paste_sequinsets(target_sequinset,source_sequinset)
+function sc.copy_paste_sequinsets(target_sequinset,source_sequinset)
   -- print("copy/paste",source_sequinset, target_sequinset)
-  sequencer_controller.sequins_outputs_table[target_sequinset] = {}
-  sequencer_controller.sequins_outputs_table[target_sequinset] = fn.deep_copy(sequencer_controller.sequins_outputs_table[source_sequinset])
-  clock.run(sequencer_controller.activate_sequinset,target_sequinset)
+  sc.sequins_outputs_table[target_sequinset] = {}
+  sc.sequins_outputs_table[target_sequinset] = fn.deep_copy(sc.sequins_outputs_table[source_sequinset])
+  clock.run(sc.activate_sequinset,target_sequinset)
   
-  -- sequencer_controller.reset_sequinset_value_heirarcy(target_sequinset)
+  -- sc.reset_sequinset_value_heirarcy(target_sequinset)
   -- clock.run(grid_sequencer.activate_grid_key_at,target_sequinset,1,0.1)
   
 end
 
-function sequencer_controller.activate_sequinset(target_sequinset)
+function sc.activate_sequinset(target_sequinset)
   -- clock.run(grid_sequencer.activate_grid_key_at,target_sequinset,1,0.01)
   clock.sleep(0.1)
-  sequencer_controller.reset_sequinset_value_heirarcy(target_sequinset)
+  sc.reset_sequinset_value_heirarcy(target_sequinset)
   print("activate",target_sequinset)
 end
 
--- > tab.print(sequencer_controller.sequins_outputs_table[4][1][1][2][2][1].output_data)
--- > tab.print(sequencer_controller.sequins_outputs_table[4][1][4][2][2][1].output_data)
-function sequencer_controller.reset_sequinset_value_heirarcy(sgp,inner_table)
-  local tab = inner_table and inner_table or sequencer_controller.sequins_outputs_table[sgp]
+-- > tab.print(sc.sequins_outputs_table[4][1][1][2][2][1].output_data)
+-- > tab.print(sc.sequins_outputs_table[4][1][4][2][2][1].output_data)
+function sc.reset_sequinset_value_heirarcy(sgp,inner_table)
+  local tab = inner_table and inner_table or sc.sequins_outputs_table[sgp]
   -- local table_type
   -- tab == tab or 
   if tab then
     for k, v in pairs(tab) do 
       if type(v) == "table" and k ~="seq" then
-        sequencer_controller.reset_sequinset_value_heirarcy(sgp,v)
+        sc.reset_sequinset_value_heirarcy(sgp,v)
       end
       if k == "value_heirarchy" then
         v.sgp = sgp
       end
     end
   end
-  local selected_sequin = sequencer_controller.selected_sequin
+  local selected_sequin = sc.selected_sequin
   for i=1,params:get("num_sequin"),1 do
-    sequencer_controller.set_selected_sequin(i)
-    sequencer_controller.update_sequin(i)
+    sc.set_selected_sequin(i)
+    sc.update_sequin(i)
   end
-  sequencer_controller.set_selected_sequin(selected_sequin)
+  sc.set_selected_sequin(selected_sequin)
 
 end
 
 -----------------------
 
-function sequencer_controller.copy_paste_sequence_data(source_id, target_id, data_path, end_node)
-  -- source_table = sequencer_controller.sequins_outputs_table
-  -- target_table = sequencer_controller.sequins_outputs_table
+function sc.copy_paste_sequence_data(source_id, target_id, data_path, end_node)
+  -- source_table = sc.sequins_outputs_table
+  -- target_table = sc.sequins_outputs_table
   -- for i=1,#data_path,1 do
   --   source_table = source_table[data_path[i]]
   --   -- target_table = target_table[data_path[i]]
@@ -132,32 +133,32 @@ function sequencer_controller.copy_paste_sequence_data(source_id, target_id, dat
   local target_table
   if #data_path == 2 then
     print(data_path[1],data_path[2])
-    print(sequencer_controller.sequins_outputs_table[data_path[1]])
-    print(sequencer_controller.sequins_outputs_table[data_path[1]][data_path[2]])
-    print(sequencer_controller.sequins_outputs_table[data_path[1]][data_path[2]][source_id])
-    local source_table = sequencer_controller.sequins_outputs_table[data_path[1]][data_path[2]][source_id]
-    -- target_table = sequencer_controller.sequins_outputs_table[data_path[1]][data_path[2]][target_id]
-    sequencer_controller.sequins_outputs_table[data_path[1]][data_path[2]][target_id] = {}
-    sequencer_controller.sequins_outputs_table[data_path[1]][data_path[2]][target_id] = fn.deep_copy(source_table)
-    target_table = sequencer_controller.sequins_outputs_table[data_path[1]][data_path[2]][target_id]
+    print(sc.sequins_outputs_table[data_path[1]])
+    print(sc.sequins_outputs_table[data_path[1]][data_path[2]])
+    print(sc.sequins_outputs_table[data_path[1]][data_path[2]][source_id])
+    local source_table = sc.sequins_outputs_table[data_path[1]][data_path[2]][source_id]
+    -- target_table = sc.sequins_outputs_table[data_path[1]][data_path[2]][target_id]
+    sc.sequins_outputs_table[data_path[1]][data_path[2]][target_id] = {}
+    sc.sequins_outputs_table[data_path[1]][data_path[2]][target_id] = fn.deep_copy(source_table)
+    target_table = sc.sequins_outputs_table[data_path[1]][data_path[2]][target_id]
   end
-  sequencer_controller.update_value_heirarcy(end_node, target_id, target_table)
-  sequencer_controller.update_sequin(target_id)
-  clock.run(sequencer_controller.activate_target,target_id)
+  sc.update_value_heirarcy(end_node, target_id, target_table)
+  sc.update_sequin(target_id)
+  clock.run(sc.activate_target,target_id)
 end
 
-function sequencer_controller.activate_target(target_id)
+function sc.activate_target(target_id)
   clock.sleep(0.1)
   clock.run(grid_sequencer.activate_grid_key_at,target_id+5,1,0.1)
 end
 
-function sequencer_controller.update_value_heirarcy(end_node,end_node_value, output_data_table)
-  -- local tab = inner_table and inner_table or sequencer_controller.sequins_outputs_table[sgp][ssg][target_id]
+function sc.update_value_heirarcy(end_node,end_node_value, output_data_table)
+  -- local tab = inner_table and inner_table or sc.sequins_outputs_table[sgp][ssg][target_id]
   -- local table_type
   if output_data_table then 
     for k, v in pairs(output_data_table) do 
       if type(v) == "table" and k ~= "seq" then
-        sequencer_controller.update_value_heirarcy(end_node,end_node_value,v)
+        sc.update_value_heirarcy(end_node,end_node_value,v)
       end
       if k == "value_heirarchy" then
         v[end_node] = end_node_value
@@ -167,29 +168,29 @@ function sequencer_controller.update_value_heirarcy(end_node,end_node_value, out
 end
 
 -----------------------
-function sequencer_controller.reset_active_sequin_value()
-  sequencer_controller.active_sequin_value = {}
-  -- if sequencer_controller.sequin_output_types then sequencer_controller:unregister_ui_group(6,2) end
+function sc.reset_active_sequin_value()
+  sc.active_sequin_value = {}
+  -- if sc.sequin_output_types then sc:unregister_ui_group(6,2) end
 end
 
 
 
 -- set in update_value_place_integers and update_value_place_decimals
-sequencer_controller.active_value_selector_place = nil 
+sc.active_value_selector_place = nil 
 
 
 -- utilities
-function sequencer_controller.print_svt()
-  for k, v in pairs(sequencer_controller.active_sequin_value) do print(k,v) end
+function sc.print_svt()
+  for k, v in pairs(sc.active_sequin_value) do print(k,v) end
 end
 
-function sequencer_controller.print_outputs_table(inner_table)
+function sc.print_outputs_table(inner_table)
   -- debug = 1
-  local tab_to_print = inner_table and inner_table or sequencer_controller.sequins_outputs_table
+  local tab_to_print = inner_table and inner_table or sc.sequins_outputs_table
   -- local table_type
   for k, v in pairs(tab_to_print) do 
     if type(v) == "table" then
-      sequencer_controller.print_outputs_table(v)
+      sc.print_outputs_table(v)
     end
     if k == "value_heirarchy" then
       tab.print(v)
@@ -206,7 +207,7 @@ end
 
 -- maps
 -- output map: the values represent the number of different outputs for each output type
-sequencer_controller.outputs_map = {
+sc.outputs_map = {
   6, -- softcut voices NOTE: the sequencer will only allow 6 voices to play at once
   4, -- devices (midi, crow, just friends, w/)
   7, -- effects (amp, drywet, pitchshift, pitchshift offset, pitchshift array (8)
@@ -216,7 +217,7 @@ sequencer_controller.outputs_map = {
 }
 
 -- note: '(nil)' means the output mode takes just 1 param) 
-sequencer_controller.output_mode_map = {
+sc.output_mode_map = {
   {nil,nil,nil,nil,nil,nil},                        -- softcut 
   {nil,3,3,2},                  -- devices midi out (nil), crow(3), just_friends(3),w/(2)
   {nil,nil,nil,nil,8,nil,nil},  -- effects: amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (8)
@@ -226,7 +227,7 @@ sequencer_controller.output_mode_map = {
 }
 
 -- note: '(nil)' means just 1 output param' 
-sequencer_controller.output_params_map = {
+sc.output_params_map = {
   {
     -- 4 softcut output params: 
     --    sample_cut_num: 1-10 ????
@@ -242,22 +243,22 @@ sequencer_controller.output_params_map = {
   {nil,nil,nil,nil,nil,nil},  -- lattice 
 }
 
-function sequencer_controller.get_num_cutters()
+function sc.get_num_cutters()
   return #cutters > 0 and #cutters or 1
 end
 
-function sequencer_controller.get_output_control_specs_map()
-  local map = sequencer_controller.output_control_specs_map and sequencer_controller.output_control_specs_map or nil
+function sc.get_output_control_specs_map()
+  local map = sc.output_control_specs_map and sc.output_control_specs_map or nil
   return map
 end
 
-function sequencer_controller.refresh_output_control_specs_map()
-  local num_cutters = sequencer_controller.get_num_cutters()
+function sc.refresh_output_control_specs_map()
+  local num_cutters = sc.get_num_cutters()
   local cutters = {}
   local min_note = initializing == false and params:get("note_center_frequency") * -1 or note_center_frequency_default
   local max_note = scale_length - min_note
   for i=1,num_cutters,1 do table.insert(cutters,i) end
-  sequencer_controller.output_control_specs_map = {
+  sc.output_control_specs_map = {
     {
       -- 4 softcut output params: 
       --    sample_cut_num: 1-10 ????
@@ -278,36 +279,36 @@ function sequencer_controller.refresh_output_control_specs_map()
       {{"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
     }, 
     { -- device (, crow(3), just_friends(3),w/(2))
-      {"number",min_note,max_note,nil,"midi_note","midi note"}, -- midi out
+      {"note",min_note,max_note,nil,"midi_note","midi note"}, -- midi out
       { -- crow
-        {"number",min_note,max_note,nil,"crow1_pitch","crow1_pitch"}, -- crow1 pitch
-        {"number",min_note,max_note,nil,"crow3_pitch","crow3_pitch"}, -- crow3 pitch
-        {"number",min_note,max_note,nil,"drum","drum"} -- drums ??????????????
+        {"note",min_note,max_note,nil,"crow1_pitch","crow1_pitch"}, -- crow1 pitch
+        {"note",min_note,max_note,nil,"crow3_pitch","crow3_pitch"}, -- crow3 pitch
+        {"note",min_note,max_note,nil,"drum","drum"} -- drums ??????????????
       }, 
       { -- just friends
-        {{"number",min_note,max_note,nil,"pitch","pitch"},{"number",'0.00',10,nil,"level","level"}}, -- play_note: pitch, level
-        {{"number",1,6,nil,"channel"},{"number",min_note,max_note,nil,"pitch","pitch"},{"number",'0.00',10,nil,"level","level"}}, -- play_voice: channel, pitch, level
-        {"number",-24,3,nil,6,"pitch_portamento","pitch portamento"}, -- play_note: pitch (portamento)
+        {{"note",min_note,max_note,nil,"pitch","pitch"},{"number",'0.00',10,nil,"level","level"}}, -- play_note: pitch, level
+        {{"number",1,6,nil,"channel"},{"note",min_note,max_note,nil,"pitch","pitch"},{"number",'0.00',10,nil,"level","level"}}, -- play_voice: channel, pitch, level
+        {"note",-24,3,nil,6,"pitch_portamento","pitch portamento"}, -- play_note: pitch (portamento)
       }, 
       {  -- w/
-        {"number",min_note,max_note,nil,"pitch","pitch"},          -- w_syn: pitch
-        {"number",min_note,max_note,nil,"pitch","pitch"}           -- w_del karplus: pitch
+        {"note",min_note,max_note,nil,"pitch","pitch"},          -- w_syn: pitch
+        {"note",min_note,max_note,nil,"pitch","pitch"}           -- w_del karplus: pitch
       }, 
     },
     {   -- effects (, pitchshift array (8))
-      {"number",'0.00',10,nil,{"level","level"}},                -- level (amp)
-      {"number",'0.00',10,nil,"drywet","drywet"},                -- drywet
-      {"number",'0.00',10,nil,"pitchshift","pitchshift"},                -- pitchshift
-      {"number",'0.00',10,nil,"pitchshift_offset","pitchshift offset"},                -- pitchshift offset
+      {"number",'0.00',1,nil,{"level","level"}},                -- level (amp)
+      {"number",'0.00',1,nil,"drywet","drywet"},                -- drywet
+      {"number",'0.00',1,nil,"pitchshift","pitchshift"},                -- pitchshift
+      {"note",'0.00',10,nil,"pitchshift_offset","pitchshift offset"},                -- pitchshift offset
       {                               -- pitchshift array
-        {"number",min_note,max_note,"pitchshift_note_1","pitchshift note 1"},
-        {"number",min_note,max_note,"pitchshift_note_2","pitchshift note 2"},
-        {"number",min_note,max_note,"pitchshift_note_3","pitchshift note 3"},
-        {"number",min_note,max_note,"pitchshift_note_4","pitchshift note 4"},
-        {"number",min_note,max_note,"pitchshift_note_5","pitchshift note 5"},
-        {"number",min_note,max_note,"pitchshift_note_6","pitchshift note 6"},
-        {"number",min_note,max_note,"pitchshift_note_7","pitchshift note 7"},
-        {"number",min_note,max_note,"pitchshift_note_8","pitchshift note 8"}
+        {"note",min_note,max_note,"pitchshift_note_1","pitchshift note 1"},
+        {"note",min_note,max_note,"pitchshift_note_2","pitchshift note 2"},
+        {"note",min_note,max_note,"pitchshift_note_3","pitchshift note 3"},
+        {"note",min_note,max_note,"pitchshift_note_4","pitchshift note 4"},
+        {"note",min_note,max_note,"pitchshift_note_5","pitchshift note 5"},
+        {"note",min_note,max_note,"pitchshift_note_6","pitchshift note 6"},
+        {"note",min_note,max_note,"pitchshift_note_7","pitchshift note 7"},
+        {"note",min_note,max_note,"pitchshift_note_8","pitchshift note 8"}
       },
       {"number",'0.00',10,nil,"phaser","phaser"}, -- phaser
       {"number",'0.00',10,nil,"delay","delay"} -- delay
@@ -335,7 +336,7 @@ function sequencer_controller.refresh_output_control_specs_map()
   }
 end
 
-function sequencer_controller:unregister_ui_group(x1,y1)
+function sc:unregister_ui_group(x1,y1)
   -- todo: figure out why the value selector row needs to be "manually" turned off
   for i=6,14,1 do
     local level = grid_sequencer:get_current_level_at(i, 6, 1)
@@ -349,14 +350,14 @@ function sequencer_controller:unregister_ui_group(x1,y1)
   if groups_unregistered then 
     for i=1,#groups_unregistered,1 do
       local group_num,group_name = table.unpack(groups_unregistered[i])
-      sequencer_controller[group_name] = nil
+      sc[group_name] = nil
     end
   end
   local selected_outputs = {
-    sequencer_controller.selected_sequin_output,
-    sequencer_controller.selected_sequin_output_mode,
-    sequencer_controller.selected_sequin_output_param,
-    sequencer_controller.active_sequin_value
+    sc.selected_sequin_output,
+    sc.selected_sequin_output_mode,
+    sc.selected_sequin_output_param,
+    sc.active_sequin_value
   } 
   if selected_outputs[y1-2] then 
     selected_outputs[y1-2] = nil
@@ -390,52 +391,52 @@ end
 --
 
 -- UI functions
-function sequencer_controller.get_active_sequinset()
-  return sequencer_controller.selected_sequin_group
+function sc.get_active_sequinset()
+  return sc.selected_sequin_group
 end
 
-function sequencer_controller.update_selected_sequin_group(index,state, seq_ix)
-  sequencer_controller.active_value_heirarchy = nil
+function sc.update_selected_sequin_group(index,state, seq_ix)
+  sc.active_value_heirarchy = nil
   if state == "on" then
     for i=1,5,1 do
       for j=1,1,1 do
         if i ~= index then
-          grid_sequencer:solid_off(i, j, sequencer_controller.from_view)  
+          grid_sequencer:solid_off(i, j, sc.from_view)  
         end
       end
     end
-    sequencer_controller.selected_sequin_group = index or nil
-    sequencer_controller.selected_sequin_subgroup = 1
-    sequencer_controller.set_ui_sequin_selector()
+    sc.selected_sequin_group = index or nil
+    sc.selected_sequin_subgroup = 1
+    sc.set_ui_sequin_selector()
     if seq_ix then
-      local seq = sequencer_controller.sequencers[sequencer_controller.selected_sequin_group].seq
+      local seq = sc.sequencers[sc.selected_sequin_group].seq
       -- local next_seq_ix = seq.ix < #seq.data and seq.ix+1 or 1
       -- seq:select(next_seq_ix)
       seq:select(seq_ix)
     end
-    if sequencer_controller.lattice.enabled == false then 
-      sequencer_controller.lattice:start()
+    if sc.lattice.enabled == false then 
+      sc.lattice:start()
     end
   else
-    -- print(sequencer_controller.lattice.enabled)
-    if sequencer_controller.lattice.enabled == true then 
-      sequencer_controller.lattice:stop()
+    -- print(sc.lattice.enabled)
+    if sc.lattice.enabled == true then 
+      sc.lattice:stop()
     end
-    -- sequencer_controller:unregister_ui_group(6,1)
-    -- sequencer_controller.selected_sequin_group = nil
-    -- sequencer_controller.selected_sequin_subgroup = nil
-    -- sequencer_controller.selected_sequin = nil
-    -- sequencer_controller.selected_sequin_output_type = nil
-    -- sequencer_controller.selected_sequin_output = nil
-    -- sequencer_controller.selected_sequin_output_mode = nil
-    -- sequencer_controller.selected_sequin_output_param = nil
-    -- sequencer_controller.value_place_integer = nil
-    -- sequencer_controller.value_place_decimal = nil
-    -- sequencer_controller.value_polarity = nil
-    -- sequencer_controller.number_sequence_mode = nil      
-    -- sequencer_controller.value_number = nil
-    -- sequencer_controller.value_option = nil
-    -- sequencer_controller.active_output_value_text = nil
+    -- sc:unregister_ui_group(6,1)
+    -- sc.selected_sequin_group = nil
+    -- sc.selected_sequin_subgroup = nil
+    -- sc.selected_sequin = nil
+    -- sc.selected_sequin_output_type = nil
+    -- sc.selected_sequin_output = nil
+    -- sc.selected_sequin_output_mode = nil
+    -- sc.selected_sequin_output_param = nil
+    -- sc.value_place_integer = nil
+    -- sc.value_place_decimal = nil
+    -- sc.value_polarity = nil
+    -- sc.sequence_mode = nil      
+    -- sc.value_number = nil
+    -- sc.value_option = nil
+    -- sc.active_output_value_text = nil
   end
 end
 
@@ -444,19 +445,19 @@ end
 --  ui group 6 sequin selector - functions
 -----------------------------
 -- UI functions
-function sequencer_controller.set_selected_sequin(index)
-  sequencer_controller.selected_sequin = index
+function sc.set_selected_sequin(index)
+  sc.selected_sequin = index
 end
 
 
-function sequencer_controller.set_ui_sequin_selector()
-  if sequencer_controller.sequin_selector == nil then
-    sequencer_controller.sequin_selector = grid_sequencer:register_ui_group("sequin_selector",6,1,14,1,2,3)
-  local selected_sequin = sequencer_controller.selected_sequin
+function sc.set_ui_sequin_selector()
+  if sc.sequin_selector == nil then
+    sc.sequin_selector = grid_sequencer:register_ui_group("sequin_selector",6,1,14,1,2,3)
+  local selected_sequin = sc.selected_sequin
     for i=6,14,1 do
       for j=1,1,1 do
         if i ~= selected_sequin then
-          grid_sequencer:solid_off(i, j, sequencer_controller.from_view)  
+          grid_sequencer:solid_off(i, j, sc.from_view)  
         end
       end
     end
@@ -467,30 +468,30 @@ function sequencer_controller.set_ui_sequin_selector()
   end
 end
 
-function sequencer_controller.update_sequin_selector(x, y, state)
+function sc.update_sequin_selector(x, y, state)
   if state == "on" then
-    local num_output_types = #sequencer_controller.outputs_map
-    -- if sequencer_controller.sequin_output_types then sequencer_controller:unregister_ui_group(6,2) end
-    if sequencer_controller.sequin_output_types == nil then 
-      sequencer_controller.sequin_output_types = grid_sequencer:register_ui_group("sequin_output_types",6,2,5+num_output_types,2,4,3)
+    local num_output_types = #sc.outputs_map
+    -- if sc.sequin_output_types then sc:unregister_ui_group(6,2) end
+    if sc.sequin_output_types == nil then 
+      sc.sequin_output_types = grid_sequencer:register_ui_group("sequin_output_types",6,2,5+num_output_types,2,4,3)
     end
-    -- sequencer_controller.sequins_mods = grid_sequencer:register_ui_group("sequins_mods",15,2,15,7,7,3)
-    sequencer_controller.set_selected_sequin(x - sequencer_controller.selectors_x_offset)
+    -- sc.sequins_mods = grid_sequencer:register_ui_group("sequins_mods",15,2,15,7,7,3)
+    sc.set_selected_sequin(x - sc.selectors_x_offset)
   else
-    -- sequencer_controller.active_value_heirarchy = nil
-    -- sequencer_controller:unregister_ui_group(6,2)
-    -- sequencer_controller.selected_sequin = nil
-    -- sequencer_controller.selected_sequin_output_type = nil
-    -- sequencer_controller.selected_sequin_output = nil
-    -- sequencer_controller.selected_sequin_output_mode = nil
-    -- sequencer_controller.selected_sequin_output_param = nil
-    -- sequencer_controller.value_place_integer = nil
-    -- sequencer_controller.value_place_decimal = nil
-    -- sequencer_controller.value_polarity = nil
-    -- sequencer_controller.number_sequence_mode = nil
-    -- sequencer_controller.value_number = nil
-    -- sequencer_controller.value_option = nil
-    -- sequencer_controller.active_output_value_text = nil
+    -- sc.active_value_heirarchy = nil
+    -- sc:unregister_ui_group(6,2)
+    -- sc.selected_sequin = nil
+    -- sc.selected_sequin_output_type = nil
+    -- sc.selected_sequin_output = nil
+    -- sc.selected_sequin_output_mode = nil
+    -- sc.selected_sequin_output_param = nil
+    -- sc.value_place_integer = nil
+    -- sc.value_place_decimal = nil
+    -- sc.value_polarity = nil
+    -- sc.sequence_mode = nil
+    -- sc.value_number = nil
+    -- sc.value_option = nil
+    -- sc.active_output_value_text = nil
   end
 end
 
@@ -499,7 +500,7 @@ end
 -- ui group 7 sequins modifiers - functions
 -----------------------------
 -- UI functions
-function sequencer_controller.update_sequins_mods(x, y, state)
+function sc.update_sequins_mods(x, y, state)
   if state == "on" then
   
   else
@@ -514,32 +515,32 @@ end
 -----------------------------
 
 -- UI functions
-function sequencer_controller.update_sequin_output_types(x, y, state)
-  sequencer_controller.active_value_heirarchy = nil
+function sc.update_sequin_output_types(x, y, state)
+  sc.active_value_heirarchy = nil
   if state == "on" then
-    local  output_type_selected = x - sequencer_controller.selectors_x_offset
-    sequencer_controller.selected_sequin_output_type =   output_type_selected
-    sequencer_controller:unregister_ui_group(6,3)
-    local num_outputs = sequencer_controller.outputs_map[output_type_selected]
-    -- if sequencer_controller.sequin_output_modes then 
-    --   sequencer_controller:unregister_ui_group(6,4)
-    -- elseif sequencer_controller.sequin_output_params then
-    --   sequencer_controller:unregister_ui_group(6,5)
+    local  output_type_selected = x - sc.selectors_x_offset
+    sc.selected_sequin_output_type =   output_type_selected
+    sc:unregister_ui_group(6,3)
+    local num_outputs = sc.outputs_map[output_type_selected]
+    -- if sc.sequin_output_modes then 
+    --   sc:unregister_ui_group(6,4)
+    -- elseif sc.sequin_output_params then
+    --   sc:unregister_ui_group(6,5)
     -- end
 
-    sequencer_controller.sequin_outputs = grid_sequencer:register_ui_group("sequin_outputs",6,3,5+num_outputs,3,7,3)
+    sc.sequin_outputs = grid_sequencer:register_ui_group("sequin_outputs",6,3,5+num_outputs,3,7,3)
   else
-    sequencer_controller:unregister_ui_group(6,3)
-    -- sequencer_controller.selected_sequin_output = nil
-    -- sequencer_controller.selected_sequin_output_mode = nil
-    -- sequencer_controller.selected_sequin_output_param = nil
-    -- sequencer_controller.value_place_integer = nil
-    -- sequencer_controller.value_place_decimal = nil
-    -- sequencer_controller.value_polarity = nil
-    -- sequencer_controller.number_sequence_mode = nil
-    -- sequencer_controller.value_number = nil
-    -- sequencer_controller.value_option = nil
-    -- sequencer_controller.active_output_value_text = nil
+    sc:unregister_ui_group(6,3)
+    -- sc.selected_sequin_output = nil
+    -- sc.selected_sequin_output_mode = nil
+    -- sc.selected_sequin_output_param = nil
+    -- sc.value_place_integer = nil
+    -- sc.value_place_decimal = nil
+    -- sc.value_polarity = nil
+    -- sc.sequence_mode = nil
+    -- sc.value_number = nil
+    -- sc.value_option = nil
+    -- sc.active_output_value_text = nil
   end
 end
 
@@ -549,71 +550,73 @@ end
 -----------------------------
 
 -- UI functions
-function sequencer_controller.update_sequin_outputs(x, y, state)
-  -- sequencer_controller.unregister_value_selectors()
-  -- sequencer_controller.selected_sequin_output = nil
-  -- sequencer_controller.selected_sequin_output_mode = nil
-  -- sequencer_controller.selected_sequin_output_param = nil
-  sequencer_controller.active_value_heirarchy = nil
+function sc.update_sequin_outputs(x, y, state)
+  -- sc.unregister_value_selectors()
+  -- sc.selected_sequin_output = nil
+  -- sc.selected_sequin_output_mode = nil
+  -- sc.selected_sequin_output_param = nil
+  sc.active_value_heirarchy = nil
   if state == "on" then
-    local output_type_selected = sequencer_controller.selected_sequin_output_type
-    local output_selected = x - sequencer_controller.selectors_x_offset
-    sequencer_controller.selected_sequin_output = output_selected
+    local output_type_selected = sc.selected_sequin_output_type
+    local output_selected = x - sc.selectors_x_offset
+    sc.selected_sequin_output = output_selected
 
-    if sequencer_controller.sequin_output_modes then 
-      sequencer_controller:unregister_ui_group(6,4)
-    elseif sequencer_controller.sequin_output_params then
-      sequencer_controller:unregister_ui_group(6,5)
+    if sc.sequin_output_modes then 
+      sc:unregister_ui_group(6,4)
+    elseif sc.sequin_output_params then
+      sc:unregister_ui_group(6,5)
     else 
       for i=1,14,1 do
         if grid_sequencer:find_ui_group_num_by_xy(i,6) then
-          sequencer_controller:unregister_ui_group(i,6)
+          sc:unregister_ui_group(i,6)
         end
       end
       for i=1,14,1 do
         if grid_sequencer:find_ui_group_num_by_xy(i,7) then
-          sequencer_controller:unregister_ui_group(i,7)
+          sc:unregister_ui_group(i,7)
         end
       end
     end
-    local num_output_modes = sequencer_controller.output_mode_map[output_type_selected][output_selected]
-    local num_output_params = sequencer_controller.output_params_map[output_type_selected][output_selected]
-    -- if #sequencer_controller.output_mode_map[output_type_selected][output_selected] > 0 then -- there are output sub types
+    local num_output_modes = sc.output_mode_map[output_type_selected][output_selected]
+    local num_output_params = sc.output_params_map[output_type_selected][output_selected]
+    -- if #sc.output_mode_map[output_type_selected][output_selected] > 0 then -- there are output sub types
     if num_output_modes then -- the output selected has output_modes, show them
-      sequencer_controller.sequin_output_modes = grid_sequencer:register_ui_group("sequin_output_modes",6,4,5+num_output_modes,4,7,3)
+      sc.sequin_output_modes = grid_sequencer:register_ui_group("sequin_output_modes",6,4,5+num_output_modes,4,7,3)
     elseif num_output_params then -- no output_modes, show the output params if there are any
-      sequencer_controller.sequin_output_params = grid_sequencer:register_ui_group("sequin_output_params",6,5,5+num_output_params,5,7,3)
+      sc.sequin_output_params = grid_sequencer:register_ui_group("sequin_output_params",6,5,5+num_output_params,5,7,3)
     else -- show value setters
-      sequencer_controller.set_sequin_output_value_controls()
+      sc.set_sequin_output_value_controls()
     end
   else
 
-    if sequencer_controller.sequin_output_modes then 
-      sequencer_controller:unregister_ui_group(6,4)
-    elseif sequencer_controller.sequin_output_params then
-      sequencer_controller:unregister_ui_group(6,5)
+    if sc.sequin_output_modes then 
+      sc:unregister_ui_group(6,4)
+    elseif sc.sequin_output_params then
+      sc:unregister_ui_group(6,5)
     else
       for i=1,14,1 do
         if grid_sequencer:find_ui_group_num_by_xy(i,6) then
-          sequencer_controller:unregister_ui_group(i,6)
+          sc:unregister_ui_group(i,6)
         end
       end
       for i=1,14,1 do
         if grid_sequencer:find_ui_group_num_by_xy(i,7) then
-          sequencer_controller:unregister_ui_group(i,7)
+          sc:unregister_ui_group(i,7)
         end
       end
     end
-    sequencer_controller.selected_sequin_output = nil
-    sequencer_controller.selected_sequin_output_mode = nil
-    sequencer_controller.selected_sequin_output_param = nil
-    sequencer_controller.value_place_integer = nil
-    sequencer_controller.value_place_decimal = nil
-    sequencer_controller.value_polarity = nil
-    sequencer_controller.number_sequence_mode = nil
-    sequencer_controller.value_number = nil
-    sequencer_controller.value_option = nil
-    sequencer_controller.active_output_value_text = nil
+    sc.selected_sequin_output = nil
+    sc.selected_sequin_output_mode = nil
+    sc.selected_sequin_output_param = nil
+    sc.value_place_integer = nil
+    sc.value_place_decimal = nil
+    sc.value_polarity = nil
+    sc.sequence_mode = nil
+    sc.value_number = nil
+    sc.value_option = nil
+    sc.value_note_num = nil
+    sc.value_octave = nil
+    sc.active_output_value_text = nil
   end
 end
 
@@ -622,48 +625,50 @@ end
 -- ui group 10 sequin output modes - functions
 -----------------------------
 -- UI functions
-function sequencer_controller.update_sequin_output_modes(x, y, state)
-  -- sequencer_controller.unregister_value_selectors()
-  -- sequencer_controller.selected_sequin_output_param = nil
-  -- sequencer_controller.active_value_heirarchy = nil
+function sc.update_sequin_output_modes(x, y, state)
+  -- sc.unregister_value_selectors()
+  -- sc.selected_sequin_output_param = nil
+  -- sc.active_value_heirarchy = nil
   if state == "on" then
-    local output_mode_selected = x - sequencer_controller.selectors_x_offset
-    sequencer_controller.selected_sequin_output_mode = output_mode_selected
-    local output_type_selected = sequencer_controller.selected_sequin_output_type
-    local output_selected = sequencer_controller.selected_sequin_output
-    local num_output_mode_params = sequencer_controller.output_params_map[output_type_selected][output_selected][output_mode_selected]
-    if sequencer_controller.sequin_output_params then
-      sequencer_controller:unregister_ui_group(6,5)
+    local output_mode_selected = x - sc.selectors_x_offset
+    sc.selected_sequin_output_mode = output_mode_selected
+    local output_type_selected = sc.selected_sequin_output_type
+    local output_selected = sc.selected_sequin_output
+    local num_output_mode_params = sc.output_params_map[output_type_selected][output_selected][output_mode_selected]
+    if sc.sequin_output_params then
+      sc:unregister_ui_group(6,5)
     end
     for i=1,14,1 do
       if grid_sequencer:find_ui_group_num_by_xy(i,7) then
-        sequencer_controller:unregister_ui_group(i,7)
+        sc:unregister_ui_group(i,7)
       end
     end
 
     if num_output_mode_params then
-      sequencer_controller.sequin_output_params = grid_sequencer:register_ui_group("sequin_output_params",6,5,5+num_output_mode_params,5,7,3)
+      sc.sequin_output_params = grid_sequencer:register_ui_group("sequin_output_params",6,5,5+num_output_mode_params,5,7,3)
     else
       -- just 1 param: show values
-      sequencer_controller.set_sequin_output_value_controls()
+      sc.set_sequin_output_value_controls()
     end
   else
-    sequencer_controller:unregister_ui_group(6,5)
+    sc:unregister_ui_group(6,5)
     for i=1,14,1 do
       if grid_sequencer:find_ui_group_num_by_xy(i,7) then
-        sequencer_controller:unregister_ui_group(i,7)
+        sc:unregister_ui_group(i,7)
       end
     end
-    -- sequencer_controller.unregister_value_selectors()
-    sequencer_controller.selected_sequin_output_mode = nil
-    sequencer_controller.selected_sequin_output_param = nil
-    sequencer_controller.value_place_integer = nil
-    sequencer_controller.value_place_decimal = nil
-    sequencer_controller.value_polarity = nil
-    sequencer_controller.number_sequence_mode = nil
-    sequencer_controller.value_number = nil
-    sequencer_controller.value_option = nil
-    sequencer_controller.active_output_value_text = nil
+    -- sc.unregister_value_selectors()
+    sc.selected_sequin_output_mode = nil
+    sc.selected_sequin_output_param = nil
+    sc.value_place_integer = nil
+    sc.value_place_decimal = nil
+    sc.value_polarity = nil
+    sc.sequence_mode = nil
+    sc.value_number = nil
+    sc.value_option = nil
+    sc.value_note_num = nil
+    sc.value_octave = nil
+    sc.active_output_value_text = nil
   end
 end
 
@@ -673,35 +678,37 @@ end
 -- ui group 11 sequin output params - functions
 -----------------------------
 -- UI functions
-function sequencer_controller.update_sequin_output_params(x, y, state)
-  -- sequencer_controller.unregister_value_selectors()
-  sequencer_controller.active_value_heirarchy = nil
+function sc.update_sequin_output_params(x, y, state)
+  -- sc.unregister_value_selectors()
+  sc.active_value_heirarchy = nil
   if state == "on" then
-    sequencer_controller.selected_sequin_output_param = x - sequencer_controller.selectors_x_offset
+    sc.selected_sequin_output_param = x - sc.selectors_x_offset
     --SHOW VALUE SETTERS
-    sequencer_controller:unregister_ui_group(6,6)
+    sc:unregister_ui_group(6,6)
     for i=1,14,1 do
       if grid_sequencer:find_ui_group_num_by_xy(i,7) then
-        sequencer_controller:unregister_ui_group(i,7)
+        sc:unregister_ui_group(i,7)
       end
     end
-    sequencer_controller.set_sequin_output_value_controls()
+    sc.set_sequin_output_value_controls()
   else
     for i=1,14,1 do
       if grid_sequencer:find_ui_group_num_by_xy(i,7) then
-        sequencer_controller:unregister_ui_group(i,7)
+        sc:unregister_ui_group(i,7)
       end
     end
-    sequencer_controller:unregister_ui_group(6,6)
-    sequencer_controller.selected_sequin_output_param = nil
-    sequencer_controller.value_place_integer = nil
-    sequencer_controller.value_place_decimal = nil
-    sequencer_controller.value_polarity = nil
-    sequencer_controller.number_sequence_mode = nil
-    sequencer_controller.value_number = nil
-    sequencer_controller.value_option = nil
-    sequencer_controller.active_output_value_text = nil
-    -- sequencer_controller.unregister_value_selectors()
+    sc:unregister_ui_group(6,6)
+    sc.selected_sequin_output_param = nil
+    sc.value_place_integer = nil
+    sc.value_place_decimal = nil
+    sc.value_polarity = nil
+    sc.sequence_mode = nil
+    sc.value_number = nil
+    sc.value_option = nil
+    sc.value_note_num = nil
+    sc.value_octave = nil
+    sc.active_output_value_text = nil
+    -- sc.unregister_value_selectors()
   end
 end
 
@@ -709,53 +716,72 @@ end
 --  row 7: cols 6-14
 -- 8-10 sequin output control specs (options/number place settings)
 ----------------------------------
-function sequencer_controller.set_sequin_output_value_controls()
-  sequencer_controller.update_active_value_heirarchy()
-  local output_type_selected = sequencer_controller.selected_sequin_output_type
-  local output_selected = sequencer_controller.selected_sequin_output
-  local output_mode_selected = sequencer_controller.selected_sequin_output_mode
-  local output_param_selected = sequencer_controller.selected_sequin_output_param
+function sc.set_sequin_output_value_controls()
+  sc.update_active_value_heirarchy()
+  local output_type_selected = sc.selected_sequin_output_type
+  local output_selected = sc.selected_sequin_output
+  local output_mode_selected = sc.selected_sequin_output_mode
+  local output_param_selected = sc.selected_sequin_output_param
   
   if output_param_selected and grid_sequencer:find_ui_group_num_by_xy(6,5) then -- the output has multiple params, check if it also has modes
     if output_mode_selected and grid_sequencer:find_ui_group_num_by_xy(6,4) then -- the output has modes and multiple params
       --output param selected with modes
-      sequencer_controller.refresh_output_control_specs_map()
-      sequencer_controller.output_control_specs_selected = 
-        sequencer_controller.output_control_specs_map[output_type_selected][output_selected][output_mode_selected][output_param_selected]
+      sc.refresh_output_control_specs_map()
+      sc.output_control_specs_selected = 
+        sc.output_control_specs_map[output_type_selected][output_selected][output_mode_selected][output_param_selected]
     else -- the output has just params
-      sequencer_controller.refresh_output_control_specs_map()
-      sequencer_controller.output_control_specs_selected = 
-        sequencer_controller.output_control_specs_map[output_type_selected][output_selected][output_param_selected]
+      sc.refresh_output_control_specs_map()
+      sc.output_control_specs_selected = 
+        sc.output_control_specs_map[output_type_selected][output_selected][output_param_selected]
     end
   elseif output_mode_selected and grid_sequencer:find_ui_group_num_by_xy(6,4) then -- the output has modes but no params
     --output mode selected, no params
-    sequencer_controller.refresh_output_control_specs_map()
-    sequencer_controller.output_control_specs_selected = 
-      sequencer_controller.output_control_specs_map[output_type_selected][output_selected][output_mode_selected]
+    sc.refresh_output_control_specs_map()
+    sc.output_control_specs_selected = 
+      sc.output_control_specs_map[output_type_selected][output_selected][output_mode_selected]
   elseif output_selected and grid_sequencer:find_ui_group_num_by_xy(6,3) then -- the output doesn't have either modes or multiple params
     --output selected, neither nodes nor params
-    sequencer_controller.refresh_output_control_specs_map()
-    sequencer_controller.output_control_specs_selected = 
-      sequencer_controller.output_control_specs_map[output_type_selected][output_selected]
+    sc.refresh_output_control_specs_map()
+    sc.output_control_specs_selected = 
+      sc.output_control_specs_map[output_type_selected][output_selected]
   end
-  sequencer_controller.set_output_values(sequencer_controller.output_control_specs_selected)
+  sc.set_output_values(sc.output_control_specs_selected)
 end
 
 -- todo: address use case where control_max is < 0
 -- todo: make this function less horribly written
-function sequencer_controller.set_output_values(control_spec)
+function sc.set_output_values(control_spec)
   local control_type = control_spec[1]
   local control_default_index = control_spec[4] or 1
-  sequencer_controller.active_sequin_control_id = control_spec[5]
-  sequencer_controller.active_sequin_control_name = control_spec[6]
-  if control_type == "number" then
+  sc.active_sequin_control_id = control_spec[5]
+  sc.active_sequin_control_name = control_spec[6]
+  if control_type == "note" then
+    sc.set_active_sequin_value_type("notes")
+    -- sc:unregister_ui_group(4,6) 
+
+    -- scale_length
+    local root_note = params:get("root_note")
+    local note_center_frequency = params:get("note_center_frequency")
+    local notes_per_octave = fn.get_num_notes_per_octave()
+    local num_octaves = math.ceil(scale_length/notes_per_octave)
+
+    local last_key = 5
+    local first_key = num_octaves > last_key and 1 or last_key - num_octaves + 1
+    local default_key = math.floor((last_key+first_key)/2)
+    sc.value_selector_notes = grid_sequencer:register_ui_group("value_selector_notes",6,6,5+notes_per_octave,6,7,3,control_spec)
+    sc.value_selector_octaves = grid_sequencer:register_ui_group("value_selector_octaves",first_key,6,last_key,6,4,6,control_spec, default_key)
+    if sc.selector_sequence_mode == nil then
+      print("init sequence mode")
+      sc.selector_sequence_mode = grid_sequencer:register_ui_group("selector_sequence_mode",4,7,5,7,10,6,control_spec, 5)
+    end
+
+  elseif control_type == "number" then
+    sc.set_active_sequin_value_type("number")
+
     local control_min, control_max
     
-    if sequencer_controller.number_selector_sequence_mode == nil then
-      sequencer_controller.number_selector_sequence_mode = grid_sequencer:register_ui_group("number_selector_sequence_mode",4,6,5,6,10,6,control_spec, 5)
-    end
     
-    local polarity = sequencer_controller.value_polarity and sequencer_controller.value_polarity or 1
+    local polarity = sc.value_polarity and sc.value_polarity or 1
     control_min = tonumber(control_spec[2])
     control_max = tonumber(control_spec[3])
     local control_default_index = control_spec[4]
@@ -771,17 +797,22 @@ function sequencer_controller.set_output_values(control_spec)
     if decimal_location > 0 then
       value_place_decimals_x1 = decimal_num_places and 14 - decimal_num_places + 1 or nil
       value_place_decimals_x2 = decimal_num_places and 14 or nil
-      sequencer_controller.value_place_decimals = grid_sequencer:register_ui_group("value_place_decimals",value_place_decimals_x1,7,value_place_decimals_x2,7,4,3,control_spec, control_default_index)
-      sequencer_controller.decimal_button = grid_sequencer:register_ui_group("decimal_button",value_place_decimals_x1-1,7,value_place_decimals_x1-1,7,15,5)
+      sc.value_place_decimals = grid_sequencer:register_ui_group("value_place_decimals",value_place_decimals_x1,7,value_place_decimals_x2,7,4,3,control_spec, control_default_index)
+      sc.decimal_button = grid_sequencer:register_ui_group("decimal_button",value_place_decimals_x1-1,7,value_place_decimals_x1-1,7,15,5)
     end
+
     local polarity_min_max = control_min < 0 and control_max > 0
-    if polarity_min_max and sequencer_controller.value_selector_polarity == nil then
-      sequencer_controller.value_selector_polarity = grid_sequencer:register_ui_group("value_selector_polarity",4,7,5,7,4,6,control_spec, 5)
+    if polarity_min_max and sc.value_selector_polarity == nil then
+      sc.value_selector_polarity = grid_sequencer:register_ui_group("value_selector_polarity",4,6,5,6,4,6,control_spec, 5)
+    end
+
+    if sc.selector_sequence_mode == nil then
+      sc.selector_sequence_mode = grid_sequencer:register_ui_group("selector_sequence_mode",4,7,5,7,10,6,control_spec, 5)
     end
 
     local value_place_integers_x1 = integer_num_places and 14 - integer_num_places - decimal_location + 1 or nil
     local value_place_integers_x2 = integer_num_places and value_place_integers_x1 + integer_num_places - 1
-    sequencer_controller.value_place_integers = grid_sequencer:register_ui_group("value_place_integers",value_place_integers_x1,7,value_place_integers_x2,7,4,3,control_spec, control_default_index)
+    sc.value_place_integers = grid_sequencer:register_ui_group("value_place_integers",value_place_integers_x1,7,value_place_integers_x2,7,4,3,control_spec, control_default_index)
     
     -- if there's just 1 value for the integer place auto-select it
     if(value_place_integers_x1 == value_place_integers_x2) then
@@ -790,21 +821,26 @@ function sequencer_controller.set_output_values(control_spec)
 
     
   elseif control_type == "fraction" then
-    sequencer_controller:unregister_ui_group(4,6) 
+    sc.set_active_sequin_value_type("fraction")
+    
+    sc:unregister_ui_group(4,6) 
+  
   elseif control_type == "option" then
-    sequencer_controller:unregister_ui_group(4,6) 
+    sc.set_active_sequin_value_type("option")
+    
+    sc:unregister_ui_group(4,6) 
 
     local num_options = #control_spec[2]
     local control_default_index = control_spec[3]
-    sequencer_controller.value_selector_options = grid_sequencer:register_ui_group("value_selector_options",6,6,6+num_options-1,6,4,3,control_spec, control_default_index)
-    local existing_output_value = sequencer_controller.get_active_output_table_slot().output_value
+    sc.value_selector_options = grid_sequencer:register_ui_group("value_selector_options",6,6,6+num_options-1,6,4,3,control_spec, control_default_index)
+    local existing_output_value = sc.get_active_output_table_slot().output_value
     if existing_output_value then
-      clock.run(sequencer_controller.activate_grid_key_at,5+tonumber(existing_output_value.value),6) 
+      clock.run(sc.activate_grid_key_at,5+tonumber(existing_output_value.value),6) 
     end
   end
 end
 
-function sequencer_controller.activate_grid_key_at(x,y)
+function sc.activate_grid_key_at(x,y)
   clock.sleep(0.1)
   grid_sequencer.activate_grid_key_at(x,y)    
   grid_sequencer.activate_grid_key_at(x,y)
@@ -813,18 +849,18 @@ end
 --  row 6: cols 6-14
 -- ui group 11-13  value number place setters (integers/decimals) - functions
 -----------------------------
-function sequencer_controller.update_value_place_integers(x, y, state)
-  sequencer_controller:unregister_ui_group(6,6)
-  if sequencer_controller.value_place_integers == nil then
-    sequencer_controller.set_sequin_output_value_controls()
+function sc.update_value_place_integers(x, y, state)
+  sc:unregister_ui_group(6,6)
+  if sc.value_place_integers == nil then
+    sc.set_sequin_output_value_controls()
   end
-  local x1 =  sequencer_controller.value_place_integers.grid_data.x1
-  local x2 =  sequencer_controller.value_place_integers.grid_data.x2
+  local x1 =  sc.value_place_integers.grid_data.x1
+  local x2 =  sc.value_place_integers.grid_data.x2
   local x_offset = x1 - 1
   if state == "on" then
-    if sequencer_controller.value_place_decimals then
-      local decimal_x1 = sequencer_controller.value_place_decimals.grid_data.x1
-      local decimal_x2 = sequencer_controller.value_place_decimals.grid_data.x2
+    if sc.value_place_decimals then
+      local decimal_x1 = sc.value_place_decimals.grid_data.x1
+      local decimal_x2 = sc.value_place_decimals.grid_data.x2
       for i=decimal_x1,decimal_x2,1 do
         grid_sequencer:solid_off(i, 7)  
       end
@@ -833,25 +869,25 @@ function sequencer_controller.update_value_place_integers(x, y, state)
     local is_last_integer_place = x == x1
 
     local x_location = x2 - x + 1
-    sequencer_controller.value_place_integer = x_location
+    sc.value_place_integer = x_location
     if x_location == 1 then 
-      sequencer_controller.active_value_selector_place = "ones"
+      sc.active_value_selector_place = "ones"
     elseif x_location == 2 then 
-      sequencer_controller.active_value_selector_place = "tens"
+      sc.active_value_selector_place = "tens"
     elseif x_location == 3 then 
-      sequencer_controller.active_value_selector_place = "hundreds"
+      sc.active_value_selector_place = "hundreds"
     elseif x_location == 4 then 
-      sequencer_controller.active_value_selector_place = "thousands"
+      sc.active_value_selector_place = "thousands"
     elseif x_location == 5 then 
-      sequencer_controller.active_value_selector_place = "ten_thousands"
+      sc.active_value_selector_place = "ten_thousands"
     end
 
-    local control_spec = sequencer_controller.value_place_integers.control_spec
+    local control_spec = sc.value_place_integers.control_spec
     local max = control_spec[3]
     local last_place_value = string.sub(tostring(max),1,1)
     local selector_length = (is_last_integer_place and  tonumber(last_place_value) > 0) and 5+tonumber(last_place_value) or 14
-    sequencer_controller.value_selector_nums = grid_sequencer:register_ui_group("value_selector_nums",6,6,selector_length,6,4,3)
-    local existing_output_value = sequencer_controller.get_active_output_table_slot().output_value
+    sc.value_selector_nums = grid_sequencer:register_ui_group("value_selector_nums",6,6,selector_length,6,4,3)
+    local existing_output_value = sc.get_active_output_table_slot().output_value
     if existing_output_value then
       local existing_output_value_int = tostring(math.floor(existing_output_value))
       local existing_output_value_int_length = #existing_output_value_int
@@ -864,23 +900,23 @@ function sequencer_controller.update_value_place_integers(x, y, state)
       grid_sequencer.activate_grid_key_at(5+tonumber(existing_output_value_at_place),6) 
     end
   else
-    -- sequencer_controller:unregister_ui_group(6,6)
-    sequencer_controller.value_place_integer = nil
-    sequencer_controller.active_output_value_text = nil
+    -- sc:unregister_ui_group(6,6)
+    sc.value_place_integer = nil
+    sc.active_output_value_text = nil
   end
 end
 
-function sequencer_controller.update_value_place_decimals(x, y, state)
-  sequencer_controller:unregister_ui_group(6,6)
+function sc.update_value_place_decimals(x, y, state)
+  sc:unregister_ui_group(6,6)
 
-  local x1 =  sequencer_controller.value_place_decimals.grid_data.x1
-  local x2 =  sequencer_controller.value_place_decimals.grid_data.x2
+  local x1 =  sc.value_place_decimals.grid_data.x1
+  local x2 =  sc.value_place_decimals.grid_data.x2
   local x_offset = x1 - 1
   
   if state == "on" then
-    if sequencer_controller.value_place_integers then
-      local integer_x1 = sequencer_controller.value_place_integers.grid_data.x1
-      local integer_x2 = sequencer_controller.value_place_integers.grid_data.x2
+    if sc.value_place_integers then
+      local integer_x1 = sc.value_place_integers.grid_data.x1
+      local integer_x2 = sc.value_place_integers.grid_data.x2
       for i=integer_x1,integer_x2,1 do
           grid_sequencer:solid_off(i, 7)  
       end
@@ -889,25 +925,25 @@ function sequencer_controller.update_value_place_decimals(x, y, state)
     local is_last_decimal_place = x == x2
 
     local x_location = x - x1 + 1
-    sequencer_controller.value_place_decimal = x_location
+    sc.value_place_decimal = x_location
     if x_location  == 1 then 
-      sequencer_controller.active_value_selector_place = "tenths"
+      sc.active_value_selector_place = "tenths"
     elseif x_location  == 2 then 
-      sequencer_controller.active_value_selector_place = "hundredths"
+      sc.active_value_selector_place = "hundredths"
     elseif x_location  == 3 then 
-      sequencer_controller.active_value_selector_place = "thousandths"
+      sc.active_value_selector_place = "thousandths"
     end
 
-    local control_spec = sequencer_controller.value_place_decimals.control_spec
+    local control_spec = sc.value_place_decimals.control_spec
     local min = control_spec[2]
     local min_length = #min
     local last_place_value = tonumber(string.sub(min,min_length))
     local selector_length = (is_last_decimal_place and  last_place_value > 0) and 5+last_place_value or 14
 
 
-    sequencer_controller.value_selector_nums = grid_sequencer:register_ui_group("value_selector_nums",6,6,selector_length,6,4,3)
+    sc.value_selector_nums = grid_sequencer:register_ui_group("value_selector_nums",6,6,selector_length,6,4,3)
 
-    local existing_output_value = sequencer_controller.get_active_output_table_slot().output_value
+    local existing_output_value = sc.get_active_output_table_slot().output_value
     local decimal_location = existing_output_value and string.find(existing_output_value,"%.") or 0
     
     local decimal_point_at = existing_output_value and string.find(existing_output_value,"%.")
@@ -923,9 +959,9 @@ function sequencer_controller.update_value_place_decimals(x, y, state)
       grid_sequencer.activate_grid_key_at(5+tonumber(existing_output_value_at_place),6) 
     end
   else
-    -- sequencer_controller:unregister_ui_group(6,6)
-    sequencer_controller.value_place_decimal = nil
-    sequencer_controller.active_output_value_text = nil
+    -- sc:unregister_ui_group(6,6)
+    sc.value_place_decimal = nil
+    sc.active_output_value_text = nil
   end
 end
 
@@ -934,131 +970,165 @@ end
 -- ui group 14 sequin value selector  - functions
 --  HERE IS WHERE THE SEQUIN GETS SET
 -----------------------------
--- function sequencer_controller.unregister_value_selectors(active_selector_type)
-function sequencer_controller.unregister_value_selectors()
-  sequencer_controller:unregister_ui_group(4,6) 
-  if sequencer_controller.value_place_integers then 
-    local x1 = sequencer_controller.value_place_integers.grid_data.x1
-    local x2 = sequencer_controller.value_place_integers.grid_data.x2
-    local y1 = sequencer_controller.value_place_integers.grid_data.y1
-    local y2 = sequencer_controller.value_place_integers.grid_data.y2
-    sequencer_controller:unregister_ui_group(x1,y1) 
+-- function sc.unregister_value_selectors(active_selector_type)
+function sc.unregister_value_selectors()
+  sc:unregister_ui_group(4,6) 
+  if sc.value_place_integers then 
+    local x1 = sc.value_place_integers.grid_data.x1
+    local x2 = sc.value_place_integers.grid_data.x2
+    local y1 = sc.value_place_integers.grid_data.y1
+    local y2 = sc.value_place_integers.grid_data.y2
+    sc:unregister_ui_group(x1,y1) 
   end
-  if sequencer_controller.value_place_decimals then 
-    local x1 = sequencer_controller.value_place_decimals.grid_data.x1
-    local x2 = sequencer_controller.value_place_decimals.grid_data.x2
-    local y1 = sequencer_controller.value_place_decimals.grid_data.y1
-    local y2 = sequencer_controller.value_place_decimals.grid_data.y2
-    sequencer_controller:unregister_ui_group(x1,y1) 
+  if sc.value_place_decimals then 
+    local x1 = sc.value_place_decimals.grid_data.x1
+    local x2 = sc.value_place_decimals.grid_data.x2
+    local y1 = sc.value_place_decimals.grid_data.y1
+    local y2 = sc.value_place_decimals.grid_data.y2
+    sc:unregister_ui_group(x1,y1) 
   end
-  if sequencer_controller.decimal_button then 
-    local x1 = sequencer_controller.decimal_button.grid_data.x1
-    local x2 = sequencer_controller.decimal_button.grid_data.x2
-    local y1 = sequencer_controller.decimal_button.grid_data.y1
-    local y2 = sequencer_controller.decimal_button.grid_data.y2
-    sequencer_controller:unregister_ui_group(x1,y1) 
+  if sc.decimal_button then 
+    local x1 = sc.decimal_button.grid_data.x1
+    local x2 = sc.decimal_button.grid_data.x2
+    local y1 = sc.decimal_button.grid_data.y1
+    local y2 = sc.decimal_button.grid_data.y2
+    sc:unregister_ui_group(x1,y1) 
   end
-  sequencer_controller.active_value_selector_place = nil
-  sequencer_controller.active_output_value_text = nil
+  sc.active_value_selector_place = nil
+  sc.active_output_value_text = nil
 end
 
-function sequencer_controller.update_value_selector_options(x, y, state)
-  local x_offset = sequencer_controller.value_selector_options.grid_data.x1 - 1
+function sc.update_value_selector_notes(x, y, state)
+  if state == "on" then  
+    local x_offset = sc.value_selector_notes.grid_data.x1 - 1
+    local selector_value = x - x_offset
+    sc.active_sequin_value.note_value = selector_value
+    sc.value_note_num = selector_value
+    sc.sequin_output_values = grid_sequencer:register_ui_group("sequin_output_values",6,8,10,8,5,3)
+  else
+    -- if sc.sequin_output_values then sc:unregister_ui_group(6,8) end
+    sc.active_sequin_value.note_value = 0
+    sc.value_note_num = 0
+    sc.active_output_value_text = 0
+  end
+end
+
+  -- octave zero is the default octave 0. 
+  -- grid selections to the left  of octave_zero will be negative octave values
+  -- grid selections to the right of octave_zero will be postitive octave values
+  -- for example:
+  --    if octave_zero is 3
+  --    and x_offset is 0 (meaning, the first octave grid key is in the first grid column)
+  --    and the selected key column is 1 (x param is the selected key column)
+  --    then the octave value will be -2
+    function sc.update_value_octave(x, y, state)
+  if state == "on" then  
+    local x_offset = sc.value_selector_octaves.grid_data.x1 - 1
+    local octave_zero = sc.value_selector_octaves.grid_data.default_value
+    local selector_value = x - octave_zero - x_offset
+    sc.active_sequin_value.octave_value = selector_value
+    sc.value_octave = selector_value
+    sc.sequin_output_values = grid_sequencer:register_ui_group("sequin_output_values",6,8,10,8,5,3)
+  end
+end
+
+function sc.update_value_selector_options(x, y, state)
+  local x_offset = sc.value_selector_options.grid_data.x1 - 1
   if state == "on" then  
     local selector_value = x - x_offset
-    sequencer_controller.active_sequin_value.option_value = selector_value
-    sequencer_controller.value_option = selector_value
+    sc.active_sequin_value.option_value = selector_value
+    sc.value_option = selector_value
 
                                               -- grid_sequencer:register_ui_group(group_name,x1,y1,x2, y2, off_level, selection_mode, control_spec, default_value)
 
-    sequencer_controller.sequin_output_values = grid_sequencer:register_ui_group("sequin_output_values",6,8,10,8,5,3)
+    sc.sequin_output_values = grid_sequencer:register_ui_group("sequin_output_values",6,8,10,8,5,3)
   else
-    if sequencer_controller.sequin_output_values then sequencer_controller:unregister_ui_group(6,8) end
-    sequencer_controller.value_option = nil
-    sequencer_controller.active_output_value_text = nil
+    if sc.sequin_output_values then sc:unregister_ui_group(6,8) end
+    sc.value_option = nil
+    sc.active_output_value_text = nil
   end
 end
 
-function sequencer_controller.update_value_polarity(x, y, state)
-    sequencer_controller.value_polarity = x == 4 and -1 or 1
-    -- sequencer_controller.unregister_value_selectors()
-    sequencer_controller.set_sequin_output_value_controls()
+function sc.update_value_polarity(x, y, state)
+    sc.value_polarity = x == 4 and -1 or 1
+    -- sc.unregister_value_selectors()
+    sc.set_sequin_output_value_controls()
 end
 
-function sequencer_controller.update_number_selector_sequence_mode(x, y, state)
-  sequencer_controller.number_sequence_mode = x == 4 and 1 or 2
-  -- sequencer_controller.unregister_value_selectors()
-  sequencer_controller.set_sequin_output_value_controls()
+function sc.update_selector_sequence_mode(x, y, state)
+  sc.sequence_mode = x == 4 and 1 or 2
+  -- sc.unregister_value_selectors()
+  sc.set_sequin_output_value_controls()
 end
 
 
 
-function sequencer_controller.update_value_selector_nums(x, y, state)
-  local x_offset = sequencer_controller.value_selector_nums.grid_data.x1 - 1
+function sc.update_value_selector_nums(x, y, state)
+  local x_offset = sc.value_selector_nums.grid_data.x1 - 1
   if state == "on" then
     local selector_value = x - x_offset
-    sequencer_controller.value_number = selector_value
-    if sequencer_controller.active_value_selector_place == "ten_thousands" then
-      sequencer_controller.active_sequin_value.place_values.ten_thousands =  selector_value
-    elseif sequencer_controller.active_value_selector_place == "thousands" then
-      sequencer_controller.active_sequin_value.place_values.thousands =  selector_value
-    elseif sequencer_controller.active_value_selector_place == "hundreds" then
-      sequencer_controller.active_sequin_value.place_values.hundreds =  selector_value
-    elseif sequencer_controller.active_value_selector_place == "ones" then
-      sequencer_controller.active_sequin_value.place_values.ones =  selector_value
-    elseif sequencer_controller.active_value_selector_place == "tens" then
-      sequencer_controller.active_sequin_value.place_values.tens =  selector_value
-    elseif sequencer_controller.active_value_selector_place == "tenths" then
-      sequencer_controller.active_sequin_value.place_values.tenths =  selector_value
-    elseif sequencer_controller.active_value_selector_place == "hundredths" then
-      sequencer_controller.active_sequin_value.place_values.hundredths =  selector_value
-    elseif sequencer_controller.active_value_selector_place == "thousandths" then
-      sequencer_controller.active_sequin_value.place_values.thousandths =  selector_value
+    sc.value_number = selector_value
+    if sc.active_value_selector_place == "ten_thousands" then
+      sc.active_sequin_value.place_values.ten_thousands =  selector_value
+    elseif sc.active_value_selector_place == "thousands" then
+      sc.active_sequin_value.place_values.thousands =  selector_value
+    elseif sc.active_value_selector_place == "hundreds" then
+      sc.active_sequin_value.place_values.hundreds =  selector_value
+    elseif sc.active_value_selector_place == "ones" then
+      sc.active_sequin_value.place_values.ones =  selector_value
+    elseif sc.active_value_selector_place == "tens" then
+      sc.active_sequin_value.place_values.tens =  selector_value
+    elseif sc.active_value_selector_place == "tenths" then
+      sc.active_sequin_value.place_values.tenths =  selector_value
+    elseif sc.active_value_selector_place == "hundredths" then
+      sc.active_sequin_value.place_values.hundredths =  selector_value
+    elseif sc.active_value_selector_place == "thousandths" then
+      sc.active_sequin_value.place_values.thousandths =  selector_value
     end
     
-    sequencer_controller.sequin_output_values = grid_sequencer:register_ui_group("sequin_output_values",6,8,10,8,5,3)
+    sc.sequin_output_values = grid_sequencer:register_ui_group("sequin_output_values",6,8,10,8,5,3)
   else
-    sequencer_controller.value_number = nil
-    if sequencer_controller.active_value_selector_place == "ten_thousands" then
-      sequencer_controller.active_sequin_value.place_values.ten_thousands =  0
-    elseif sequencer_controller.active_value_selector_place == "thousands" then
-      sequencer_controller.active_sequin_value.place_values.thousands =  0
-    elseif sequencer_controller.active_value_selector_place == "hundreds" then
-      sequencer_controller.active_sequin_value.place_values.hundreds =  s0
-    elseif sequencer_controller.active_value_selector_place == "ones" then
-      sequencer_controller.active_sequin_value.place_values.ones =  0
-    elseif sequencer_controller.active_value_selector_place == "tens" then
-      sequencer_controller.active_sequin_value.place_values.tens =  0
-    elseif sequencer_controller.active_value_selector_place == "tenths" then
-      sequencer_controller.active_sequin_value.place_values.tenths =  0
-    elseif sequencer_controller.active_value_selector_place == "hundredths" then
-      sequencer_controller.active_sequin_value.place_values.hundredths =  0
-    elseif sequencer_controller.active_value_selector_place == "thousandths" then
-      sequencer_controller.active_sequin_value.place_values.thousandths =  0
+    sc.value_number = nil
+    if sc.active_value_selector_place == "ten_thousands" then
+      sc.active_sequin_value.place_values.ten_thousands =  0
+    elseif sc.active_value_selector_place == "thousands" then
+      sc.active_sequin_value.place_values.thousands =  0
+    elseif sc.active_value_selector_place == "hundreds" then
+      sc.active_sequin_value.place_values.hundreds =  s0
+    elseif sc.active_value_selector_place == "ones" then
+      sc.active_sequin_value.place_values.ones =  0
+    elseif sc.active_value_selector_place == "tens" then
+      sc.active_sequin_value.place_values.tens =  0
+    elseif sc.active_value_selector_place == "tenths" then
+      sc.active_sequin_value.place_values.tenths =  0
+    elseif sc.active_value_selector_place == "hundredths" then
+      sc.active_sequin_value.place_values.hundredths =  0
+    elseif sc.active_value_selector_place == "thousandths" then
+      sc.active_sequin_value.place_values.thousandths =  0
     end
-    sequencer_controller.sequin_output_values = grid_sequencer:register_ui_group("sequin_output_values",6,8,10,8,5,3)    
+    sc.sequin_output_values = grid_sequencer:register_ui_group("sequin_output_values",6,8,10,8,5,3)    
   end
 end
 
 
 ---------------- THE SEQUIN GETS SET HERE ---------------
-function sequencer_controller.reset_place_values(exception)
+function sc.reset_place_values(exception)
   print("reset_place_values")
-  -- print("exception, = =tenths", exception, exception == "tenths",sequencer_controller.active_sequin_value.place_values.tenths)
-  -- sequencer_controller.active_sequin_value.place_values = {}
-  sequencer_controller.active_sequin_value.place_values.ten_thousands   = (exception == "ten_thousands")  and  sequencer_controller.active_sequin_value.place_values.ten_thousands or  0
-  sequencer_controller.active_sequin_value.place_values.thousands       = (exception == "thousands")      and  sequencer_controller.active_sequin_value.place_values.thousands     or  0
-  sequencer_controller.active_sequin_value.place_values.hundreds        = (exception == "hundreds")       and  sequencer_controller.active_sequin_value.place_values.hundreds      or  0
-  sequencer_controller.active_sequin_value.place_values.ones            = (exception == "ones")           and  sequencer_controller.active_sequin_value.place_values.ones          or  0
-  sequencer_controller.active_sequin_value.place_values.tens            = (exception == "tens")           and  sequencer_controller.active_sequin_value.place_values.tens          or  0
-  sequencer_controller.active_sequin_value.place_values.tenths          = (exception == "tenths")         and  sequencer_controller.active_sequin_value.place_values.tenths        or  0
-  sequencer_controller.active_sequin_value.place_values.hundredths      = (exception == "hundredths")     and  sequencer_controller.active_sequin_value.place_values.hundredths    or  0
-  sequencer_controller.active_sequin_value.place_values.thousandths     = (exception == "thousandths")    and  sequencer_controller.active_sequin_value.place_values.thousandths   or  0
+  -- print("exception, = =tenths", exception, exception == "tenths",sc.active_sequin_value.place_values.tenths)
+  -- sc.active_sequin_value.place_values = {}
+  sc.active_sequin_value.place_values.ten_thousands   = (exception == "ten_thousands")  and  sc.active_sequin_value.place_values.ten_thousands or  0
+  sc.active_sequin_value.place_values.thousands       = (exception == "thousands")      and  sc.active_sequin_value.place_values.thousands     or  0
+  sc.active_sequin_value.place_values.hundreds        = (exception == "hundreds")       and  sc.active_sequin_value.place_values.hundreds      or  0
+  sc.active_sequin_value.place_values.ones            = (exception == "ones")           and  sc.active_sequin_value.place_values.ones          or  0
+  sc.active_sequin_value.place_values.tens            = (exception == "tens")           and  sc.active_sequin_value.place_values.tens          or  0
+  sc.active_sequin_value.place_values.tenths          = (exception == "tenths")         and  sc.active_sequin_value.place_values.tenths        or  0
+  sc.active_sequin_value.place_values.hundredths      = (exception == "hundredths")     and  sc.active_sequin_value.place_values.hundredths    or  0
+  sc.active_sequin_value.place_values.thousandths     = (exception == "thousandths")    and  sc.active_sequin_value.place_values.thousandths   or  0
 end
 
-function sequencer_controller.get_previous_active_sequin_value(selected_sequin)
-  -- selected_control_indices = sequencer_controller.get_selected_indices()
-  local active_output_values = sequencer_controller.get_active_output_values()
+function sc.get_previous_active_sequin_value(selected_sequin)
+  -- selected_control_indices = sc.get_selected_indices()
+  local active_output_values = sc.get_output_values()
   local previous_active_sequin_value = nil
   local previous_active_sequin_value_index
   for i=selected_sequin-1,1,-1 do
@@ -1071,8 +1141,7 @@ function sequencer_controller.get_previous_active_sequin_value(selected_sequin)
   return previous_active_sequin_value, previous_active_sequin_value_index
 end
 
-function sequencer_controller.update_sequin_output_value(x, y, state, press_type)
-  -- sequencer_controller.selected_output_sequin = x-5
+function sc.update_sequin_output_value(x, y, state, press_type)
   local output_value
   local value_selector_default_value
   if press_type == "long" then
@@ -1080,52 +1149,66 @@ function sequencer_controller.update_sequin_output_value(x, y, state, press_type
     value_selector_default_value = grid_sequencer.ui_groups[value_selector_group_id].default_value
     value_selector_default_value = value_selector_default_value and value_selector_default_value or 1
 
-    if sequencer_controller.active_value_selector_place then
-      local reset_exception = sequencer_controller.active_value_selector_place
+    if sc.active_value_selector_place then
+      local reset_exception = sc.active_value_selector_place
       print("reset_exception",reset_exception)
-      sequencer_controller.reset_place_values(reset_exception)
+      sc.reset_place_values(reset_exception)
     else
       print("reset_place_values to default",press_type)
-      sequencer_controller.reset_place_values()
+      sc.reset_place_values()
       -- output_value = value_selector_default_value
     end
 
   end
 
-  if sequencer_controller.active_sequin_value.value_type == "number" then
-    output_value =  sequencer_controller.active_sequin_value.place_values.ten_thousands ..
-                    sequencer_controller.active_sequin_value.place_values.thousands ..
-                    sequencer_controller.active_sequin_value.place_values.hundreds ..
-                    sequencer_controller.active_sequin_value.place_values.tens ..
-                    sequencer_controller.active_sequin_value.place_values.ones .. "." ..
-                    sequencer_controller.active_sequin_value.place_values.tenths ..
-                    sequencer_controller.active_sequin_value.place_values.hundredths ..
-                    sequencer_controller.active_sequin_value.place_values.thousandths
+  if sc.active_sequin_value.value_type == "number" then
+    output_value =  sc.active_sequin_value.place_values.ten_thousands ..
+                    sc.active_sequin_value.place_values.thousands ..
+                    sc.active_sequin_value.place_values.hundreds ..
+                    sc.active_sequin_value.place_values.tens ..
+                    sc.active_sequin_value.place_values.ones .. "." ..
+                    sc.active_sequin_value.place_values.tenths ..
+                    sc.active_sequin_value.place_values.hundredths ..
+                    sc.active_sequin_value.place_values.thousandths
    
-    local polarity = sequencer_controller.value_polarity and sequencer_controller.value_polarity or 1
+    local polarity = sc.value_polarity and sc.value_polarity or 1
     output_value = tonumber(output_value * polarity)
 
-    -- here's where the number gets set according to the number_sequence_mode
-    local number_sequence_mode = sequencer_controller.number_sequence_mode and sequencer_controller.number_sequence_mode or 1
+    -- here's where the number gets set according to the sequence_mode
+    local sequence_mode = sc.sequence_mode and sc.sequence_mode or 1
     
     -- clear out the place values if press_type == "long" and value is already 0
     if press_type == "long" and output_value == 0 then 
       output_value = "clear" 
     else 
-      local sequence_mode = sequencer_controller.number_sequence_mode 
+      local sequence_mode = sc.sequence_mode 
       output_value = sequence_mode == 1 and output_value .. "r" or output_value    
     end                    
     
-    sequencer_controller.active_output_value_text = output_value
-  elseif sequencer_controller.active_sequin_value.value_type == "option" then
+    sc.active_output_value_text = output_value
+  elseif sc.active_sequin_value.value_type == "notes" then
+    if press_type == "long" then
+      output_value = value_selector_default_value
+    else
+      local num_notes_per_octave = fn.get_num_notes_per_octave()
+      local octave_offset = sc.active_sequin_value.octave_value * num_notes_per_octave
+      local sequence_mode = sc.sequence_mode 
+      output_value = sc.active_sequin_value.note_value + octave_offset
+      output_value = sequence_mode == 1 and output_value .. "r" or output_value    
+    end
+    -- print("")
+    -- local value_text = sc.get_options_text(output_value)
+    sc.active_output_value_text = output_value
+    -- print("output value", output_value)
+  elseif sc.active_sequin_value.value_type == "option" then
     if press_type == "long" then
       print("reset to default value",press_type)
       output_value = value_selector_default_value
     else
-      output_value = sequencer_controller.active_sequin_value.option_value
+      output_value = sc.active_sequin_value.option_value
     end
-    local value_text = sequencer_controller.get_options_text(output_value)
-    sequencer_controller.active_output_value_text = value_text
+    local value_text = sc.get_options_text(output_value)
+    sc.active_output_value_text = value_text
   end
 
   local output_sequins_index = x-5
@@ -1134,46 +1217,46 @@ function sequencer_controller.update_sequin_output_value(x, y, state, press_type
   -- update the ouptut table
   -- !!!!!!!!!!!!!!!!!!!!!!!!!!
   ---------------------------------------
-  sequencer_controller.update_outputs_table(output_value,output_sequins_index)
+  sc.update_outputs_table(output_value,output_sequins_index)
   
-  sequencer_controller.update_sequin(output_sequins_index)
+  sc.update_sequin(output_sequins_index)
 end
 
 -- todo: implement subgroups
 
-function sequencer_controller.update_sequin(output_sequins_index)
-  local selected_indices = sequencer_controller.get_selected_indices()
+function sc.update_sequin(output_sequins_index)
+  local selected_indices = sc.get_selected_indices()
   local sgp = selected_indices.selected_sequin_group
   local ssg = selected_indices.selected_sequin_subgroup
   local sqn = sequin and sequin or selected_indices.selected_sequin
-  local sequin_to_update = sequencer_controller.sequencers[sgp].sequin_set[sqn]
-  sequin_to_update.set_output_table(sequencer_controller.sequins_outputs_table)
+  local sequin_to_update = sc.sequencers[sgp].sequin_set[sqn]
+  sequin_to_update.set_output_table(sc.sequins_outputs_table)
 end
 
-function sequencer_controller.get_selected_indices()
+function sc.get_selected_indices()
   local indices = {
-    selected_sequin_group        = sequencer_controller.selected_sequin_group,         -- selected_sequin_group:  value table level 1
-    selected_sequin_subgroup     = sequencer_controller.selected_sequin_subgroup,      -- selected_sequin_group:  value table level 2
-    selected_sequin               = sequencer_controller.selected_sequin,          -- selected_sequin:  value table level 3
-    selected_sequin_output_type   = sequencer_controller.selected_sequin_output_type,    -- output_type_selected:  value table level 4
-    selected_sequin_output        = sequencer_controller.selected_sequin_output,         -- output_selected:  value table level 5
-    selected_sequin_output_mode   = sequencer_controller.selected_sequin_output_mode,    -- output_mode_selected:  value table level 6
-    selected_sequin_output_param  = sequencer_controller.selected_sequin_output_param,   -- output_param_selected:  value table level 7
+    selected_sequin_group        = sc.selected_sequin_group,         -- selected_sequin_group:  value table level 1
+    selected_sequin_subgroup     = sc.selected_sequin_subgroup,      -- selected_sequin_group:  value table level 2
+    selected_sequin               = sc.selected_sequin,          -- selected_sequin:  value table level 3
+    selected_sequin_output_type   = sc.selected_sequin_output_type,    -- output_type_selected:  value table level 4
+    selected_sequin_output        = sc.selected_sequin_output,         -- output_selected:  value table level 5
+    selected_sequin_output_mode   = sc.selected_sequin_output_mode,    -- output_mode_selected:  value table level 6
+    selected_sequin_output_param  = sc.selected_sequin_output_param,   -- output_param_selected:  value table level 7
   }
   return indices
 end
 
-function sequencer_controller.get_options_text(option_index)
-  -- local sgp = sequencer_controller.selected_sequin_group
-  -- local ssg = sequencer_controller.selected_sequin_subgroup
-  -- local sqn = sequencer_controller.selected_sequin
-  local typ = sequencer_controller.selected_sequin_output_type
-  local out = sequencer_controller.selected_sequin_output
-  local mod = sequencer_controller.selected_sequin_output_mode
-  local par = sequencer_controller.selected_sequin_output_param
-  local opt = sequencer_controller.value_option
+function sc.get_options_text(option_index)
+  -- local sgp = sc.selected_sequin_group
+  -- local ssg = sc.selected_sequin_subgroup
+  -- local sqn = sc.selected_sequin
+  local typ = sc.selected_sequin_output_type
+  local out = sc.selected_sequin_output
+  local mod = sc.selected_sequin_output_mode
+  local par = sc.selected_sequin_output_param
+  local opt = sc.value_option
 
-  local map = sequencer_controller.get_output_control_specs_map()
+  local map = sc.get_output_control_specs_map()
   local options_table
   if mod and par then
     options_table = map[typ][out][mod][par][2]
@@ -1182,153 +1265,155 @@ function sequencer_controller.get_options_text(option_index)
   else
     options_table = map[typ][out][par][2]
   end
+  -- tab.print(options_table)
   if option_index then
     local active_option_text = options_table[option_index]
     print("active_option_text",active_option_text)
     return active_option_text
-  else
+  elseif options_table then
     options_table = type(options_table) == "table" and options_table or nil 
     return options_table
+  else
+    print("error",typ,out,mod,par)
   end
 end
 
-function sequencer_controller.get_active_output_table_slot()
-  local sgp     =   sequencer_controller.selected_sequin_group         -- selected_sequin_group:  value table level 1
-  local ssg  =   sequencer_controller.selected_sequin_subgroup      -- selected_sequin_sub_group:  value table level 2
-  local sqn     =   sequencer_controller.selected_sequin          -- selected_sequin:  value table level 3
-  local typ    =   sequencer_controller.selected_sequin_output_type    -- output_type_selected:  value table level 4
-  local out   =   sequencer_controller.selected_sequin_output         -- output_selected:  value table level 5
-  local mod    =   sequencer_controller.selected_sequin_output_mode    -- output_mode_selected:  value table level 6
-  local par    =   sequencer_controller.selected_sequin_output_param   -- output_param_selected:  value table level 7
+function sc.get_active_output_table_slot()
+  local sgp     =   sc.selected_sequin_group         -- selected_sequin_group:  value table level 1
+  local ssg  =   sc.selected_sequin_subgroup      -- selected_sequin_sub_group:  value table level 2
+  local sqn     =   sc.selected_sequin          -- selected_sequin:  value table level 3
+  local typ    =   sc.selected_sequin_output_type    -- output_type_selected:  value table level 4
+  local out   =   sc.selected_sequin_output         -- output_selected:  value table level 5
+  local mod    =   sc.selected_sequin_output_mode    -- output_mode_selected:  value table level 6
+  local par    =   sc.selected_sequin_output_param   -- output_param_selected:  value table level 7
   mod = mod ~= nil and mod or 1 -- if output mode is nil set it to one to indicate there is just 1 output mode
 
   -- ??????????????????? IS THIS NEEDED  ???????????????????????
-  sequencer_controller.update_outputs_table()
+  sc.update_outputs_table()
   -- ??????????????????? ??????????????????? ???????????????????
 
   if par == nil then
-    return sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod]
+    return sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod]
   else
-    return sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par]
+    return sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par]
   end
 end
 
-function sequencer_controller.update_outputs_table(output_value,output_sequins_index)
-  local sgp     =   sequencer_controller.selected_sequin_group         -- selected_sequin_group:  value table level 1
-  local ssg  =   sequencer_controller.selected_sequin_subgroup      -- selected_sequin_sub_group:  value table level 2
-  local sqn     =   sequencer_controller.selected_sequin          -- selected_sequin:  value table level 3
-  local typ    =   sequencer_controller.selected_sequin_output_type    -- output_type_selected:  value table level 4
-  local out   =   sequencer_controller.selected_sequin_output         -- output_selected:  value table level 5
-  local mod    =   sequencer_controller.selected_sequin_output_mode    -- output_mode_selected:  value table level 6
-  local par    =   sequencer_controller.selected_sequin_output_param   -- output_param_selected:  value table level 7
+function sc.update_outputs_table(output_value,output_sequins_index)
+  local sgp     =   sc.selected_sequin_group         -- selected_sequin_group:  value table level 1
+  local ssg  =   sc.selected_sequin_subgroup      -- selected_sequin_sub_group:  value table level 2
+  local sqn     =   sc.selected_sequin          -- selected_sequin:  value table level 3
+  local typ    =   sc.selected_sequin_output_type    -- output_type_selected:  value table level 4
+  local out   =   sc.selected_sequin_output         -- output_selected:  value table level 5
+  local mod    =   sc.selected_sequin_output_mode    -- output_mode_selected:  value table level 6
+  local par    =   sc.selected_sequin_output_param   -- output_param_selected:  value table level 7
   mod = mod ~= nil and mod or 1 -- if output mode is nil set it to one to indicate there is just 1 output mode
   -- kinda klunky but push the output_value into the sequins_outputs_table
-  --local sequencer_controller.sequins_outputs_table = sequencer_controller.sequins_outputs_table
-  if sequencer_controller.sequins_outputs_table[sgp] == nil then sequencer_controller.sequins_outputs_table[sgp] = {} sequencer_controller.sequins_outputs_table[sgp].table_type = "sgp" end
-  if sequencer_controller.sequins_outputs_table[sgp][ssg] == nil then sequencer_controller.sequins_outputs_table[sgp][ssg] = {} sequencer_controller.sequins_outputs_table[sgp][ssg].table_type = "sgp" end
-  if sequencer_controller.sequins_outputs_table[sgp][ssg][sqn] == nil then sequencer_controller.sequins_outputs_table[sgp][ssg][sqn] = {} sequencer_controller.sequins_outputs_table[sgp][ssg][sqn].table_type = "sqn" end
-  if sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ] == nil then sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ] = {} sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ].table_type = "typ" end
-  if sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out] == nil then sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out] = {} sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out].table_type = "out" end
-  if sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod] == nil then sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod] = {} sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].table_type = "mod" end
+  --local sc.sequins_outputs_table = sc.sequins_outputs_table
+  if sc.sequins_outputs_table[sgp] == nil then sc.sequins_outputs_table[sgp] = {} sc.sequins_outputs_table[sgp].table_type = "sgp" end
+  if sc.sequins_outputs_table[sgp][ssg] == nil then sc.sequins_outputs_table[sgp][ssg] = {} sc.sequins_outputs_table[sgp][ssg].table_type = "sgp" end
+  if sc.sequins_outputs_table[sgp][ssg][sqn] == nil then sc.sequins_outputs_table[sgp][ssg][sqn] = {} sc.sequins_outputs_table[sgp][ssg][sqn].table_type = "sqn" end
+  if sc.sequins_outputs_table[sgp][ssg][sqn][typ] == nil then sc.sequins_outputs_table[sgp][ssg][sqn][typ] = {} sc.sequins_outputs_table[sgp][ssg][sqn][typ].table_type = "typ" end
+  if sc.sequins_outputs_table[sgp][ssg][sqn][typ][out] == nil then sc.sequins_outputs_table[sgp][ssg][sqn][typ][out] = {} sc.sequins_outputs_table[sgp][ssg][sqn][typ][out].table_type = "out" end
+  if sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod] == nil then sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod] = {} sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].table_type = "mod" end
 
   if par == nil then
-    if sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod] == nil then 
-      sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod] = {} 
+    if sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod] == nil then 
+      sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod] = {} 
     end
     -- print("selected item table structure som",sgp,ssg,sqn,typ,out,som)
-    local existing_output_data_at_location = sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data
+    local existing_output_data_at_location = sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data
     if output_value and output_value ~= "clear" then 
-      if sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data == nil then
-        sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data = {}
-        sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.seq = Sequins{"","","","",""}
-        print("sequp seq: mod")
+      if sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data == nil then
+        sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data = {}
+        sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.seq = Sequins{"","","","",""}
       end
-      -- print("output_sequins_index",output_sequins_index)
-
-      sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].table_type = "mod" 
-      -- sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.value = output_value
-      sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.seq[output_sequins_index] = output_value 
-      sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.value_heirarchy = {sgp=sgp,ssg=ssg,sqn=sqn,typ=typ,out=out,mod=mod}
-      sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.control_id = sequencer_controller.active_sequin_control_id
-      sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.control_name = sequencer_controller.active_sequin_control_name
-      sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.value_type = sequencer_controller.active_sequin_value.value_type
-      sequencer_controller.active_value_heirarchy = {sgp=sgp,ssg=ssg,sqn=sqn,typ=typ,out=out,mod=mod}
+      sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].table_type = "mod" 
+      -- sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.value = output_value
+      sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.seq[output_sequins_index] = output_value 
+      sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.value_heirarchy = {sgp=sgp,ssg=ssg,sqn=sqn,typ=typ,out=out,mod=mod}
+      sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.control_id = sc.active_sequin_control_id
+      sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.control_name = sc.active_sequin_control_name
+      sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.value_type = sc.active_sequin_value.value_type
+      sc.active_value_heirarchy = {sgp=sgp,ssg=ssg,sqn=sqn,typ=typ,out=out,mod=mod}
     elseif output_value == "clear" then
       print("clear")
-      sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod] = {}
+      sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod] = {}
     end
   else
-    if sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod] == nil then 
-      sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod] = {} 
-      sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].table_type = "mod" 
+    if sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod] == nil then 
+      sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod] = {} 
+      sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].table_type = "mod" 
     end
-    if sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par] == nil then 
-      sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par] = {} 
-      sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].table_type = "par" 
+    if sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par] == nil then 
+      sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par] = {} 
+      sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].table_type = "par" 
     end
-    local existing_output_data_at_location = sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data
+    local existing_output_data_at_location = sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data
     if output_value and output_value ~= "clear" then 
-      if sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data == nil then
-        sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data = {}
-        sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.seq = Sequins{"","","","",""}
-        print("sequp seq: par")
+      if sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data == nil then
+        sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data = {}
+        sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.seq = Sequins{"","","","",""}
       end
-      sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].table_type = "par" 
-      -- sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.value = output_value 
-      sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.seq[output_sequins_index] = output_value 
-      sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.value_heirarchy = {sgp=sgp,ssg=ssg,sqn=sqn,typ=typ,out=out,mod=mod,par=par}
-      sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.control_id = sequencer_controller.active_sequin_control_id
-      sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.control_name = sequencer_controller.active_sequin_control_name
-      sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.value_type = sequencer_controller.active_sequin_value.value_type
-      sequencer_controller.active_value_heirarchy = {sgp=sgp,ssg=ssg,sqn=sqn,typ=typ,out=out,mod=mod,par=par}
+      sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].table_type = "par" 
+      -- sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.value = output_value 
+      sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.seq[output_sequins_index] = output_value 
+      sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.value_heirarchy = {sgp=sgp,ssg=ssg,sqn=sqn,typ=typ,out=out,mod=mod,par=par}
+      sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.control_id = sc.active_sequin_control_id
+      sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.control_name = sc.active_sequin_control_name
+      sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.value_type = sc.active_sequin_value.value_type
+      sc.active_value_heirarchy = {sgp=sgp,ssg=ssg,sqn=sqn,typ=typ,out=out,mod=mod,par=par}
     elseif output_value == "clear" then
       print("clear")
-      sequencer_controller.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par] = {}
+      sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par] = {}
     end
   end
 end
 
-function sequencer_controller.get_acnym_map()
+function sc.get_acnym_map()
   local acnym_map = {
-    sgp = sequencer_controller.selected_sequin_group,         -- selected_sequin_group:  value table level 1
-    ssg = sequencer_controller.selected_sequin_subgroup,      -- selected_sequin_group:  value table level 2
-    sqn = sequencer_controller.selected_sequin,          -- selected_sequin:  value table level 3
-    typ = sequencer_controller.selected_sequin_output_type,    -- output_type_selected:  value table level 4
-    out = sequencer_controller.selected_sequin_output,         -- output_selected:  value table level 5
-    mod = sequencer_controller.selected_sequin_output_mode,    -- output_mode_selected:  value table level 6
-    par = sequencer_controller.selected_sequin_output_param,   -- output_param_selected:  value table level 7
-    int = sequencer_controller.value_place_integer,
-    dec = sequencer_controller.value_place_decimal,
-    sqm = sequencer_controller.number_sequence_mode,
-    pol = sequencer_controller.value_polarity,
-    num = sequencer_controller.value_number,
-    opt = sequencer_controller.value_option,
+    sgp = sc.selected_sequin_group,         -- selected_sequin_group:  value table level 1
+    ssg = sc.selected_sequin_subgroup,      -- selected_sequin_group:  value table level 2
+    sqn = sc.selected_sequin,          -- selected_sequin:  value table level 3
+    typ = sc.selected_sequin_output_type,    -- output_type_selected:  value table level 4
+    out = sc.selected_sequin_output,         -- output_selected:  value table level 5
+    mod = sc.selected_sequin_output_mode,    -- output_mode_selected:  value table level 6
+    par = sc.selected_sequin_output_param,   -- output_param_selected:  value table level 7
+    int = sc.value_place_integer,
+    dec = sc.value_place_decimal,
+    sqm = sc.sequence_mode,
+    pol = sc.value_polarity,
+    num = sc.value_number,
+    opt = sc.value_option,
+    ntn = sc.value_note_num,
+    oct = sc.value_octave,
+
   }
   if acnym_map.mod == nil and acnym_map.par then acnym_map.mod = 1 end
   return acnym_map
 end
 
-function sequencer_controller.update_active_value_heirarchy()
-  local a_map = sequencer_controller.get_acnym_map()
-  -- if sequencer_controller.sequins_outputs_table[a_map.sgp] and sequencer_controller.sequins_outputs_table[a_map.sgp][a_map.ssg] then 
+function sc.update_active_value_heirarchy()
+  local a_map = sc.get_acnym_map()
+  -- if sc.sequins_outputs_table[a_map.sgp] and sc.sequins_outputs_table[a_map.sgp][a_map.ssg] then 
     -- local sgp = a_map.sgp
     -- local ssg = a_map.ssg
-    -- local sqn = sequencer_controller.sequins_outputs_table[a_map.sgp][a_map.ssg][a_map.sqn]
-    -- local type = sqn and sequencer_controller.sequins_outputs_table[a_map.sgp][a_map.ssg][a_map.sqn][a_map.typ]
-    -- local out = (sqn and type) and sequencer_controller.sequins_outputs_table[a_map.sgp][a_map.ssg][a_map.sqn][a_map.typ][a_map.out]
-    -- local mod = (sqn and type and out) and sequencer_controller.sequins_outputs_table[a_map.sgp][a_map.ssg][a_map.sqn][a_map.typ][a_map.out][a_map.mod]
-    -- local par = (sqn and type and out and mod) and sequencer_controller.sequins_outputs_table[a_map.sgp][a_map.ssg][a_map.sqn][a_map.typ][a_map.out][a_map.mod][a_map.par]
+    -- local sqn = sc.sequins_outputs_table[a_map.sgp][a_map.ssg][a_map.sqn]
+    -- local type = sqn and sc.sequins_outputs_table[a_map.sgp][a_map.ssg][a_map.sqn][a_map.typ]
+    -- local out = (sqn and type) and sc.sequins_outputs_table[a_map.sgp][a_map.ssg][a_map.sqn][a_map.typ][a_map.out]
+    -- local mod = (sqn and type and out) and sc.sequins_outputs_table[a_map.sgp][a_map.ssg][a_map.sqn][a_map.typ][a_map.out][a_map.mod]
+    -- local par = (sqn and type and out and mod) and sc.sequins_outputs_table[a_map.sgp][a_map.ssg][a_map.sqn][a_map.typ][a_map.out][a_map.mod][a_map.par]
     -- print(a_map, sqn, type, out, mod, par, output_data)
     -- return output_data
     local output_data
     if a_map.par then 
-      output_data = (a_map.sqn and a_map.type and a_map.out and a_map.mod and a_map.par) and sequencer_controller.sequins_outputs_table[a_map.sgp][a_map.ssg][a_map.sqn][a_map.typ][a_map.out][a_map.mod][a_map.par].output_data
+      output_data = (a_map.sqn and a_map.type and a_map.out and a_map.mod and a_map.par) and sc.sequins_outputs_table[a_map.sgp][a_map.ssg][a_map.sqn][a_map.typ][a_map.out][a_map.mod][a_map.par].output_data
       -- print ("found par",output_data )
-      sequencer_controller.active_value_heirarchy = {sgp=a_map.sgp,ssg=a_map.ssg,sqn=a_map.sqn,typ=a_map.typ,out=a_map.out,mod=a_map.mod,par=a_map.par}
+      sc.active_value_heirarchy = {sgp=a_map.sgp,ssg=a_map.ssg,sqn=a_map.sqn,typ=a_map.typ,out=a_map.out,mod=a_map.mod,par=a_map.par}
     elseif a_map.mod then
-      output_data = (sqn and type and out and mod and par) and sequencer_controller.sequins_outputs_table[a_map.sgp][a_map.ssg][a_map.sqn][a_map.typ][a_map.out][a_map.mod].output_data
+      output_data = (sqn and type and out and mod and par) and sc.sequins_outputs_table[a_map.sgp][a_map.ssg][a_map.sqn][a_map.typ][a_map.out][a_map.mod].output_data
       -- print ("found mod, no par",output_data)
-      sequencer_controller.active_value_heirarchy = {sgp=a_map.sgp,ssg=a_map.ssg,sqn=a_map.sqn,typ=a_map.typ,out=a_map.out,mod=a_map.mod}
+      sc.active_value_heirarchy = {sgp=a_map.sgp,ssg=a_map.ssg,sqn=a_map.sqn,typ=a_map.typ,out=a_map.out,mod=a_map.mod}
     end
     if output_data then
       -- print("found output data") 
@@ -1342,10 +1427,10 @@ function sequencer_controller.update_active_value_heirarchy()
   -- end
 end
 
-function sequencer_controller.get_selected_sequin_values(sgp,sqn,output_table)
+function sc.get_selected_sequin_values(sgp,sqn,output_table)
   -- print("sgp,sqn",sgp,sqn)
-  sequencer_controller.update_active_value_heirarchy()
-  local output_table = output_table and output_table or sequencer_controller.sequencers[sgp].seq[sqn].active_outputs
+  sc.update_active_value_heirarchy()
+  local output_table = output_table and output_table or sc.sequencers[sgp].seq[sqn].active_outputs
   local sequin_id = sqn
 
   local selected_sequin_values 
@@ -1353,69 +1438,63 @@ function sequencer_controller.get_selected_sequin_values(sgp,sqn,output_table)
     if k == "output_data" then
       local selected_sequin = v.value_heirarchy.sqn
       if selected_sequin == sequin_id then
-        local selected_sequin_output_group = sequencer_controller.get_active_sequinset()
+        local selected_sequin_output_group = sc.get_active_sequinset()
         local sequin_output_group = v.value_heirarchy.sgp
         local sequin_output_type  = v.value_heirarchy.typ
         local sequin_output_type_processor = sequin_processor.processors[sequin_output_type]
 
         if selected_sequin_output_group == sequin_output_group then
           selected_sequin_values = fn.deep_copy(v.seq.data)
-          sequencer_controller.selected_sequin_ix = v.seq.ix
+          sc.selected_sequin_ix = v.seq.ix
         end
       end
     elseif type(v) == "table" then
-      sequencer_controller.get_selected_sequin_values(sgp,sqn,v)    
+      sc.get_selected_sequin_values(sgp,sqn,v)    
     end
   end
   if selected_sequin_values then
-    sequencer_controller.selected_sequin_values = selected_sequin_values
+    sc.selected_sequin_values = selected_sequin_values
   end
 end
 
-function sequencer_controller.get_active_output_values()
-  sequencer_controller.update_active_value_heirarchy()
-  local vh = sequencer_controller.active_value_heirarchy
-  if vh then
-  end
+function sc.get_output_values(vh)
+  sc.update_active_value_heirarchy()
+  local vh = vh or sc.active_value_heirarchy
   local outputs_table = {}
   if vh and vh.par then
     for i=1,params:get("num_sequin"),1 do
       local sqn_index = i
-      local sgp = sequencer_controller.sequins_outputs_table[vh.sgp]
-      local ssg = sgp and sequencer_controller.sequins_outputs_table[vh.sgp][vh.ssg]
-      local sqn = (sgp and ssg) and sequencer_controller.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index]
-      local type = (sgp and ssg and sqn) and sequencer_controller.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index][vh.typ]
-      local out = (sgp and ssg and sqn and type) and sequencer_controller.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index][vh.typ][vh.out]
-      local mod = (sgp and ssg and sqn and type and out) and sequencer_controller.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index][vh.typ][vh.out][vh.mod]
-      local par = (sgp and ssg and sqn and type and out and mod) and sequencer_controller.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index][vh.typ][vh.out][vh.mod][vh.par]
-      local output_data = (sgp and ssg and sqn and type and out and mod and par) and sequencer_controller.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index][vh.typ][vh.out][vh.mod][vh.par].output_data
+      local sgp = sc.sequins_outputs_table[vh.sgp]
+      local ssg = sgp and sc.sequins_outputs_table[vh.sgp][vh.ssg]
+      local sqn = (sgp and ssg) and sc.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index]
+      local type = (sgp and ssg and sqn) and sc.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index][vh.typ]
+      local out = (sgp and ssg and sqn and type) and sc.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index][vh.typ][vh.out]
+      local mod = (sgp and ssg and sqn and type and out) and sc.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index][vh.typ][vh.out][vh.mod]
+      local par = (sgp and ssg and sqn and type and out and mod) and sc.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index][vh.typ][vh.out][vh.mod][vh.par]
+      local output_data = (sgp and ssg and sqn and type and out and mod and par) and sc.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index][vh.typ][vh.out][vh.mod][vh.par].output_data
       local output_value = (sqn and output_data) and output_data.value or nil
       output_value = output_value == nil and "nil" or output_value
       local calculated_absolute_value = (sqn and output_data and output_data.calculated_absolute_value) and output_data.calculated_absolute_value or nil
       calculated_absolute_value = calculated_absolute_value == nil and "nil" or calculated_absolute_value
-      -- table.insert(outputs_table,output_value)
       -- print(output_value,calculated_absolute_value)
       table.insert(outputs_table,{output_value,calculated_absolute_value})
-      -- print("par i",i, #outputs_table)
     end
   elseif vh and vh.mod then
     for i=1,params:get("num_sequin"),1 do
       local sqn_index = i
-      local sgp = sequencer_controller.sequins_outputs_table[vh.sgp]
-      local ssg = sgp and sequencer_controller.sequins_outputs_table[vh.sgp][vh.ssg]
-      local sqn = (sgp and ssg) and sequencer_controller.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index]
-      local type = (sgp and ssg and sqn) and sequencer_controller.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index][vh.typ]
-      local out = (sgp and ssg and sqn and type) and sequencer_controller.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index][vh.typ][vh.out]
-      local mod = (sgp and ssg and sqn and type and out) and sequencer_controller.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index][vh.typ][vh.out][vh.mod]
-      local output_data = (sgp and ssg and sqn and type and out and mod) and sequencer_controller.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index][vh.typ][vh.out][vh.mod].output_data
+      local sgp = sc.sequins_outputs_table[vh.sgp]
+      local ssg = sgp and sc.sequins_outputs_table[vh.sgp][vh.ssg]
+      local sqn = (sgp and ssg) and sc.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index]
+      local type = (sgp and ssg and sqn) and sc.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index][vh.typ]
+      local out = (sgp and ssg and sqn and type) and sc.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index][vh.typ][vh.out]
+      local mod = (sgp and ssg and sqn and type and out) and sc.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index][vh.typ][vh.out][vh.mod]
+      local output_data = (sgp and ssg and sqn and type and out and mod) and sc.sequins_outputs_table[vh.sgp][vh.ssg][sqn_index][vh.typ][vh.out][vh.mod].output_data
       local output_value = (sqn and output_data) and output_data.value or nil
       output_value = output_value == nil and "nil" or output_value
       local calculated_absolute_value = (sqn and output_data and output_data.calculated_absolute_value) and output_data.calculated_absolute_value or nil
       calculated_absolute_value = calculated_absolute_value == nil and "nil" or calculated_absolute_value
-      -- table.insert(outputs_table,output_value)
       -- print(output_value,calculated_absolute_value)
       table.insert(outputs_table,{output_value,calculated_absolute_value})
-      -- print("mod i",i, #outputs_table)
     end
   end
   if outputs_table then 
@@ -1430,7 +1509,7 @@ end
 ----------------------------------
 -- 
 ----------------------------------
-function sequencer_controller:get_active_ui_group()
+function sc:get_active_ui_group()
   local num_ui_groups = grid_sequencer.get_num_ui_groups()
   local group_name = grid_sequencer.ui_groups[num_ui_groups].group_name
   -- group_name = string.sub(group_name,1,13) == "sequin_groups" and "sequin_groups" or group_name
@@ -1438,25 +1517,29 @@ function sequencer_controller:get_active_ui_group()
   return group_name
 end
 
-function sequencer_controller.set_active_sequin_value_type(value_type)
-  if value_type == "number" and sequencer_controller.active_sequin_value.place_values == nil then
-    sequencer_controller.reset_place_values()
-  elseif value_type == "option" and sequencer_controller.active_sequin_value == nil then
+function sc.set_active_sequin_value_type(value_type)
+  if value_type == "number" and sc.active_sequin_value.place_values == nil then
+    sc.reset_place_values()
+  elseif value_type == "option" and sc.active_sequin_value == nil then
     -- do something here?
-    sequencer_controller.active_sequin_value.place_values = nil
+    sc.active_sequin_value.place_values = nil
   end
-  sequencer_controller.active_sequin_value.value_type = value_type
+  sc.active_sequin_value.value_type = value_type
 end
 
-function sequencer_controller:update_group(group_name,x, y, state, press_type)
+function sc.get_active_sequin_value_type()
+  return sc.active_sequin_value.value_type
+end
+
+function sc:update_group(group_name,x, y, state, press_type)
   -- local sequin_groups_start, sequin_groups_finish = string.find(group_name,"sequin_groups")
   -- sequencer_screen.update_screen_instructions(group_name, state)
-  sequencer_controller.active_output_value_text = nil
+  sc.active_output_value_text = nil
   if string.sub(group_name,1,13) == "sequin_groups" then 
     -- sync the sequin index 
     local seq_ix
-    if sequencer_controller.selected_sequin_group then
-      seq_ix = sequencer_controller.sequencers[sequencer_controller.selected_sequin_group].seq.ix
+    if sc.selected_sequin_group then
+      seq_ix = sc.sequencers[sc.selected_sequin_group].seq.ix
     end
     self.update_selected_sequin_group(x,state,seq_ix)
   elseif group_name == "sequin_selector" then
@@ -1471,6 +1554,11 @@ function sequencer_controller:update_group(group_name,x, y, state, press_type)
     self.update_sequin_output_params(x, y, state)
   elseif group_name == "sequins_mods" then
     self.update_sequins_mods(x, y, state)
+  elseif group_name == "value_selector_notes" then
+    self.set_active_sequin_value_type("notes")
+    self.update_value_selector_notes(x, y, state)
+  elseif group_name == "value_selector_octaves" then
+    self.update_value_octave(x, y, state)
   elseif group_name == "value_selector_options" then
     self.set_active_sequin_value_type("option")
     self.update_value_selector_options(x, y, state)
@@ -1480,8 +1568,8 @@ function sequencer_controller:update_group(group_name,x, y, state, press_type)
   elseif group_name == "value_place_decimals" then
     self.set_active_sequin_value_type("number")
     self.update_value_place_decimals(x, y, state)
-  elseif group_name == "number_selector_sequence_mode" then
-    self.update_number_selector_sequence_mode(x, y, state)
+  elseif group_name == "selector_sequence_mode" then
+    self.update_selector_sequence_mode(x, y, state)
   elseif group_name == "value_selector_polarity" then
     self.update_value_polarity(x, y, state)
   elseif group_name == "value_selector_nums" then
@@ -1489,9 +1577,9 @@ function sequencer_controller:update_group(group_name,x, y, state, press_type)
   elseif group_name == "sequin_output_values" then
     self.update_sequin_output_value(x, y, state, press_type)
   end
-  sequencer_controller.update_active_value_heirarchy()
+  sc.update_active_value_heirarchy()
 
 end
 
 
-return sequencer_controller
+return sc

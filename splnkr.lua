@@ -31,27 +31,14 @@ include "lib/includes"
 
 engine.name = 'Splnkr'
 
-  ----------------------------
-  -- from softcut studies 5. filter
-  -- file = _path.dust.."/code/softcut-studies/lib/whirl1.aif"
-  --[[
-  file = _path.dust.."/code/splnkr/lib/minutemen_we_can_do_this.wav"
-  rate = 1.0
-  low = 15000
-  band = 2000
-  loop_start = 17
-  loop_end = 20
-  loop_length = loop_end - loop_start
-  ]]
+alt_key_active = false
 
-  alt_key_active = false
-
-  pitchshift = 1
-  vinyl = 1
-  phaser = 1
-  delay = 1
-  strobe = 1
-  drywet = 1
+pitchshift = 1
+vinyl = 1
+phaser = 1
+delay = 1
+strobe = 1
+drywet = 1
 
   ----------------------------
 
@@ -188,7 +175,7 @@ function init()
   end
   
   parameters.init()
-  build_scale()
+  fn.build_scale()
 
   parameters.init_envelope_controls(1)
 

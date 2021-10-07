@@ -207,7 +207,7 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
 end
 
 function sequencer_screen.get_sequence_values()
-  local vals = sequencer_controller.get_active_output_values()
+  local vals = sequencer_controller.get_output_values()
   return vals
 end
 
@@ -219,11 +219,11 @@ function sequencer_screen.get_selected_sequin_values()
   end
   return vals
 end
-local ui_group_acnyms =   { "sgp","sqn","typ","out","mod",
-                            "par","opt","sqm","pol",
-                            "int","dec","num",
-                            -- "num","opt","val"
-                          }
+-- local ui_group_acnyms =   { "sgp","sqn","typ","out","mod",
+--                             "par","opt","sqm","pol",
+--                             "int","dec","num",
+--                             -- "num","opt","val"
+--                           }
 
 function sequencer_screen.check_for_active_chicklet(acronym)
   local active_ui_group_name = sequencer_controller:get_active_ui_group()
@@ -246,7 +246,7 @@ function sequencer_screen.check_for_active_chicklet(acronym)
     active_chicklet = true
   elseif active_ui_group_name == "value place decimals" and acronym == "dec" then
     active_chicklet = true
-  elseif active_ui_group_name == "number_sequence_mode" and acronym == "sqm" then
+  elseif active_ui_group_name == "sequence_mode" and acronym == "sqm" then
     active_chicklet = true
   elseif active_ui_group_name == "value selector polarity" and acronym == "pol" then
     active_chicklet = true
@@ -263,7 +263,28 @@ end
 
 
 function sequencer_screen.draw_chicklets(selected_control_indices)
-  
+  local selected_value_type = sequencer_controller.get_active_sequin_value_type()
+  -- local ui_group_acnyms
+  if selected_value_type == "number" then
+    ui_group_acnyms =   { "sgp","sqn","typ","out","mod",
+                          "par","sqm","pol",
+                          "int","dec","num",
+    }
+  elseif selected_value_type == "notes" then
+    ui_group_acnyms =   { "sgp","sqn","typ","out","mod",
+                          "par","sqm",
+                          "oct","ntn",
+    }
+  elseif selected_value_type == "option" then
+    ui_group_acnyms =   { "sgp","sqn","typ","out","mod",
+                          "par","sqm","opt",
+    }
+  else 
+    ui_group_acnyms =   { "sgp","sqn","typ","out","mod",
+                          "par","sqm",
+    }  
+  end 
+    
   local chicklet_direction = "lr"
   local c_loc = {5,15}
   local chicklet_dim = {20,10}
@@ -334,7 +355,7 @@ function sequencer_screen.update()
     -- screen.move(1,62)
     -- screen.rect(1,62,127,2)
 
-    local control_labels, control_bcrumbs, sequence_values, sequin_values = sequencer_screen.update_screen_instructions(selected_control_indices)
+    control_labels, control_bcrumbs, sequence_values, sequin_values = sequencer_screen.update_screen_instructions(selected_control_indices)
     sequencer_screen.set_control_bcrumbs(control_bcrumbs)
     -- if sequencer_controller.active_output_value_text then
     --   screen.font_size(16)
@@ -413,6 +434,7 @@ function sequencer_screen.update()
       for i=1,5,1 do
         screen.move(lx,ly)
         local val = (sequin_values and #sequin_values > 0) and sequin_values[i] or val
+        -- if (i==1 and sequin_values) then print (sequin_values[i],val) end
         val = val ~= "" and val or "-"
         screen_text = screen_text .. val .. "  "
         local screen_level = selected_sequin_index == i and 15 or 5

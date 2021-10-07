@@ -160,6 +160,10 @@ the grid ui is organized into multiple ui groups:
       * *level*: the amplitude of the *voice*
     * *dev*/*just friends*: TBD
 * (J) option/place value selection: depending on the configuration of the selected option/mode/param, this ui group is used to ether select from a list of options or a place value (see *number selection* ui groups below for details about place values). 
+* note selection ui groups: 
+  * (K) *note sequence mode* selector: if a note is set to a sequence mode of *relative*, its value is added to the previous value. the *number sequence mode* selector is set to *absolute* for each value by default (meaning, the value selected will be the value used, irrespective of the prior value).
+  * (L) *octave* selector: shifts the note up/down octaves. the *octave* selector is set to 0 by default.
+
 * number selection ui groups: 
   * (G) *decimal place value* selectors: one or more decimal place number selection may be assigned to a sequencer value. decimal place values are defined going from left to right from the *decimal point* button (*I*):
     * tenths, hundredths, thousandths, etc
@@ -168,7 +172,7 @@ the grid ui is organized into multiple ui groups:
   * (I) *decimal point* button: this button separates *integer place value* selectors from *decimal place value* selectors does nothing function
   * (J) *place value* selector: sets the place value. For example, if the *integer place value* is set to `3` and the *place value* selector is selected, the place value will be set to 0.3. This value will be added to the other selected place values (with exceptions noted below) 
     * note: if 
-  * (K) *number sequence mode* selector (on/off): if a number is set to *relative*, its value is added to the previous value. the *number sequence mode* selector is turned to *absolute* for each value by default (meaning, the value selected will be the value used, irrespective of the prior value).
+  * (K) *number sequence mode* selector: if a number is set to a sequence mode of *relative*, its value is added to the previous value. the *number sequence mode* selector is set to *absolute* for each value by default (meaning, the value selected will be the value used, irrespective of the prior value).
   * (L) *polarity* selector: sets the value to positive or negative. the *polarity* selector is set to positive by default.
   * (M) *sub-sequins* selector: sets the values at each step of a five step sub-sequence based on the option selected (UI group J) or the number selected (UI groups (G-L)). When a value is active within this five step sub-sequence, this value is used to set the value of the selected output/mode/param.
   * notes about number selection: 
@@ -207,12 +211,18 @@ the screenshot above shows the norns ui when a sequin output is being setup, pri
   * out: selected output
   * mod: selected output mode
   * par: selected output param
-  * opt: selected value option 
-  * sqm: selected number sequence mode (*relative* or *absolute*)
-  * pol: selected number polarity (*negative* or *positive*) 
-  * int: selected integer place (ones, tens, hundreds, etc.)
-  * dec: selected decimal place (tenths, hundredths, etc.)
-  * num: selected number (calculated according to the integer/decimal place value(s) selected)
+  * displayed when the output value is an option (e.g. "on" or "off"):
+    * opt: selected value option 
+  * displayed when the output value is a musical note:
+    * sqm: selected number sequence mode (*relative* or *absolute*)
+    * oct: octave
+    * ntn: note number
+  * displayed when the output value is a number:
+    * sqm: selected number sequence mode (*relative* or *absolute*)
+    * pol: selected number polarity (*negative* or *positive*) 
+    * int: selected integer place (ones, tens, hundreds, etc.)
+    * dec: selected decimal place (tenths, hundredths, etc.)
+    * num: selected number (calculated according to the integer/decimal place value(s) selected)
 * (D) selection values: displays the values available based on the ui group selected 
   * in the example above, the values shown are the parameters available for the softcut output types (i.e., *cutter, mode, rate, direction, level*)
 
