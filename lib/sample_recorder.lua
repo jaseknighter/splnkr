@@ -26,8 +26,8 @@ function sample_recorder.save_samples(dir_name, incr)
   pre_save_play_mode = play_mode
   sample_player.set_play_mode(0)
   
-  local starting_clip = pre_save_play_mode == 3 and active_cutter or 1
-  local ending_cutter = pre_save_play_mode == 3 and active_cutter or #cutters
+  local starting_clip = pre_save_play_mode == 3 and sample_player.active_cutter or 1
+  local ending_cutter = pre_save_play_mode == 3 and sample_player.active_cutter or #cutters
   sample_recorder.record_to_tape_start(starting_clip, ending_cutter, dir_name, pathname2)
 end
 

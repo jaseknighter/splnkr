@@ -36,6 +36,7 @@ this script is something like an amplitude/frequency tracking sequencer/sampler/
 * All screens
   * e1: previous page 
   * e2: next/prev control
+  * k1 + k2: stop/start selected voice
 * Screen 1: select/play sample 
   * k2: select audio sample
   * e3: select softcut voice

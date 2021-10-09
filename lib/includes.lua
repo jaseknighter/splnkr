@@ -44,6 +44,8 @@ sequencer_screen = include "splnkr/lib/sequencer_screen"
 -- sequencer_lattice = include "splnkr/lib/sequencer_lattice"
 
 include "splnkr/lib/Cutter"
-cut_detector = include("splnkr/lib/cut_detector")
+cut_detector = include "splnkr/lib/cut_detector"
 
-parameters = include("splnkr/lib/parameters")
+parameters = include "splnkr/lib/parameters"
+instructions = include "splnkr/lib/instructions"
+
