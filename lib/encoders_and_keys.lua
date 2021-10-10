@@ -96,6 +96,14 @@ local enc = function (n, d)
         else
           nav_active_control = util.clamp(nav_active_control+d,1,#sample_player_nav_labels)
           if waveform_loaded then 
+            if nav_active_control > 2 and sample_player.active_cutter == 0 then
+              sample_player.active_cutter = 1
+              if sample_player.cutter_assignments[sample_player.active_cutter] < 1 then 
+                sample_player.cutter_assignments[sample_player.active_cutter] = 1
+                sample_player.update() 
+              end
+            end
+    
             if nav_active_control == 3 then 
               for i=1,#cutters,1
               do
@@ -113,8 +121,8 @@ local enc = function (n, d)
         end 
       elseif n==3 then
         d = util.clamp(d,-1,1)
-        if nav_active_control == 1 then
-          if alt_key_active == true then
+        if nav_active_control == 1 then 
+          if alt_key_active == true then -- scrub
             local r = sample_player.voice_rates[sample_player.selected_voice]
             -- local adj_amt = (d>0) and (r>0 and (1/(r*100)) or 0.001) or (r>0 and 0.001 or (1/(r*100)))
             -- local adj_amt = (d>0) and 0.001 + (r*0.005) or (r>0 and (-0.01 - (-r*0.05)) or (-0.001 - (-r*0.005)))
@@ -123,7 +131,7 @@ local enc = function (n, d)
             (r>0 and (-0.001 - (-r*0.005)) or (-0.001 - (-r*0.005)))
             sample_player.sample_positions[sample_player.selected_voice] = util.clamp(sample_player.sample_positions[sample_player.selected_voice] + (d*adj_amt),0, 1)
             softcut.position(sample_player.selected_voice,sample_player.sample_positions[sample_player.selected_voice]*length)
-          else
+          else -- select active voice
             sample_player.selected_voice = util.clamp(d+sample_player.selected_voice,1,6)
             sample_player.active_cutter = sample_player.cutter_assignments[sample_player.selected_voice]
             sample_player.selected_cutter_group = sample_player.active_cutter
@@ -132,14 +140,15 @@ local enc = function (n, d)
             do
               cutters[i]:set_display_mode(0)
             end 
-            local display_mode = nav_active_control == 3 and 1 or 2  
-            cutters[sample_player.active_cutter]:set_display_mode(display_mode)
-            
+            if sample_player.active_cutter > 0 then
+              local display_mode = nav_active_control == 3 and 1 or 2  
+              cutters[sample_player.active_cutter]:set_display_mode(display_mode)
+            end
           end
-        elseif nav_active_control == 2 then
+        elseif nav_active_control == 2 then -- set play mode
           local new_play_mode = util.clamp(sample_player.play_modes[sample_player.selected_voice]+d,0,#play_mode_text-1)
           sample_player.set_play_mode(sample_player.selected_voice,new_play_mode)
-        elseif nav_active_control == 3 then
+        elseif nav_active_control == 3 then -- move cutter edge
           if alt_key_active == true then
             local active_edge = cutters[sample_player.active_cutter]:get_active_edge()
             local cutter = cutters[sample_player.active_cutter]
@@ -156,7 +165,7 @@ local enc = function (n, d)
           else
             cutters[sample_player.active_cutter]:rotate_cutter_edge(d)
           end
-        elseif nav_active_control == 4 then
+        elseif nav_active_control == 4 then -- move cutter
           if alt_key_active == true then
             for i=1,#cutters,1
             do  
@@ -172,7 +181,7 @@ local enc = function (n, d)
               end
             end
           end
-        elseif nav_active_control == 5 then
+        elseif nav_active_control == 5 then -- set rate
           local rate = sample_player.voice_rates[sample_player.selected_voice]
           rate = rate + d
           rate = rate ~= 0 and rate or rate + d

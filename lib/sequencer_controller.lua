@@ -219,7 +219,8 @@ sc.outputs_map = {
 -- note: '(nil)' means the output mode takes just 1 param) 
 sc.output_mode_map = {
   {nil,nil,nil,nil,nil,nil},                        -- softcut 
-  {nil,3,3,2},                  -- devices midi out (nil), crow(3), just_friends(3),w/(2)
+  -- {nil,3,3,2},                  -- devices midi out (nil), crow(3), just_friends(3),w/(2)
+  {nil,2,3,2},                  -- devices midi out (nil), crow(2), just_friends(3),w/(2)
   {nil,nil,nil,nil,8,nil,nil},  -- effects: amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (8)
   {nil},                        -- enveloper: on/off (nil), trig_rate(nil), overlap (nil)
   {nil,nil},                    -- pattern (division)
@@ -236,7 +237,8 @@ sc.output_params_map = {
     --    level: 0-1
     5,5,5,5,5,5
   }, 
-  {nil,{nil,nil,nil},{2,3,nil},{nil,nil}}, -- device (midi out (nil), crow(3), just_friends(3),w/(2))
+  -- {nil,{nil,nil,nil},{2,3,nil},{nil,nil}}, -- device (midi out (nil), crow(3), just_friends(3),w/(2))
+  {nil,{nil,nil},{2,3,nil},{nil,nil}}, -- device (midi out (nil), crow(2), just_friends(3),w/(2))
   {nil,nil,nil,nil,{nil,nil,nil,nil,nil,nil,nil,nil},nil,nil}, -- effect (amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (8)), phaser(nil), delay(nil)
   {nil,nil,nil}, -- enveloper 
   {nil,nil}, -- pattern
@@ -283,7 +285,7 @@ function sc.refresh_output_control_specs_map()
       { -- crow
         {"note",min_note,max_note,nil,"crow1_pitch","crow1_pitch"}, -- crow1 pitch
         {"note",min_note,max_note,nil,"crow3_pitch","crow3_pitch"}, -- crow3 pitch
-        {"note",min_note,max_note,nil,"drum","drum"} -- drums ??????????????
+        -- {"note",min_note,max_note,nil,"drum","drum"} -- drums ??????????????
       }, 
       { -- just friends
         {{"note",min_note,max_note,nil,"pitch","pitch"},{"number",'0.00',10,nil,"level","level"}}, -- play_note: pitch, level
@@ -771,7 +773,6 @@ function sc.set_output_values(control_spec)
     sc.value_selector_notes = grid_sequencer:register_ui_group("value_selector_notes",6,6,5+notes_per_octave,6,7,3,control_spec)
     sc.value_selector_octaves = grid_sequencer:register_ui_group("value_selector_octaves",first_key,6,last_key,6,4,6,control_spec, default_key)
     if sc.selector_sequence_mode == nil then
-      print("init sequence mode")
       sc.selector_sequence_mode = grid_sequencer:register_ui_group("selector_sequence_mode",4,7,5,7,10,6,control_spec, 5)
     end
 

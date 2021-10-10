@@ -4,7 +4,7 @@ softcut_processor.controls = {}
 
 function softcut_processor.init()
   softcut_processor.controls = {
-    cutter = softcut_processor.assign_sample_to_cutter,
+    cutter = softcut_processor.update_cutter_assignment,
     v_mode = softcut_processor.update_voice_mode,
     rate = softcut_processor.update_rate,
     direction = softcut_processor.update_direction,
@@ -43,7 +43,7 @@ end
 -- end
 
 
-function softcut_processor.assign_sample_to_cutter(voice, cutter_assignment)
+function softcut_processor.update_cutter_assignment(voice, cutter_assignment)
   -- if cutter_assignment > 0 and params:get("play_sequencer") == 2 then
   if cutter_assignment > 0 then
     -- if params:get("play_sequencer") ~= 2  then
@@ -51,7 +51,7 @@ function softcut_processor.assign_sample_to_cutter(voice, cutter_assignment)
       -- params:set("play_sequencer", 2)
       sample_player.set_cutter_assignment(voice, cutter_assignment)
       -- sample_player.selected_cutter_group = cutter_assignment
-    
+      
       if sample_player.play_modes[voice] < 3 then
         sample_player.set_play_mode(voice, 3) -- TODO: move into a parameter
         sample_player.set_cutter_assignment(voice, cutter_assignment)
@@ -82,6 +82,7 @@ function softcut_processor.assign_sample_to_cutter(voice, cutter_assignment)
 end
 
 function softcut_processor.update_rate(voice, rate)
+  sample_player.play_check(voice)
   sample_player.set_rate(voice,rate)
 end
 
@@ -90,11 +91,13 @@ function softcut_processor.update_voice_mode(voice, mode)
 end
 
 function softcut_processor.update_direction(voice, direction)
+  sample_player.play_check(voice)
   direction = direction == 1 and -1 or 1
   sample_player.set_direction(voice,direction)
 end
 
 function softcut_processor.update_level(voice, level)
+  sample_player.play_check(voice)
   sample_player.set_level(voice,level)
 end
 

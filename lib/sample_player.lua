@@ -84,7 +84,7 @@ function sample_player.init()
     softcut.phase_quant(i,0.1)
     sample_player.sample_positions[i] = 0
     sample_player.playhead_positions[i] = 1
-    sample_player.cutter_assignments[i] = 1
+    sample_player.cutter_assignments[i] = 0
     -- sample_player.play_modes[i] = i == 1 and 1 or 0
     sample_player.play_modes[i] = 0
 
@@ -126,6 +126,12 @@ function sample_player.load_file(file)
   end
 end
 
+function sample_player.play_check(voice)
+  if sample_player.get_play_mode(voice) < 1 then
+    sample_player.set_play_mode(voice,1)
+  end
+end
+
 function sample_player.get_cutter_assignment(voice) 
   return sample_player.cutter_assignments[voice] 
   -- print("set cutter assignment",voice,cutter_assignment) 
@@ -158,11 +164,11 @@ function sample_player.reset(voice, set_position_at_start)
   softcut.loop(voice,1)
   
   if cutters[1] then
-    if sample_player.play_modes[voice] > 1 then
+    if sample_player.play_modes[voice] > 1 and sample_player.cutter_assignments[voice] > 0 then
       
-      if sample_player.play_modes[voice] == 3 then 
+      -- if sample_player.play_modes[voice] == 3 then 
         -- sample_player.cutter_assignments[voice] = sample_player.selected_cutter_group 
-      end
+      -- end
       sample_player.voices_start_finish[voice][1] = util.linlin(10,120,0,length,cutters[sample_player.cutter_assignments[voice]]:get_start_x_updated())
       sample_player.voices_start_finish[voice][2] = util.linlin(10,120,0,length,cutters[sample_player.cutter_assignments[voice]]:get_finish_x_updated())      
     else 
@@ -178,8 +184,9 @@ function sample_player.reset(voice, set_position_at_start)
     -- softcut.position(voice,sample_player.sample_positions[voice])
   end 
   local play_mode = sample_player.play_modes[voice]
-  -- local rate = play_mode < 2 and sample_player.voice_rates[1] or sample_player.voice_rates[sample_player.cutter_assignments[voice]]
-  local rate = play_mode < 2 and sample_player.voice_rates[1] or sample_player.voice_rates[voice]
+  -- local rate = play_mode < 2 and sample_player.voice_rates[1] or sample_player.voice_rates[voice]
+  local rate = sample_player.voice_rates[voice]
+  
   softcut.rate(voice,rate)
   -- playing = 1
   softcut.fade_time(voice,0)
@@ -266,7 +273,8 @@ function yo()
 end
 function sample_player.playhead_position_update(voice,pos)
   sample_player.sample_positions[voice] = (pos - 1) / length
-  if cutters[sample_player.cutter_assignments[voice]] then
+  -- if cutters[sample_player.cutter_assignments[voice]] then
+  if waveform_loaded then
     local next_cutter_to_play = util.wrap(sample_player.cutter_assignments[voice]+1,1,#cutters)
     local rate = sample_player.voice_rates[voice]
     
@@ -290,6 +298,9 @@ function sample_player.playhead_position_update(voice,pos)
     end
 
     if sample_player.play_modes[voice] > 1 then
+      if sample_player.cutter_assignments[voice] < 1 then
+        sample_player.cutter_assignments[voice] = 1
+      end
       local start = cutters[sample_player.cutter_assignments[voice]]:get_start_x_updated()
       local finish = cutters[sample_player.cutter_assignments[voice]]:get_finish_x_updated()
       local active_cutter_sample_position = (pos - sample_player.voices_start_finish[voice][1])/(sample_player.voices_start_finish[voice][2]-sample_player.voices_start_finish[voice][1])
