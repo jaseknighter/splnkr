@@ -20,9 +20,10 @@ function sequin_processor.process(sequin_to_process)
   end
 end
 
-otab = {}
+local previous_absolute_value = 0
+local previous_relative_values = {}
+
 function sequin_processor.find_outputs(output_table, sequin_id)
-  otab[sequin_id] = output_table
   if sequin_id then
     -- print("find_outputs")
     for k, v in pairs(output_table) do 
@@ -50,42 +51,61 @@ function sequin_processor.find_outputs(output_table, sequin_id)
               if process_mode == "absolute" or (value_type ~= "number" and value_type ~= "notes" ) then 
                 v.value = next_output_value 
                 v.calculated_absolute_value = nil
+                previous_absolute_value = next_output_value
                 sequin_output_type_processor.process(v)
+                previous_relative_values = {}
               elseif process_mode == "relative" and (value_type == "number" or value_type == "notes") then
+                print("previous_absolute_value",previous_absolute_value)
                 -- local active_output_values = sequencer_controller.get_output_values(v.value_heirarchy)
                 -- find the last occurrance of an absolute value
-                local previous_absolute_value = 0
-                local previous_absolute_value_index = 1
+                -- local previous_absolute_value = 0
+                -- local previous_absolute_value_index = 1
                 
-                for i=selected_sequin,1,-1 do
-                 if (output_table and 
-                      output_table[i] and 
-                      output_table[i][1] ~= nil and 
-                      output_table[i][1] ~= "nil") and 
-                      string.find(output_table[i][1],"r") == nil 
-                  then
-                    previous_absolute_value = output_table[i][1]
-                    -- print("previous_absolute_value",previous_absolute_value)
-                    previous_absolute_value_index = i
-                    -- break
-                  end
-                end
+                -- tab.print(output_table)
+                -- for i=selected_sequin-1,1,-1 do
+                --  if (output_table and 
+                --       output_table[i] and 
+                --       output_table[i][1] ~= nil and 
+                --       output_table[i][1] ~= "nil") and 
+                --       string.find(output_table[i][1],"r") == nil 
+                --   then
+                --     previous_absolute_value = output_table[i][1]
+                --     -- print("previous_absolute_value",previous_absolute_value)
+                --     previous_absolute_value_index = i
+                --     -- break
+                --   end
+                -- end
                 
                 -- starting from the previous absolute value (or the start of the output values table),
                 -- figure out the current relative value to output
+                
+                -- local calculated_absolute_value = previous_absolute_value
+                -- for i=previous_absolute_value_index,selected_sequin,1 do
+                --   if (output_table[i] and output_table[i][1] ~= "nil") then
+                --     local val
+                --     if string.find(next_output_value,"r") then
+                --       local number_end = string.find(next_output_value,"r") - 1
+                --       val = string.sub(next_output_value,1,number_end)
+                --       -- print("previous_absolute_value, calculated_absolute_value,val",previous_absolute_value, calculated_absolute_value, val)
+                --       calculated_absolute_value = previous_absolute_value + tonumber(val)
+                --       v.value = next_output_value 
+                --     end
+                --   end
+                -- end
+
                 local calculated_absolute_value = previous_absolute_value
-                for i=previous_absolute_value_index,selected_sequin,1 do
-                  if (output_table[i] and output_table[i][1] ~= "nil") then
-                    local val
-                    if string.find(next_output_value,"r") then
-                      local number_end = string.find(next_output_value,"r") - 1
-                      val = string.sub(next_output_value,1,number_end)
-                      -- print("previous_absolute_value, calculated_absolute_value,val",previous_absolute_value, calculated_absolute_value, val)
-                      calculated_absolute_value = previous_absolute_value + tonumber(val)
-                      v.value = next_output_value 
-                    end
-                  end
+                for i=1,#previous_relative_values,1 do
+                  print("prev_rel_val",i,previous_relative_values[i])
+                  calculated_absolute_value = calculated_absolute_value + previous_relative_values[i]
                 end
+
+                local number_end = string.find(next_output_value,"r") - 1
+                val = string.sub(next_output_value,1,number_end)
+                calculated_absolute_value = calculated_absolute_value + tonumber(val)
+                table.insert(previous_relative_values,val)
+                v.value = next_output_value 
+                
+
                 v.calculated_absolute_value = calculated_absolute_value
                 -- provide relative value and calculated absolute value ()
                 sequin_output_type_processor.process(v)
