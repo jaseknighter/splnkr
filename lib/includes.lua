@@ -31,6 +31,7 @@ sample_recorder = include "splnkr/lib/sample_recorder"
 
 devices_processor = include "splnkr/lib/sequin_processors/devices_processor"
 devices_crow_processor = include "splnkr/lib/sequin_processors/devices_crow_processor"
+devices_jf_processor = include "splnkr/lib/sequin_processors/devices_jf_processor"
 softcut_processor = include "splnkr/lib/sequin_processors/softcut_processor"
 sequin_processor = include "splnkr/lib/sequin_processor"
 
@@ -44,6 +45,8 @@ sequencer_screen = include "splnkr/lib/sequencer_screen"
 -- sequencer_lattice = include "splnkr/lib/sequencer_lattice"
 
 include "splnkr/lib/Cutter"
-cut_detector = include("splnkr/lib/cut_detector")
+cut_detector = include "splnkr/lib/cut_detector"
 
-parameters = include("splnkr/lib/parameters")
+parameters = include "splnkr/lib/parameters"
+instructions = include "splnkr/lib/instructions"
+

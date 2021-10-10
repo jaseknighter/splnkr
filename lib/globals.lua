@@ -26,6 +26,16 @@ function fn.deep_copy(orig, copies)
   return copy
 end
 
+function fn.round_decimals (value_to_round, num_decimals, rounding_direction)
+  local rounded_val
+  local mult = 10^num_decimals
+  if rounding_direction == "up" then
+    rounded_val = math.floor(value_to_round * mult + 0.5) / mult
+  else
+    rounded_val = math.floor(value_to_round * mult + 0.5) / mult
+  end
+  return rounded_val
+end
 -- scale/note functions
 scale_length = 35 --128
 root_note_default = 33 --(A0)

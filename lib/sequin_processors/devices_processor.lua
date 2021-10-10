@@ -14,6 +14,7 @@ function devices_processor.process(output_table)
   elseif output_table.value_heirarchy.out == 2 then -- crow
     devices_crow_processor.process(output_table)
   elseif output_table.value_heirarchy.out == 3 then -- just friends
+    devices_jf_processor.process(output_table)
   elseif output_table.value_heirarchy.out == 4 then -- w/
   end
 end
