@@ -126,13 +126,21 @@ end
 
 function grid_filter:grid_long_press(x, y)
   clock.sleep(0.5)
-  -- print("long press",x,y)
   grid_filter:set_long_press(true)
-  --samples:select_x(x)
-  --samples:select_y(y)
+  
+  -- clear values on long press 
+  local from_view = grid_filter.active_view
+  if from_view == 1 then -- set level
+    params:set("filter_level"..x,0)
+  elseif from_view == 2 then -- set reciprocal quality
+    params:set("reciprocal_quality"..x,1)
+  elseif from_view == 3 then -- set center frequency
+    local cf = cs_cf.minval
+    params:set("filter_center_frequency"..x,cf)
+  end
+
   grid_filter.counter[x][y] = nil
   grid_filter.dirtygrid(true)  
-  -- fn.dirty_screen(true)
 end
 
 function grid_filter.grid_redraw_clock()

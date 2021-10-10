@@ -343,18 +343,18 @@ function sample_player.autogenerate_cutters(a)
         table.insert(cutters, i, Cutter:new(i, new_cutter_start_x, new_cutter_finish_x))
         table.insert(cutter_rates, i,1)
       end
-    elseif a == 1 then
-      cutters = {}
-      cutter_rates = {}
-      local cutter1_start_x = 0
-      local cutter1_finish_x = 128/a
-      cutters[1] = Cutter:new(1,cutter1_start_x,cutter1_finish_x)
-      cutter_rates[1] = 1
+    -- elseif a == 1 then
+    --   cutters = {}
+    --   cutter_rates = {}
+    --   local cutter1_start_x = 0
+    --   local cutter1_finish_x = 128/a
+    --   cutters[1] = Cutter:new(1,cutter1_start_x,cutter1_finish_x)
+    --   cutter_rates[1] = 1
     else
       -- make cuts according to sample levels
       cutters = {}
       cutter_rates = {}
-
+      
       -- get the cut indices and resort them lowest to highest
       local sorted_cut_indices = cut_detector.get_sorted_cut_indices()
       autogen_cut_indices = {}
@@ -386,6 +386,7 @@ function sample_player.autogenerate_cutters(a)
     end
     sample_player.cutters_start_finish_update()
     sample_player.active_cutter = 1
+    sample_player.selected_cutter_group = 1
     cutter_to_play = 1
     local display_mode = nav_active_control == 3 and 1 or 2
     cutters[1]:set_display_mode(display_mode)
@@ -483,7 +484,7 @@ function sample_player.draw_top_nav (msg)
       subnav_title = subnav_title .. ": " .. clip_loc
     elseif nav_active_control == 5 then
       local rate = sample_player.voice_rates[sample_player.selected_voice]
-      subnav_title = subnav_title .. "[" .. sample_player.selected_voice .. "]: " .. rate
+        subnav_title = subnav_title .. "[" .. sample_player.selected_voice .. "]: " .. rate
       -- local cutter_to_show = sample_player.active_cutter
       -- subnav_title = subnav_title .. "[" .. cutter_to_show .. "]: " .. rate
     elseif nav_active_control == 6 then

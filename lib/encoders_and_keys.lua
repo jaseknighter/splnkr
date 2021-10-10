@@ -261,7 +261,7 @@ local key = function (n,z)
         else
           if #cutters > 1 and nav_active_control > 1 and nav_active_control < 7 then
             table.remove(cutters, sample_player.active_cutter)
-            table.remove(sample_player.voice_rates, sample_player.active_cutter)
+            -- table.remove(sample_player.voice_rates, sample_player.active_cutter)
             for i=1,#cutters,1
             do
               cutters[i]:set_cutter_id(i)
