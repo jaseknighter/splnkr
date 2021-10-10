@@ -85,7 +85,6 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
   if sequencer_controller.selected_sequin_group then
     control_bcrumbs = control_bcrumbs .. sequencer_controller.selected_sequin_group
     sequence_values = sequencer_screen.get_sequence_values()
-    -- sequin_values   = sequencer_screen.get_selected_sequin_values() 
   end
   if sequencer_controller.selected_sequin then
     control_bcrumbs = control_bcrumbs .. "-" .. sequencer_controller.selected_sequin .. " "
