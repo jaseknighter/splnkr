@@ -105,7 +105,7 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
   elseif output_type == 2 then
     control_bcrumbs =  control_bcrumbs .. "dev "
     if output_index then 
-      if output_index == 1 then 
+      if output_index == 1 then -- midi
         control_bcrumbs = control_bcrumbs .. "midi "
       elseif output_index == 2 then -- crow
         control_bcrumbs = "dev crow "
@@ -118,9 +118,47 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
           control_bcrumbs = control_bcrumbs .. specs_map[output_type][output_index][output_mode][5] .. " "
         end
       elseif output_index == 3 then -- just friends
-        control_bcrumbs =  control_bcrumbs .. "dev jf "
-        control_labels[1] = "play_note play_voice"
-        control_labels[2] = "portamento"
+        local control_bcrumbs_base = control_bcrumbs
+        if output_mode == nil and output_param == nil then
+          control_bcrumbs =  control_bcrumbs .. "jf "
+          control_labels[1] = "play_note"
+          control_labels[2] = "vce1 vce2 vce3"
+          control_labels[3] = "vce4 vce5 vce6"
+        elseif output_mode then
+          -- if output_mode < 3 then
+            -- control_bcrumbs = output_mode == 1 and control_bcrumbs .. "jf note" or control_bcrumbs .. "jf voice"
+            -- local label_pos = 1
+            -- for i=1,#specs_map[output_type][output_index][output_mode],1 do
+            --   control_labels[label_pos] = control_labels[label_pos] .. specs_map[output_type][output_index][output_mode][i][5] .. " "
+            --   label_pos = i%3 == 0 and label_pos + 1 or label_pos
+            -- end
+          -- else
+          --   control_bcrumbs =  control_bcrumbs .. "jf port"
+          --   local label_pos = 1
+          --   control_labels[1] = control_labels[label_pos] .. specs_map[output_type][output_index][output_mode][5] .. " "
+          -- end
+          if output_mode == nil then
+            control_bcrumbs = output_mode == 1 and control_bcrumbs .. "jf note" or control_bcrumbs .. "jf vce"
+          else
+            control_bcrumbs = output_mode == 1 and control_bcrumbs .. "jf note" or control_bcrumbs .. "jf vce" .. (output_mode-1)
+          end
+          local label_pos = 1
+          for i=1,#specs_map[output_type][output_index][output_mode],1 do
+            control_labels[label_pos] = control_labels[label_pos] .. specs_map[output_type][output_index][output_mode][i][5] .. " "
+            label_pos = i%3 == 0 and label_pos + 1 or label_pos
+          end
+
+          if output_param and output_mode == 1 then
+            control_bcrumbs = control_bcrumbs .. " " .. specs_map[output_type][output_index][output_mode][output_param][5]
+          elseif output_param and output_mode > 1 then 
+            control_bcrumbs = control_bcrumbs_base .. "jf vce" .. (output_mode-1)
+            control_bcrumbs = control_bcrumbs .. " " .. specs_map[output_type][output_index][output_mode][output_param][5]
+          end
+        end
+        -- if output_mode and output_param == nil then
+            -- print(specs_map[output_type][output_index][output_mode][output_param][5])
+          -- control_bcrumbs = control_bcrumbs .. specs_map[output_type][output_index][output_mode][output_param][5] .. " "
+        -- end
         -- if output_mode and output_mode < 3 and output_param then
         --   control_bcrumbs = control_bcrumbs .. specs_map[output_type][output_index][output_mode][output_param][5] .. " "
         -- end

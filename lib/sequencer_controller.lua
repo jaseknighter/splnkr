@@ -65,7 +65,8 @@ function sc.init()
 
   sequin_processor.init()
   devices_crow_processor.init()
-  
+  devices_jf_processor.init()
+
   sc.refresh_output_control_specs_map()
   sc.sequencers = {}
   sc.sequencers[1] = Sequencer:new(sc.lattice,1)
@@ -220,7 +221,7 @@ sc.outputs_map = {
 sc.output_mode_map = {
   {nil,nil,nil,nil,nil,nil},                        -- softcut 
   -- {nil,3,3,2},                  -- devices midi out (nil), crow(3), just_friends(3),w/(2)
-  {nil,2,3,2},                  -- devices midi out (nil), crow(2), just_friends(3),w/(2)
+  {nil,2,7,2},                  -- devices midi out (nil), crow(2), just_friends(7),w/(2)
   {nil,nil,nil,nil,8,nil,nil},  -- effects: amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (8)
   {nil},                        -- enveloper: on/off (nil), trig_rate(nil), overlap (nil)
   {nil,nil},                    -- pattern (division)
@@ -238,7 +239,7 @@ sc.output_params_map = {
     5,5,5,5,5,5
   }, 
   -- {nil,{nil,nil,nil},{2,3,nil},{nil,nil}}, -- device (midi out (nil), crow(3), just_friends(3),w/(2))
-  {nil,{nil,nil},{2,3,nil},{nil,nil}}, -- device (midi out (nil), crow(2), just_friends(3),w/(2))
+  {nil,{nil,nil},{2,2,2,2,2,2,2},{nil,nil}}, -- device (midi out (nil), crow(2), just_friends(2),w/(2))
   {nil,nil,nil,nil,{nil,nil,nil,nil,nil,nil,nil,nil},nil,nil}, -- effect (amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (8)), phaser(nil), delay(nil)
   {nil,nil,nil}, -- enveloper 
   {nil,nil}, -- pattern
@@ -283,14 +284,20 @@ function sc.refresh_output_control_specs_map()
     { -- device (, crow(3), just_friends(3),w/(2))
       {"note",min_note,max_note,nil,"midi_note","midi note"}, -- midi out
       { -- crow
-        {"note",min_note,max_note,nil,"crow1_pitch","crow1_pitch"}, -- crow1 pitch
-        {"note",min_note,max_note,nil,"crow3_pitch","crow3_pitch"}, -- crow3 pitch
+        {"note",min_note,max_note,nil,"c1_pitch","c1 pitch"}, -- crow1 pitch
+        {"note",min_note,max_note,nil,"c3_pitch","c3 pitch"}, -- crow3 pitch
         -- {"note",min_note,max_note,nil,"drum","drum"} -- drums ??????????????
       }, 
       { -- just friends
         {{"note",min_note,max_note,nil,"pitch","pitch"},{"number",'0.00',10,nil,"level","level"}}, -- play_note: pitch, level
-        {{"number",1,6,nil,"channel"},{"note",min_note,max_note,nil,"pitch","pitch"},{"number",'0.00',10,nil,"level","level"}}, -- play_voice: channel, pitch, level
-        {"note",-24,3,nil,6,"pitch_portamento","pitch portamento"}, -- play_note: pitch (portamento)
+        {{"note",min_note,max_note,nil,"pitch","pitch"},{"number",'0.00',10,nil,"level","level"}}, -- play_voice channel 1: pitch, level
+        {{"note",min_note,max_note,nil,"pitch","pitch"},{"number",'0.00',10,nil,"level","level"}}, -- play_voice channel 2: pitch, level
+        {{"note",min_note,max_note,nil,"pitch","pitch"},{"number",'0.00',10,nil,"level","level"}}, -- play_voice channel 3: pitch, level
+        {{"note",min_note,max_note,nil,"pitch","pitch"},{"number",'0.00',10,nil,"level","level"}}, -- play_voice channel 4: pitch, level
+        {{"note",min_note,max_note,nil,"pitch","pitch"},{"number",'0.00',10,nil,"level","level"}}, -- play_voice channel 5: pitch, level
+        {{"note",min_note,max_note,nil,"pitch","pitch"},{"number",'0.00',10,nil,"level","level"}}, -- play_voice channel 6: pitch, level
+        -- {{"number",1,6,nil,"channel"},{"note",min_note,max_note,nil,"pitch","pitch"},{"number",'0.00',10,nil,"level","level"}}, -- play_voice: channel, pitch, level
+        -- {"note",-24,3,nil,6,"pitch_portamento","pitch portamento"}, -- play_note: pitch (portamento)
       }, 
       {  -- w/
         {"note",min_note,max_note,nil,"pitch","pitch"},          -- w_syn: pitch

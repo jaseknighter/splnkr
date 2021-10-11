@@ -25,17 +25,18 @@ function devices_crow_processor.process(output_table)
 end
 
 function devices_crow_processor.play_note1(value)
-  externals1.note_on(1,value,1,1,1,"sequencer", "crow")
-  -- externals2.note_on(1,value/2,1,1,1,"sequencer", crow)
+  externals1.note_on(1,value,1,1,"sequencer", "crow")
+  -- externals1.note_on(1,value,1,1,1,"sequencer", "crow")
 end
 
 function devices_crow_processor.play_note3(value)
-  externals1.note_on(3,value,1,1,1,"sequencer", "crow")
-  -- externals2.note_on(1,value/2,1,1,1,"sequencer", crow)
+  externals1.note_on(3,value,1,1,"sequencer", "crow")
+  -- externals1.note_on(3,value,1,1,1,"sequencer", "crow")
 end
 
 function devices_crow_processor.play_drum(value)
-  externals1.note_on(1,value,1,1,1,"sequencer", "crow_drum")
+  externals1.note_on(1,value,1,1,"sequencer", "crow_drum")
+  -- externals1.note_on(1,value,1,1,1,"sequencer", "crow_drum")
 end
 
 return devices_crow_processor

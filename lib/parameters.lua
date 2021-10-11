@@ -110,21 +110,21 @@ function parameters.init()
   }
 
 
-  params:add{
-    type = "option", id = "play_sequencer", name = "play sequencer", 
-    options = {"off", "on"},
-    default = 1,
-    action = function(value) 
-      if value == 1 then
-        sequencer_playing = false 
-        -- sample_player.set_play_mode(sample_player.selected_voice,5)
-      else
-        sequencer_playing= true
-        -- sample_player.set_play_mode(3)
-      end
-      ur_position = sample_player.sample_positions[sample_player.selected_voice]
-    end
-  }
+  -- params:add{
+  --   type = "option", id = "play_sequencer", name = "play sequencer", 
+  --   options = {"off", "on"},
+  --   default = 1,
+  --   action = function(value) 
+  --     if value == 1 then
+  --       sequencer_playing = false 
+  --       -- sample_player.set_play_mode(sample_player.selected_voice,5)
+  --     else
+  --       sequencer_playing= true
+  --       -- sample_player.set_play_mode(3)
+  --     end
+  --     ur_position = sample_player.sample_positions[sample_player.selected_voice]
+  --   end
+  -- }
   ------------------------------
   -- filter params
   ------------------------------
@@ -692,12 +692,13 @@ function parameters.init()
   params:add_group("just friends",2)
   params:add{type = "option", id = "output_jf", name = "just friends",
     options = {"off","engine", "midi", "engine + midi"},
-    default = 1,
+    default = 2,
     action = function(value)
       if value > 1 then 
         -- crow.output[2].action = "{to(5,0),to(0,0.25)}"
         crow.ii.pullup(true)
         crow.ii.jf.mode(1)
+        print("pullup mode 1")
       else
         crow.ii.jf.mode(0)
         -- crow.ii.pullup(false)
