@@ -146,7 +146,7 @@ the grid ui is organized into multiple ui groups:
   * some of the *output types* and *outputs* have multiple *modes*:
     * dev/crow modes: *volts* and *drum*
     * dev/just friends modes: *play_note*, *play_voice*
-    * dev/w/ modoes: *w_syn pitch* and *w_del karplus pitch*
+    * dev/w/ modes: *w_syn pitch* and *w_del karplus pitch*
 * (F) *params*
   * some of the *output types'* *outputs* and *modes* have multiple *params*: 
     * sc/voice[1-6] params: 
