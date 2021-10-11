@@ -149,8 +149,15 @@ function sample_player.set_rate(voice, rate)
 end
 
 function sample_player.set_direction(voice, direction)
-  sample_player.voice_rates[voice] = sample_player.voice_rates[voice] * direction < 0 and sample_player.voice_rates[voice] * direction or sample_player.voice_rates[voice]
-  sample_player.reset(voice)
+  -- print("direction",voice,direction)
+  -- sample_player.voice_rates[voice] * direction < 0 and sample_player.voice_rates[voice] * direction or sample_player.voice_rates[voice]
+  if direction > 0 and sample_player.voice_rates[voice] < 0 then
+    sample_player.voice_rates[voice] = sample_player.voice_rates[voice] * -1
+    sample_player.reset(voice)
+  elseif direction < 0 and sample_player.voice_rates[voice] > 0 then
+    sample_player.voice_rates[voice] = sample_player.voice_rates[voice] * -1
+    sample_player.reset(voice)
+  end
 end
 
 function sample_player.set_level(voice, level)

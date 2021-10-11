@@ -1269,7 +1269,6 @@ function sc.get_options_text(option_index)
   -- tab.print(options_table)
   if option_index then
     local active_option_text = options_table[option_index]
-    print("active_option_text",active_option_text)
     return active_option_text
   elseif options_table then
     options_table = type(options_table) == "table" and options_table or nil 
@@ -1435,17 +1434,42 @@ function sc.get_selected_sequin_values(sgp,sqn,output_table)
   local sequin_id = sqn
 
   local selected_sequin_values 
+  local selected_sequin_value_heirarchy
   for k, v in pairs(output_table) do 
     if k == "output_data" then
       local selected_sequin = v.value_heirarchy.sqn
+      
       if selected_sequin == sequin_id then
-        local selected_sequin_output_group = sc.get_active_sequinset()
-        local sequin_output_group = v.value_heirarchy.sgp
+        -- local selected_sequin_output_group = sc.get_active_sequinset()
+        local sequin_group = v.value_heirarchy.sgp
         local sequin_output_type  = v.value_heirarchy.typ
-        local sequin_output_type_processor = sequin_processor.processors[sequin_output_type]
+        local sequin_output        = v.value_heirarchy.out
+        local sequin_output_param  = v.value_heirarchy.par      
+        local sequin_output_mode   = v.value_heirarchy.mod
 
-        if selected_sequin_output_group == sequin_output_group then
+        
+        -- local sequin_output_type_processor = sequin_processor.processors[sequin_output_type]
+
+        -- if selected_sequin_output_group == sequin_output_group then
+
+        local sel_ixs = sequencer_controller.get_selected_indices()
+          -- print(">>>>>>>>>>>")
+          -- print(sel_ixs.selected_sequin_group, sequin_group)
+          -- print(sel_ixs.selected_sequin_output_type, sequin_output_type)
+          -- print(sel_ixs.selected_sequin_output, sequin_output)
+          -- print(sel_ixs.selected_sequin_output_param, sequin_output_param)
+          -- print(sel_ixs.selected_sequin_output_mode, sequin_output_mode)
+        
+        
+        if (
+          sel_ixs.selected_sequin_group           == sequin_group         and
+          sel_ixs.selected_sequin_output_type     == sequin_output_type   and 
+          sel_ixs.selected_sequin_output          == sequin_output        and
+          (sel_ixs.selected_sequin_output_param  == nil or sel_ixs.selected_sequin_output_param  == sequin_output_param)  and 
+          (sel_ixs.selected_sequin_output_mode   == nil or sel_ixs.selected_sequin_output_mode   == sequin_output_mode)    
+        ) then
           selected_sequin_values = fn.deep_copy(v.seq.data)
+          selected_sequin_value_heirarchy = v.value_heirarchy
           sc.selected_sequin_ix = v.seq.ix
         end
       end
@@ -1454,6 +1478,14 @@ function sc.get_selected_sequin_values(sgp,sqn,output_table)
     end
   end
   if selected_sequin_values then
+
+    -- if the selected control is an option, convert the values 
+    if sc.output_control_specs_selected[1]=="option" then
+      for i=1,#selected_sequin_values,1 do
+        local idx = selected_sequin_values[i]
+        selected_sequin_values[i]=sc.output_control_specs_selected[2][idx]
+      end
+    end
     sc.selected_sequin_values = selected_sequin_values
   end
 end

@@ -202,6 +202,7 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
   
   local sequin_values = {}
   sequin_values = sequencer_screen.get_selected_sequin_values() 
+  -- if type(sequin_values) == "table" then tab.print(sequin_values) end
   return control_labels, control_bcrumbs, sequence_values, sequin_values
 end
 
