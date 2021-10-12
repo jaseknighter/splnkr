@@ -92,11 +92,9 @@ function sc.activate_sequinset(target_sequinset)
   -- clock.run(grid_sequencer.activate_grid_key_at,target_sequinset,1,0.01)
   clock.sleep(0.1)
   sc.reset_sequinset_value_heirarcy(target_sequinset)
-  print("activate",target_sequinset)
+  -- print("activate",target_sequinset)
 end
 
--- > tab.print(sc.sequins_outputs_table[4][1][1][2][2][1].output_data)
--- > tab.print(sc.sequins_outputs_table[4][1][4][2][2][1].output_data)
 function sc.reset_sequinset_value_heirarcy(sgp,inner_table)
   local tab = inner_table and inner_table or sc.sequins_outputs_table[sgp]
   -- local table_type
@@ -122,34 +120,41 @@ end
 
 -----------------------
 
+function sc.clear_sequence_data(source_id, data_path, end_node)
+  local source_table
+  if #data_path == 2 then
+    -- print(data_path[1],data_path[2])
+    -- print(sc.sequins_outputs_table[data_path[1]])
+    -- print(sc.sequins_outputs_table[data_path[1]][data_path[2]])
+    -- print(sc.sequins_outputs_table[data_path[1]][data_path[2]][source_id])
+    local source_table = sc.sequins_outputs_table[data_path[1]][data_path[2]][source_id]
+    sc.sequins_outputs_table[data_path[1]][data_path[2]][source_id] = {}
+    source_table = sc.sequins_outputs_table[data_path[1]][data_path[2]][source_id]
+  end
+  sc.update_value_heirarcy(end_node, source_id, source_table)
+  sc.update_sequin(source_id)
+  -- clock.run(sc.activate_target,source_id)
+end
+
 function sc.copy_paste_sequence_data(source_id, target_id, data_path, end_node)
-  -- source_table = sc.sequins_outputs_table
-  -- target_table = sc.sequins_outputs_table
-  -- for i=1,#data_path,1 do
-  --   source_table = source_table[data_path[i]]
-  --   -- target_table = target_table[data_path[i]]
-  -- end
-  -- source_table = source_table[source_id]
-  -- target_table = target_table[target_id]
   local target_table
   if #data_path == 2 then
-    print(data_path[1],data_path[2])
-    print(sc.sequins_outputs_table[data_path[1]])
-    print(sc.sequins_outputs_table[data_path[1]][data_path[2]])
-    print(sc.sequins_outputs_table[data_path[1]][data_path[2]][source_id])
+    -- print(data_path[1],data_path[2])
+    -- print(sc.sequins_outputs_table[data_path[1]])
+    -- print(sc.sequins_outputs_table[data_path[1]][data_path[2]])
+    -- print(sc.sequins_outputs_table[data_path[1]][data_path[2]][source_id])
     local source_table = sc.sequins_outputs_table[data_path[1]][data_path[2]][source_id]
-    -- target_table = sc.sequins_outputs_table[data_path[1]][data_path[2]][target_id]
     sc.sequins_outputs_table[data_path[1]][data_path[2]][target_id] = {}
     sc.sequins_outputs_table[data_path[1]][data_path[2]][target_id] = fn.deep_copy(source_table)
     target_table = sc.sequins_outputs_table[data_path[1]][data_path[2]][target_id]
   end
   sc.update_value_heirarcy(end_node, target_id, target_table)
-  sc.update_sequin(target_id)
   clock.run(sc.activate_target,target_id)
 end
 
 function sc.activate_target(target_id)
   clock.sleep(0.1)
+  sc.update_sequin(target_id)
   clock.run(grid_sequencer.activate_grid_key_at,target_id+5,1,0.1)
 end
 
@@ -194,7 +199,7 @@ function sc.print_outputs_table(inner_table)
       sc.print_outputs_table(v)
     end
     if k == "value_heirarchy" then
-      tab.print(v)
+      -- tab.print(v)
       -- print(">>>>>")
     end
     if k == "output_data" then
@@ -1121,9 +1126,6 @@ end
 
 ---------------- THE SEQUIN GETS SET HERE ---------------
 function sc.reset_place_values(exception)
-  print("reset_place_values")
-  -- print("exception, = =tenths", exception, exception == "tenths",sc.active_sequin_value.place_values.tenths)
-  -- sc.active_sequin_value.place_values = {}
   sc.active_sequin_value.place_values.ten_thousands   = (exception == "ten_thousands")  and  sc.active_sequin_value.place_values.ten_thousands or  0
   sc.active_sequin_value.place_values.thousands       = (exception == "thousands")      and  sc.active_sequin_value.place_values.thousands     or  0
   sc.active_sequin_value.place_values.hundreds        = (exception == "hundreds")       and  sc.active_sequin_value.place_values.hundreds      or  0
@@ -1273,7 +1275,6 @@ function sc.get_options_text(option_index)
   else
     options_table = map[typ][out][par][2]
   end
-  -- tab.print(options_table)
   if option_index then
     local active_option_text = options_table[option_index]
     return active_option_text

@@ -184,17 +184,28 @@ the grid ui is organized into multiple ui groups:
     * if a *decimal place* value or *integer place* value is set with a short press with nothing selected in the number row (*J*), the value is set to 0 at that place
     * if a *decimal place* value or *integer place* value is set with a long press and nothing selected in the number row (*J*), the value for the selected output/mode/param is set to nil and will be skipped
     * if a place value is set with a long press with a number selected in the number row (*J*), only the selected place value is used and other place values are cleared. 
-* duplicating values (copy/paste)
+
+### clear sequence data
+* what data can be cleared:
+  * a sequinset (row 1, columns 1-5) 
+  * a sequin (ie an individual sequence steps) (row 1, columns 6-14)
+* to clear sequence data:
+  * select the data element (sequinset or sequin) you want to clear to activate it 
+  * long press the key selected in the previous step and then release it
 
 ### copy/paste sequence data
 copy paste is available in a number of areas:
 
 * sequinset: copy all the sequence/output settings from one sequinset to another
-  * press the grid key representing the target sequinset (the sequinset you want to copy to) so it is activated (blinking). for example, to copy to the first sequinset, press grid key 1,1
-  * again, press the grid key representing the target sequinset, this time holding the key down
-  * with the target sequinset key pressed, also press the key representing the source sequinset you want to copy from
-  * release the target sequinset key
-* sequin: to copy from one sequin (sequence step) to another follow the directions above for sequinset copying, pressing the target and source sequin keys you want to copy/paste to/from
+  * method #1:
+    * press the key representing the source sequinset you want to copy from to active it
+    * long press the key representing the target sequinset you want to copy to and release the key
+  * method #2:
+    * press the grid key representing the target sequinset (the sequinset you want to copy to) so it is activated (blinking). for example, to copy to the first sequinset, press grid key 1,1
+    * again, press the grid key representing the target sequinset, this time holding the key down
+    * with the target sequinset key pressed, also press the key representing the source sequinset you want to copy from
+    * release the target sequinset key
+* sequin: to copy from one sequin (sequence step) to another follow the directions for one of the two methods detailed above for sequinset copying
 
 ### sequencer/norns interface
 the third screen of the norns ui displays the current state of the grid when the grid is set to *sequencer mode*. 

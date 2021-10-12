@@ -240,7 +240,6 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
   
   local sequin_values = {}
   sequin_values = sequencer_screen.get_selected_sequin_values() 
-  -- if type(sequin_values) == "table" then tab.print(sequin_values) end
   return control_labels, control_bcrumbs, sequence_values, sequin_values
 end
 
@@ -472,7 +471,6 @@ function sequencer_screen.update()
       for i=1,5,1 do
         screen.move(lx,ly)
         local val = (sequin_values and #sequin_values > 0) and sequin_values[i] or val
-        -- if (i==1 and sequin_values) then print (sequin_values[i],val) end
         val = val ~= "" and val or "-"
         screen_text = screen_text .. val .. "  "
         local screen_level = selected_sequin_index == i and 15 or 5

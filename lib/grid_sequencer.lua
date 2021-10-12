@@ -199,11 +199,6 @@ function grid_sequencer.init()
   grid_sequencer.dirtygrid(true)
 end
 
--- function grid_sequencer:registergrid_fn(group,fn)
---   group.fn = fn
---   -- print()
--- end
-
 function grid_sequencer.activate_grid_key_at(x,y, delay)
   if delay then clock.sleep(delay) end
   grid_sequencer.key(x, y, 1)
@@ -706,13 +701,27 @@ end
 -- local long_presses = {}
 
 function grid_sequencer:copy_paste(first_press,second_press)
-  -- print(first_press[1],first_press[2],second_press[1],second_press[2])
-  if (first_press[1] < 6 and second_press[1] < 6 ) and (first_press[2] == 1 and second_press[2] == 1 ) then
-    -- copy/paste sequinsets to selected set from pressed set
-    -- print("copy/paste sequinsets")
+  if (first_press[1] < 6 and second_press == nil) and (first_press[2] == 1) then
+    -- copy/paste sequinsets to selected set from active set
+    sequencer_controller.copy_paste_sequinsets(first_press[1], sequencer_controller.selected_sequin_group)
+  elseif (first_press[1] < 15 and second_press == nil ) and (first_press[2] == 1) then
+    -- copy/paste indivdual sequins to first pressed sequin from active sequin
+    local sgp = sequencer_controller.selected_sequin_group
+    local ssg = 1  
+    local data_path = {sgp,ssg}
+    local target_id = first_press[1]-5
+    local source_id = sequencer_controller.selected_sequin
+    local end_node = "sqn"
+    if target_id ~= source_id then
+      sequencer_controller.copy_paste_sequence_data(source_id, target_id, data_path, end_node)
+    else
+      sequencer_controller.clear_sequence_data(source_id, data_path, end_node)
+    end
+  elseif (first_press[1] < 6 and second_press[1] < 6 ) and (first_press[2] == 1 and second_press[2] == 1 ) then
+    -- copy/paste sequinsets to first pressed set from second pressed set
     sequencer_controller.copy_paste_sequinsets(first_press[1], second_press[1])
   elseif (first_press[1] < 15 and second_press[1] < 15 ) and (first_press[2] == 1 and second_press[2] == 1 ) then
-    -- copy/paste indivdual sequins
+    -- copy/paste indivdual sequins to first pressed sequin from second pressed sequin
     local sgp = sequencer_controller.selected_sequin_group
     local ssg = 1  
     local data_path = {sgp,ssg}
@@ -747,11 +756,9 @@ function grid_sequencer:set_long_press(bool,x,y)
       long_presses = {}
       grid_sequencer:copy_paste(first_press,second_press)
     else 
-      long_presses = {}
-    -- elseif #long_presses == 0 then
+      local first_press = long_presses[1]
+      grid_sequencer:copy_paste(first_press)
       grid_sequencer:key_press(x, y, 1, "long")
-      print("long")
-      -- unflickered,send long pressed keys to controller
       long_presses = {}
     end
   end

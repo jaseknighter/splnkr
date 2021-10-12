@@ -242,7 +242,6 @@ end
 function grid_filter:animate()
   local i=1
   while i <= 3 do
-    -- print("anim",i,grid_filter.animator)
     if grid_filter.animator and grid_filter.animator[i] ~= 0 then
       for j=1,16,1 do
         if grid_filter.animator[i] == 1 then

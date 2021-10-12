@@ -7,7 +7,6 @@ end
 
 local draw_top_nav = function()
   -- if nav_off == false then
-  -- print("red")
   screen.level(15)
   screen.stroke()
   screen.rect(0,0,screen_size.x,10)
@@ -71,10 +70,7 @@ local update_pages = function()
   if initializing == false then
     
     if pages.index == 1 then
-      -- print("update")
-      -- screen.clear()
       sample_player.update()
-
     elseif pages.index == 2 then
       -- update_content(1,1,length,128)
       -- redraw_waveform()

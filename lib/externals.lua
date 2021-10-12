@@ -36,7 +36,6 @@ function externals:new(active_notes)
     else
       value = notes[value+note_offset]
     end
-    -- print("value",value)
     
     local output_midi = params:get("output_midi")
 
@@ -221,7 +220,6 @@ function externals:new(active_notes)
         end
       else
         local level = params:get("envelope1_max_level") 
-        -- print("jfjfjfjf", jf_mode, voice_id,level,value)
         crow.ii.jf.play_note((value-60)/12,level)
       end
     end
@@ -232,13 +230,11 @@ function externals:new(active_notes)
       if mode == 1 then -- play_note
         local pitch = value.pitch
         local level = value.level
-        -- print("crow.ii.jf.play_note", pitch, level)
         crow.ii.jf.play_note((pitch-60)/12,level)
       elseif mode == 2 then -- play_voice
         local channel = value.channel
         local pitch = value.pitch
         local level = value.level
-        -- print("crow.ii.jf.play_voice", channel, pitch, level)
         crow.ii.jf.play_voice(channel,(pitch-60)/12,level)
       else
         crow.ii.jf.pitch(1,(value-60)/12)
