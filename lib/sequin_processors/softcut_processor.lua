@@ -13,7 +13,7 @@ function softcut_processor.init()
 end
 
 function softcut_processor.process(output_table)
-  -- print("process softcut control_id, control_name:",output_table.control_id,output_table.control_name)
+  --print("process softcut control_id, control_name:",output_table.control_id,output_table.control_name)
   -- tab.print(output_table)
   -- local voice = output_table.value_heirarchy
   -- tab.print(output_table.value_heirarchy)
@@ -22,7 +22,7 @@ function softcut_processor.process(output_table)
   
   -- sub sequin gets called here--
   local value = output_table.calculated_absolute_value and output_table.calculated_absolute_value or output_table.value
-  -- print("control_to_update, voice, value",control_to_update, voice, value)
+  --print("control_to_update, voice, value",control_to_update, voice, value)
   control_to_update(voice,value) -- update control
 end
 
@@ -38,7 +38,7 @@ end
 --     softcut.loop_start(1,start)
 --     softcut.loop_end(1,start + (0.3))
 --     softcut.play(1, 1)
---     -- print("sample_pattern1_event",start)  
+--     --print("sample_pattern1_event",start)  
 --   end
 -- end
 
@@ -61,7 +61,7 @@ function softcut_processor.update_cutter_assignment(voice, cutter_assignment)
     -- cutter_assignment = cutter_assignment
     
 
-    -- print("call: set cut assignment", voice, cutter_assignment)
+    --print("call: set cut assignment", voice, cutter_assignment)
     -- TODO: move into a global function shared with code in encoders_and keys
     -- local d = 0 -- DIRECTION, DON'T NEED TO CHANGE HERE!!!!!
     -- cutters[sample_player.selected_cutter_group]:set_start_x(util.clamp(cutters[sample_player.selected_cutter_group]:get_start_x()+(d*1),0,cutters[sample_player.selected_cutter_group]:get_finish_x()))

@@ -18,7 +18,7 @@ function lattice_sequins.init()
   ennui_crystal       = crow.sequins{ b,  b,  b,  1,  1,  1,  1,  a,  a,  e,  b}
   stable_crystal      = crow.sequins{ 1,  1,  a,  1,  a}
 
-  -- print("ennui_crystal...",ennui_crystal)
+  --print("ennui_crystal...",ennui_crystal)
   hearts_in_need_make_syphonies = {}
   hearts_in_need_make_syphonies[1] = {0, 3, 7}
   hearts_in_need_make_syphonies[2] = {0, 3, 5}

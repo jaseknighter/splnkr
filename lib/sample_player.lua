@@ -122,7 +122,7 @@ function sample_player.load_file(file)
     new_sample_load_completed()
   else
     -- sample_player.update()
-    -- print("cancel")
+    --print("cancel")
   end
 end
 
@@ -134,12 +134,12 @@ end
 
 function sample_player.get_cutter_assignment(voice) 
   return sample_player.cutter_assignments[voice] 
-  -- print("set cutter assignment",voice,cutter_assignment) 
+  --print("set cutter assignment",voice,cutter_assignment) 
 end
 
 function sample_player.set_cutter_assignment(voice, cutter_assignment) 
   sample_player.cutter_assignments[voice] = cutter_assignment
-  -- print("set cutter assignment",voice,cutter_assignment) 
+  --print("set cutter assignment",voice,cutter_assignment) 
   sample_player.reset(voice, true)
 end
 
@@ -149,7 +149,7 @@ function sample_player.set_rate(voice, rate)
 end
 
 function sample_player.set_direction(voice, direction)
-  -- print("direction",voice,direction)
+  --print("direction",voice,direction)
   -- sample_player.voice_rates[voice] * direction < 0 and sample_player.voice_rates[voice] * direction or sample_player.voice_rates[voice]
   if direction > 0 and sample_player.voice_rates[voice] < 0 then
     sample_player.voice_rates[voice] = sample_player.voice_rates[voice] * -1
@@ -165,7 +165,7 @@ function sample_player.set_level(voice, level)
 end
 
 function sample_player.reset(voice, set_position_at_start)
-  -- print("reset",voice,cutters[1],sample_player.sample_positions[voice])
+  --print("reset",voice,cutters[1],sample_player.sample_positions[voice])
   -- softcut.enable(voice,1)
   softcut.buffer(voice,1)
   softcut.loop(voice,1)
@@ -185,7 +185,7 @@ function sample_player.reset(voice, set_position_at_start)
     softcut.loop_start(voice,sample_player.voices_start_finish[voice][1])
     softcut.loop_end(voice,sample_player.voices_start_finish[voice][2])
   else  -- not sure what this is for (it does get called at script init)
-    -- print("WHY AM I HERE?!?!?!")
+    --print("WHY AM I HERE?!?!?!")
     -- softcut.loop_start(voice,1)
     -- softcut.loop_end(voice,1+length)
     -- softcut.position(voice,sample_player.sample_positions[voice])
@@ -384,9 +384,9 @@ function sample_player.autogenerate_cutters(a)
       end
       
       table.sort(autogen_cut_indices)
-      -- print(">>>>>>>>>>>>")
+      --print(">>>>>>>>>>>>")
       -- tab.print(autogen_cut_indices)
-      -- print(">>>>>>")
+      --print(">>>>>>")
 
       local cutter_first_start_x = 0
       local cutter_first_finish_x = autogen_cut_indices[1]
@@ -397,7 +397,7 @@ function sample_player.autogenerate_cutters(a)
       do
         local new_cutter_start_x = autogen_cut_indices[i]
         local new_cutter_finish_x = autogen_cut_indices[i+1] and autogen_cut_indices[i+1] or 128
-        -- print(i+1, new_cutter_start_x, new_cutter_finish_x)
+        --print(i+1, new_cutter_start_x, new_cutter_finish_x)
         table.insert(cutters, i+1, Cutter:new(i+1, new_cutter_start_x, new_cutter_finish_x))
         table.insert(cutter_rates, i+1,1)
       end

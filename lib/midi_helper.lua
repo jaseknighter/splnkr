@@ -21,7 +21,7 @@ end
 midi_out_device = midi.connect(1)
 
 -- set_midi_channels = function()
-  -- print("set midi channels")
+  --print("set midi channels")
 --   if pages.index < 4 then
 --     if active_plant == 1 then
 --       if device_16n then set_16n_channel_and_cc_values(plant1_cc_channel) end
@@ -67,7 +67,7 @@ local channel_vals_16n = {}
 
 -- note: this function isn't currently required
 local process_16n_data = function(data)
-  -- print("process 16n data")
+  --print("process 16n data")
   local msg_data = midi.to_msg(data)
   
   midi_event_index = midi_event_index + 1
@@ -172,10 +172,10 @@ midi_event = function(data)
   else
     if data[1] == 240 and data[2] == 125 then        --- this is the start byte with a a message from the 16n faderbank 
       midi_event_index = 2
-      -- print("received start byte from the 16n faderbank")
+      --print("received start byte from the 16n faderbank")
       message_from_16n = true
     elseif message_from_16n == true and data[2] == 15 and data[3] == 2 then        --- this is the start of a message with the 16n configs
-      -- print("receiving of 16n configs. set receiving_configs_from_16n = true")
+      --print("receiving of 16n configs. set receiving_configs_from_16n = true")
       receiving_configs_from_16n = true
     else
       -- handle other message types
@@ -199,7 +199,7 @@ midi_event = function(data)
         note_to_play = MusicUtil.freq_to_note_num(freq)
         
         if data[1] == midi_in_command1 then -- plant 1 engine note on
-          -- print("note to play",note_to_play,midi_in_command1)
+          --print("note to play",note_to_play,midi_in_command1)
           envelopes[1].update_envelope()
           -- if output_bandsaw == 3 or output_bandsaw == 4 or output_midi == 3 or output_midi == 4 then
           --   plants[1].sounds.engine_note_on(note_to_play, freq, random_note_frequency)
@@ -228,7 +228,7 @@ end
 midi.add = function(device)
   params.get_midi_devices()
 
-  -- print("midi device add ", device.id, device.name)
+  --print("midi device add ", device.id, device.name)
   if device.name == "16n" then 
       device_16n = device 
       -- send_16n_sysex(midi,get_16n_data_table)

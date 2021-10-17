@@ -9,12 +9,12 @@ function devices_crow_processor.init()
 end
 
 function devices_crow_processor.process(output_table)
-  -- print("process crow control_id, control_name:",output_table.control_id,output_table.control_name)
+  --print("process crow control_id, control_name:",output_table.control_id,output_table.control_name)
   -- tab.print(output_table)
   -- local voice = output_table.value_heirarchy
   -- tab.print(output_table.value_heirarchy)
   -- local voice = output_table.value_heirarchy.out
-  -- print("control_to_update, voice",control_to_update, voice)
+  --print("control_to_update, voice",control_to_update, voice)
   
   
   local control_to_update = devices_crow_processor.controls[output_table.control_id]

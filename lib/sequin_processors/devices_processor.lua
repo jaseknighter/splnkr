@@ -16,6 +16,7 @@ function devices_processor.process(output_table)
   elseif output_table.value_heirarchy.out == 3 then -- just friends
     devices_jf_processor.process(output_table)
   elseif output_table.value_heirarchy.out == 4 then -- w/
+    devices_w_processor.process(output_table)
   end
 end
 

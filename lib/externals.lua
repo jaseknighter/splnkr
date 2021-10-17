@@ -22,7 +22,7 @@ function externals:new(active_notes)
     if note_location <= #active_notes then
       table.remove(active_notes, note_location)
     else
-    --   print("note location is out of bounds!!!", note_location, #active_notes)
+    --print("note location is out of bounds!!!", note_location, #active_notes)
     end
     midi_out_device:note_off(note_num, nil, channel)
   end
@@ -98,7 +98,7 @@ function externals:new(active_notes)
       end
     
       asl_envelope = "{" .. asl_envelope .. "}"
-      -- print(asl_envelope)
+      --print(asl_envelope)
       return asl_envelope 
     end
 
@@ -225,8 +225,11 @@ function externals:new(active_notes)
     end
     
     -- just friends out (sequencer)
-    if (note_source == "sequencer" and (output_jf == 2 or output_jf == 4) and note_target == "jf") then
+    if (note_source == "sequencer" and note_target == "jf") then
+      if (output_jf ~= 2 and output_jf ~= 4) then params:set("output_jf",2) end
+      
       mode = value.mode
+        print("jf process",note_source,note_target, output_jf,value.mode,value.level)
       if mode == 1 then -- play_note
         local pitch = value.pitch
         local level = value.level
@@ -244,15 +247,28 @@ function externals:new(active_notes)
     -- wsyn out
     if (note_source == "engine" and (output_wsyn == 2 or output_wsyn == 4)) or
       (note_source == "midi" and (output_wsyn == 3 or output_wsyn == 4)) then
-        local pitch = (value-48)/12
-        local velocity = active_voice == 1 and params:get("envelope1_max_level") or params:get("envelope2_max_level") 
-        if voice_id == 1 then
-        params:set("wsyn_init",1)
+      local pitch = (value-48)/12
+      local velocity = active_voice == 1 and params:get("envelope1_max_level") or params:get("envelope2_max_level") 
+      params:set("wsyn_init",1)
+      if voice_id == 1 then
         local voice = 1
         crow.send("ii.wsyn.play_voice(" .. voice .."," .. pitch .."," .. velocity .. ")")
       else
         local voice = 2
         crow.send("ii.wsyn.play_voice(" .. voice .."," .. pitch .."," .. velocity .. ")")
+      end
+    end
+
+    -- wsyn out (sequencer)
+    if (note_source == "sequencer" and  note_target == "wsyn") then
+      if value then
+        local pitch = (value-60)/12
+        local velocity = params:get("envelope1_max_level") 
+        -- params:set("wsyn_init",1)
+        local voice = voice_id
+        crow.send("ii.wsyn.play_voice(" .. voice .."," .. pitch .."," .. velocity .. ")")
+      else
+        print("ERROR externals.lua, value not defined externals.lua line 271")
       end
     end
 
@@ -265,6 +281,20 @@ function externals:new(active_notes)
       crow.send("ii.wdel.freq(" .. pitch .. ")")
       params:set("wdel_rate",0)
     end
+
+    if (note_source == "sequencer" and  note_target == "wdel_ks") then
+
+      if params:get("output_wdel_ks") ~= 2 then
+        params:set("output_wdel_ks",2)
+      end
+      local pitch = (value-60)/12
+      -- local level = voice_id == 1 and params:get("envelope1_max_level") or params:get("envelope2_max_level") 
+      local level = params:get("envelope1_max_level") 
+      crow.send("ii.wdel.pluck(" .. level .. ")")
+      crow.send("ii.wdel.freq(" .. pitch .. ")")
+      params:set("wdel_rate",0)
+    end
+
 
     -- divide 1 over beat_frequency to translate from hertz (cycles per second) into beats per second
     if envelope_length > 1/beat_frequency then

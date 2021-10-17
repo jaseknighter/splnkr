@@ -77,7 +77,7 @@ end
 
 function sample_recorder.record_to_tape_next(wait, next_loop, ending_cutter, dir_name, pathname)
   clock.sleep(wait)
-  -- print("loop done",next_loop,dir_name,pathname)
+  --print("loop done",next_loop,dir_name,pathname)
   -- stop the recording
   softcut.play(1,0)
   audio.tape_record_stop ()
@@ -94,7 +94,7 @@ function sample_recorder.record_to_tape_pause(next_loop, ending_cutter, dir_name
 end
 
 function sample_recorder.record_to_tape_done()
-  -- print("done. reset play mode:",pre_save_play_mode)
+  --print("done. reset play mode:",pre_save_play_mode)
   saving = false
   sample_player.set_play_mode(pre_save_play_mode)
 end

@@ -47,7 +47,6 @@ function cut_detector.find_cuts()
   do
     local b_diff = cut_detector.bright_tab[i] - cut_detector.bright_tab[i-1]
     b_diff = b_diff < 0 and b_diff * -1 or b_diff
-    -- print("i,b_diff",i,b_diff)
     table.insert(bright_diff_tab,{i,b_diff})
   end
 

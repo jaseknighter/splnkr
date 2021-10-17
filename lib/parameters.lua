@@ -147,7 +147,7 @@ function parameters.init()
       -- update engine
         engine.set_filter_level(i-1,x)
       -- update grid
-      -- print(grid_filter,grid_filter.last_known_height)
+      --print(grid_filter,grid_filter.last_known_height)
       -- if grid_filter and grid_filter.last_known_height > 0 then
       if grid_filter and grid_filter.last_known_height then
         local j = i
@@ -168,7 +168,7 @@ function parameters.init()
   for i=1,16,1 do
     params:add_control("reciprocal_quality"..i,"reciprocal q"..i,cs_rq)
     -- local default_val = ((i-1)%5)+2
-    -- print(default_val)
+    --print(default_val)
     local default_val = 1
     params:set("reciprocal_quality"..i,default_val)
     params:set_action("reciprocal_quality"..i,function(x) 
@@ -183,12 +183,12 @@ function parameters.init()
           local j = i
         -- local l =math.floor(util.linlin(cs_rq.minval,cs_rq.maxval,8,1,x))
         local l =math.floor(util.linlin(cs_rq.minval,cs_rq.maxval,1,8,x))
-        -- print("l",cs_rq.minval,cs_rq.maxval,x,l)
+        --print("l",cs_rq.minval,cs_rq.maxval,x,l)
 
         grid_filter.solids[filter_rqgrid_view][j] = {}
         for k=7,l,-1
         do
-          -- print(j, k, l, filter_rqgrid_view)
+          --print(j, k, l, filter_rqgrid_view)
           grid_filter:register_solid_at(j, k, l, filter_rqgrid_view)
         end
       end
@@ -698,7 +698,6 @@ function parameters.init()
         -- crow.output[2].action = "{to(5,0),to(0,0.25)}"
         crow.ii.pullup(true)
         crow.ii.jf.mode(1)
-        print("pullup mode 1")
       else
         crow.ii.jf.mode(0)
         -- crow.ii.pullup(false)
@@ -722,7 +721,7 @@ function parameters.init()
   }
 
 
-  params:add_group("w/syn",14)
+  params:add_group("w/syn",13)
   w_slash.wsyn_add_params()
   -- w_slash.wsyn_v2_add_params()
 
@@ -991,7 +990,7 @@ function parameters.init()
               envelopes[envelope_id].graph:edit_graph(env_nodes)
               local num_envelope_controls = envelope_id == 1 and "num_envelope1_controls" or "num_envelope2_controls"
               local num_env_nodes = #envelopes[envelope_id].graph_nodes
-              -- print("reset_envelope_control_params",envelope_id,i)
+              --print("reset_envelope_control_params",envelope_id,i)
               reset_envelope_control_params(envelope_id)
               params:set(num_envelope_controls,num_env_nodes)
             end

@@ -483,7 +483,7 @@ function grid_sequencer:register_ui_group(group_name,x1,y1,x2, y2, off_level, se
   grid_data.active_item = nil
   grid_data.default_value = default_value
   grid_data.group_name = group_name
-  -- print(group_name,x1,y1,x2, y2, off_level, selection_mode, control_spec, default_value)
+  --print(group_name,x1,y1,x2, y2, off_level, selection_mode, control_spec, default_value)
   local ol = off_level
   local increment = 0
   local has_default_value = false
@@ -700,7 +700,7 @@ end
 
 -- local long_presses = {}
 
-function grid_sequencer:copy_paste(first_press,second_press)
+function grid_sequencer:process_long_press(first_press,second_press)
   if (first_press[1] < 6 and second_press == nil) and (first_press[2] == 1) then
     -- copy/paste sequinsets to selected set from active set
     sequencer_controller.copy_paste_sequinsets(first_press[1], sequencer_controller.selected_sequin_group)
@@ -717,6 +717,8 @@ function grid_sequencer:copy_paste(first_press,second_press)
     else
       sequencer_controller.clear_sequence_data(source_id, data_path, end_node)
     end
+  elseif (first_press[1] >5 and first_press[1] < 11 and first_press[2] == 8  and second_press == nil ) then
+    -- print("clear")
   elseif (first_press[1] < 6 and second_press[1] < 6 ) and (first_press[2] == 1 and second_press[2] == 1 ) then
     -- copy/paste sequinsets to first pressed set from second pressed set
     sequencer_controller.copy_paste_sequinsets(first_press[1], second_press[1])
@@ -754,10 +756,10 @@ function grid_sequencer:set_long_press(bool,x,y)
       local first_press = long_presses[1]
       local second_press = long_presses[2]
       long_presses = {}
-      grid_sequencer:copy_paste(first_press,second_press)
+      grid_sequencer:process_long_press(first_press,second_press)
     else 
       local first_press = long_presses[1]
-      grid_sequencer:copy_paste(first_press)
+      grid_sequencer:process_long_press(first_press)
       grid_sequencer:key_press(x, y, 1, "long")
       long_presses = {}
     end

@@ -360,6 +360,16 @@ function w_slash.wsyn_add_params()
   ]]
 
   params:add {
+    type = "number",
+    id = "wsyn_voc",
+    name = " Voice",
+    min = 1,
+    max = 3,
+    action = function(val) 
+    end
+  }
+
+  params:add {
     type = "option",
     id = "wsyn_ar_mode",
     name = "AR mode",
@@ -377,6 +387,8 @@ function w_slash.wsyn_add_params()
     name = " Velocity",
     controlspec = controlspec.new(0, 5, "lin", 0, 2, "v"),
     action = function(val) 
+      local voice = params:get('wsyn_voc')
+      crow.send("ii.wsyn.velocity(" .. voice .. "," .. val .. ")") 
       pset_wsyn_vel = val
     end
   }
@@ -406,7 +418,7 @@ function w_slash.wsyn_add_params()
     type = "control",
     id = "wsyn_fm_index",
     name = "FM index",
-    controlspec = controlspec.new(0, 5, "lin", 0, 0, "v"),
+    controlspec = controlspec.new(-5, 5, "lin", 0, 0, "v"),
     action = function(val) 
       crow.send("ii.wsyn.fm_index(" .. val .. ")") 
       pset_wsyn_fm_index = val
@@ -423,25 +435,16 @@ function w_slash.wsyn_add_params()
     end
   }
   params:add {
-    type = "control",
-    id = "wsyn_fm_ratio_num",
-    name = "FM ratio numerator",
-    controlspec = controlspec.new(1, 20, "lin", 1, 2),
+    type = "option",
+    id = "wsyn_fm_ratio",
+    name = "FM ratio",
+    options={"1","1/2","1/4","3/4","1/3","2/3","1/5","2/5","3/5"},
     action = function(val) 
-      crow.send("ii.wsyn.fm_ratio(" .. val .. "," .. params:get("wsyn_fm_ratio_den") .. ")") 
-      pset_wsyn_fm_ratio_num = val
+      crow.send("ii.wsyn.fm_ratio(" .. val .. ")") 
+      pset_wsyn_fm_ratio = val
     end
   }
-  params:add {
-    type = "control",
-    id = "wsyn_fm_ratio_den",
-    name = "FM ratio denominator",
-    controlspec = controlspec.new(1, 20, "lin", 1, 1),
-    action = function(val) 
-      crow.send("ii.wsyn.fm_ratio(" .. params:get("wsyn_fm_ratio_num") .. "," .. val .. ")") 
-      pset_wsyn_fm_ratio_den = val
-    end
-  }
+
   params:add {
     type = "control",
     id = "wsyn_lpg_time",
@@ -471,8 +474,7 @@ function w_slash.wsyn_add_params()
       params:set("wsyn_ramp", math.random(-5, 5)/10)
       params:set("wsyn_fm_index", math.random(-50, 50)/10)
       params:set("wsyn_fm_env", math.random(-50, 40)/10)
-      params:set("wsyn_fm_ratio_num", math.random(1, 4))
-      params:set("wsyn_fm_ratio_den", math.random(1, 4))
+      params:set("wsyn_fm_ratio", math.random(1, 9))
       params:set("wsyn_lpg_time", math.random(-28, -5)/10)
       params:set("wsyn_lpg_symmetry", math.random(-50, -30)/10)
     end
@@ -486,8 +488,7 @@ function w_slash.wsyn_add_params()
       params:set("wsyn_ramp", math.random(-50, 50)/10)
       params:set("wsyn_fm_index", math.random(0, 50)/10)
       params:set("wsyn_fm_env", math.random(-50, 50)/10)
-      params:set("wsyn_fm_ratio_num", math.random(1, 20))
-      params:set("wsyn_fm_ratio_den", math.random(1, 20))
+      params:set("wsyn_fm_ratio", math.random(1, 9))
       params:set("wsyn_lpg_time", math.random(-50, 50)/10)
       params:set("wsyn_lpg_symmetry", math.random(-50, 50)/10)
     end
@@ -501,8 +502,7 @@ function w_slash.wsyn_add_params()
       params:set("wsyn_ramp", pset_wsyn_ramp)
       params:set("wsyn_fm_index", pset_wsyn_fm_index)
       params:set("wsyn_fm_env", pset_wsyn_fm_env)
-      params:set("wsyn_fm_ratio_num", pset_wsyn_fm_ratio_num)
-      params:set("wsyn_fm_ratio_den", pset_wsyn_fm_ratio_den)
+      params:set("wsyn_fm_ratio", pset_wsyn_fm_ratio)
       params:set("wsyn_lpg_time", pset_wsyn_lpg_time)
       params:set("wsyn_lpg_symmetry", pset_wsyn_lpg_symmetry)
       params:set("wsyn_vel", pset_wsyn_vel)

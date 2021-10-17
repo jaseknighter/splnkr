@@ -187,11 +187,13 @@ the grid ui is organized into multiple ui groups:
 
 ### clear sequence data
 * what data can be cleared:
-  * a sequinset (row 1, columns 1-5) 
-  * a sequin (ie an individual sequence steps) (row 1, columns 6-14)
+  * a sequinset (row 1-5, column 1) 
+  * a sequin (ie an individual sequence steps) (rows 6-14, column 1)
+  * an individual value within a sub-sequence (rows 6-10, row 8)
 * to clear sequence data:
   * select the data element (sequinset or sequin) you want to clear to activate it 
   * long press the key selected in the previous step and then release it
+* to clear an indivdual value within a sub-sequence long press the sub-sequence key (i.e. a key in rows 6-10, row 8)
 
 ### copy/paste sequence data
 copy paste is available in a number of areas:

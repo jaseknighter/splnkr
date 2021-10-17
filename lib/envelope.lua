@@ -273,7 +273,7 @@ function Envelope:new(id, num_envelopes, env_nodes)
   end
   
   e.update_envelope = function()
-    -- print("update_env")
+    --print("update_env")
     if initializing == false then
       engine.set_numSegs(#e.graph_nodes)
       local env_arrays = e.get_envelope_arrays()
@@ -284,7 +284,7 @@ function Envelope:new(id, num_envelopes, env_nodes)
       for i=#env_arrays.times,2,-1
       do
         if env_arrays.times[i] == env_arrays.times[i-1] then
-          -- print("equal",i)
+          --print("equal",i)
           env_arrays.times[i] = env_arrays.times[i] + 0.001
         end
       end
@@ -356,7 +356,7 @@ function Envelope:new(id, num_envelopes, env_nodes)
   end
   
   e.remove_node = function()
-    -- print(e.active_node, #e.graph_nodes)
+    --print(e.active_node, #e.graph_nodes)
     if (e.active_node > 1 and e.active_node < #e.graph_nodes and #e.graph_nodes > 3) then
       table.remove(e.graph_nodes, e.active_node)
       e.graph:remove_point(e.active_node)

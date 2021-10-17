@@ -1,3 +1,4 @@
+-- TODO: add a parameter to the number 'controlspec' to indicate the number of decimal places
 -- TODO: implement subgroups
 -- TODO: figure out how to implement conditional/probabilisticx controls
 -- TODO: save sequencer settings
@@ -78,7 +79,6 @@ function sc.init()
 end
 
 function sc.copy_paste_sequinsets(target_sequinset,source_sequinset)
-  -- print("copy/paste",source_sequinset, target_sequinset)
   sc.sequins_outputs_table[target_sequinset] = {}
   sc.sequins_outputs_table[target_sequinset] = fn.deep_copy(sc.sequins_outputs_table[source_sequinset])
   clock.run(sc.activate_sequinset,target_sequinset)
@@ -92,7 +92,6 @@ function sc.activate_sequinset(target_sequinset)
   -- clock.run(grid_sequencer.activate_grid_key_at,target_sequinset,1,0.01)
   clock.sleep(0.1)
   sc.reset_sequinset_value_heirarcy(target_sequinset)
-  -- print("activate",target_sequinset)
 end
 
 function sc.reset_sequinset_value_heirarcy(sgp,inner_table)
@@ -123,10 +122,6 @@ end
 function sc.clear_sequence_data(source_id, data_path, end_node)
   local source_table
   if #data_path == 2 then
-    -- print(data_path[1],data_path[2])
-    -- print(sc.sequins_outputs_table[data_path[1]])
-    -- print(sc.sequins_outputs_table[data_path[1]][data_path[2]])
-    -- print(sc.sequins_outputs_table[data_path[1]][data_path[2]][source_id])
     local source_table = sc.sequins_outputs_table[data_path[1]][data_path[2]][source_id]
     sc.sequins_outputs_table[data_path[1]][data_path[2]][source_id] = {}
     source_table = sc.sequins_outputs_table[data_path[1]][data_path[2]][source_id]
@@ -139,10 +134,6 @@ end
 function sc.copy_paste_sequence_data(source_id, target_id, data_path, end_node)
   local target_table
   if #data_path == 2 then
-    -- print(data_path[1],data_path[2])
-    -- print(sc.sequins_outputs_table[data_path[1]])
-    -- print(sc.sequins_outputs_table[data_path[1]][data_path[2]])
-    -- print(sc.sequins_outputs_table[data_path[1]][data_path[2]][source_id])
     local source_table = sc.sequins_outputs_table[data_path[1]][data_path[2]][source_id]
     sc.sequins_outputs_table[data_path[1]][data_path[2]][target_id] = {}
     sc.sequins_outputs_table[data_path[1]][data_path[2]][target_id] = fn.deep_copy(source_table)
@@ -200,7 +191,7 @@ function sc.print_outputs_table(inner_table)
     end
     if k == "value_heirarchy" then
       -- tab.print(v)
-      -- print(">>>>>")
+      --print(">>>>>")
     end
     if k == "output_data" then
       -- do something???
@@ -226,7 +217,7 @@ sc.outputs_map = {
 sc.output_mode_map = {
   {nil,nil,nil,nil,nil,nil},                        -- softcut 
   -- {nil,3,3,2},                  -- devices midi out (nil), crow(3), just_friends(3),w/(2)
-  {nil,2,7,2},                  -- devices midi out (nil), crow(2), just_friends(7),w/(2)
+  {nil,2,7,5},                  -- devices midi out (nil), crow(2), just_friends(7),w/(5)
   {nil,nil,nil,nil,8,nil,nil},  -- effects: amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (8)
   {nil},                        -- enveloper: on/off (nil), trig_rate(nil), overlap (nil)
   {nil,nil},                    -- pattern (division)
@@ -244,7 +235,7 @@ sc.output_params_map = {
     5,5,5,5,5,5
   }, 
   -- {nil,{nil,nil,nil},{2,3,nil},{nil,nil}}, -- device (midi out (nil), crow(3), just_friends(3),w/(2))
-  {nil,{nil,nil},{2,2,2,2,2,2,2},{nil,nil}}, -- device (midi out (nil), crow(2), just_friends(2),w/(2))
+  {nil,{nil,nil},{2,2,2,2,2,2,2},{9,9,9,4,9}}, -- device (midi out (nil), crow(2), just_friends(2),w/(2))
   {nil,nil,nil,nil,{nil,nil,nil,nil,nil,nil,nil,nil},nil,nil}, -- effect (amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (8)), phaser(nil), delay(nil)
   {nil,nil,nil}, -- enveloper 
   {nil,nil}, -- pattern
@@ -276,7 +267,7 @@ function sc.refresh_output_control_specs_map()
       {
         {"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"v_mode","v_mode"},      -- play mode
         {"option",cutters,nil,"cutter","cutter"},  -- cutter
-        {"number","0.00",20.00,1,"rate","rate"},    -- rate
+        {"number","0.00",20,1,"rate","rate"},    -- rate
         {"option",{-1,1},2,nil,"direction","direction"},      -- direction
         {"number",'0.00',10,0.20,"level","level"}         -- level (amp)
       },  
@@ -305,8 +296,61 @@ function sc.refresh_output_control_specs_map()
         -- {"note",-24,3,nil,6,"pitch_portamento","pitch portamento"}, -- play_note: pitch (portamento)
       }, 
       {  -- w/
-        {"note",min_note,max_note,nil,"pitch","pitch"},          -- w_syn: pitch
-        {"note",min_note,max_note,nil,"pitch","pitch"}           -- w_del karplus: pitch
+        {   -- w_syn voice 1                                                          
+          {"note",min_note,max_note,nil,"pitch","pitch"},          -- w_syn: pitch
+          {"number",'0.00',5,nil,"vel","vel"},              -- w_syn: velocity
+          {"number",'-5.00',5,nil,"crv","crv"},              -- w_syn: ar_curve
+          {"number",'-5.00',5,nil,"rmp","rmp"},              -- w_syn: ar_ramp
+          {"number",'-5.00',5.00,nil,"fm_ix","fm_ix"},                -- w_syn: fm index
+          {"number",'-5.00',5.00,nil,"fm_env","fm_env"},                 -- w_syn: fm envelope
+          {"option",{"1","1/2","1/4","3/4","1/3","2/3","1/5","2/5","3/5",},1,nil,"fm_rat","fm_rat"}, -- w_syn: fm ratio
+          {"number",'-5.00',5,nil,"lpg_tme","lpg_tme"},               -- w_syn: lpg time
+          {"number",'-5.00',5.0,nil,"lpg_sym","lpg_sym"},         -- w_syn: lpg symmetry
+        },          
+        {   -- w_syn voice 2                                                          
+          {"note",min_note,max_note,nil,"pitch","pitch"},          -- w_syn: pitch
+          {"number",'0.00',5,nil,"vel","vel"},              -- w_syn: velocity
+          {"number",'-5.00',5,nil,"crv","crv"},              -- w_syn: ar_curve
+          {"number",'-5.00',5,nil,"rmp","rmp"},              -- w_syn: ar_ramp
+          {"number",'-5.00',5,nil,"fm_ix","fm_ix"},                -- w_syn: fm index
+          {"number",'-5.00',5,nil,"fm_env","fm_env"},                 -- w_syn: fm envelope
+          {"option",{"1","1/2","1/4","3/4","1/3","2/3","1/5","2/5","3/5",},1,nil,"fm_rat","fm_rat"}, -- w_syn: fm ratio
+          {"number",'-5.00',5,nil,"lpg_tme","lpg_tme"},               -- w_syn: lpg time
+          {"number",'-5.00',5.0,nil,"lpg_sym","lpg_sym"},         -- w_syn: lpg symmetry
+        },          
+        {   -- w_syn voice 3                                                          
+          {"note",min_note,max_note,nil,"pitch","pitch"},          -- w_syn: pitch
+          {"number",'0.00',5,nil,"vel","vel"},              -- w_syn: velocity
+          {"number",'-5.00',5,nil,"crv","crv"},              -- w_syn: ar_curve
+          {"number",'-5.00',5,nil,"rmp","rmp"},              -- w_syn: ar_ramp
+          {"number",'-5.00',5,nil,"fm_ix","fm_ix"},                -- w_syn: fm index
+          {"number",'-5.00',5,nil,"fm_env","fm_env"},                 -- w_syn: fm envelope
+          {"option",{"1","1/2","1/4","3/4","1/3","2/3","1/5","2/5","3/5",},1,nil,"fm_rat","fm_rat"}, -- w_syn: fm ratio
+          {"number",'-5.00',5,nil,"lpg_tme","lpg_tme"},               -- w_syn: lpg time
+          {"number",'-5.00',5.0,nil,"lpg_sym","lpg_sym"},         -- w_syn: lpg symmetry
+        },          
+        {   -- w_del karplus                                                          
+          {"note",min_note,max_note,nil,"pitch","pitch"},    -- w_del_ks: pitch
+          {"number","0",100,nil,"mix","mix"},              -- w_del_ks: mix
+          {"number",'0',100,99,"fbk","fbk"},              -- w_del_ks: feedback
+          {"number",'1',16,12,"flt","flt"},           -- w_del_ks: filter
+          -- {"number",'0.000',5.00,nil,"rte","rate"},     -- w_del_ks: fm index
+          -- {"note",min_note,max_note,nil,"frq","frq"},      -- w_del_ks: pitch
+          -- {"number",'0.00',5,nil,"mod_rte","mod_rte"},     -- w_del_ks: lpg time
+          -- {"number",'0.00',5.0,nil,"mod_amt","mod_amt"},   -- w_del_ks: lpg symmetry
+          -- {"option",{0,1},1,nil,"frz","frz"},           -- w_del_ks: lpg freeze
+        },          
+        {   -- w_del delay                                                          
+          {"number","0",100,nil,"mix","mix"},                  -- w_del: mix
+          {"number",'0.000',10,nil,"tme","tme"},               -- w_del: delay time
+          {"number",'0',100,nil,"fbk","fbk"},               -- w_del: feedback
+          {"number",'1',16,12,"flt","flt"},                -- w_del: filter
+          {"number",'0.000',5.00,nil,"rte","rate"},               -- w_del: fm index
+          {"note",min_note,max_note,nil,"frq","frq"},         -- w_syn: pitch
+          {"number",'0.00',5,nil,"mod_rte","mod_rte"},        -- w_del: lpg time
+          {"number",'0.00',5.0,nil,"mod_amt","mod_amt"},      -- w_del: lpg symmetry
+          {"option",{0,1},1,nil,"frz","frz"},                 -- w_del: lpg freeze
+        },          
       }, 
     },
     {   -- effects (, pitchshift array (8))
@@ -329,7 +373,7 @@ function sc.refresh_output_control_specs_map()
     }, 
     {   -- enveloper 
       {"option",{"off","on"},nil,nil,"enveloper_off_on","enveloper off/on"},        -- off/on
-      {"number", 0.01, 50.00,nil,"trig_rate","trig rate"},        -- trig_rate 0.01 - 50.00
+      {"number", 0.01, 50,nil,"trig_rate","trig rate"},        -- trig_rate 0.01 - 50.00
       {"number",'0.00',1,nil,"overlap","overlap"}                  -- overlap 0-1
     },
     {   -- pattern (TODO: replace with more flexible pattern division selector)
@@ -432,7 +476,6 @@ function sc.update_selected_sequin_group(index,state, seq_ix)
       sc.lattice:start()
     end
   else
-    -- print(sc.lattice.enabled)
     if sc.lattice.enabled == true then 
       sc.lattice:stop()
     end
@@ -799,11 +842,15 @@ function sc.set_output_values(control_spec)
     control_max = tonumber(control_spec[3])
     local control_default_index = control_spec[4]
     local control_min_length, control_max_length
-    control_min_length = #tostring(math.abs(control_min)) 
-    control_max_length = polarity ~= -1 and #tostring(math.abs(control_max)) or control_min_length
+    -- control_min_length = #tostring(math.abs(control_min)) 
+    control_min_length = #control_spec[2] 
+    control_max_length = polarity ~= -1 and #tostring(math.floor(control_max)) or control_min_length
+    -- control_max_length = polarity ~= -1 and #control_spec[3] or control_min_length
+     
     local decimal_location = string.find(math.abs(control_min),"%.") or 0
     local decimal_num_places = decimal_location > 0 and control_min_length - decimal_location or 0
-    local integer_num_places = decimal_location > 0 and control_max_length - (control_max_length - decimal_location) or control_max_length
+    -- local integer_num_places = decimal_location > 0 and control_max_length - (control_max_length - decimal_location) or control_max_length
+    local integer_num_places = control_max_length
     integer_num_places = (control_max <= -1 or control_max >= 1) and integer_num_places or nil
     local value_selector_length = integer_num_places + decimal_num_places
     local value_place_decimals_x1, value_place_decimals_x2
@@ -823,12 +870,18 @@ function sc.set_output_values(control_spec)
       sc.selector_sequence_mode = grid_sequencer:register_ui_group("selector_sequence_mode",4,7,5,7,10,6,control_spec, 5)
     end
 
-    local value_place_integers_x1 = integer_num_places and 14 - integer_num_places - decimal_location + 1 or nil
-    local value_place_integers_x2 = integer_num_places and value_place_integers_x1 + integer_num_places - 1
+    local value_place_integers_x1, value_place_integers_x2
+    if decimal_num_places and integer_num_places then
+      value_place_integers_x1 = 14 - integer_num_places - decimal_num_places
+      value_place_integers_x2 = value_place_integers_x1 + integer_num_places - 1
+    elseif integer_num_places then
+      value_place_integers_x1 = 14 - integer_num_places
+      value_place_integers_x2 = value_place_integers_x1 + integer_num_places - 1
+    end
     sc.value_place_integers = grid_sequencer:register_ui_group("value_place_integers",value_place_integers_x1,7,value_place_integers_x2,7,4,3,control_spec, control_default_index)
     
     -- if there's just 1 value for the integer place auto-select it
-    if(value_place_integers_x1 == value_place_integers_x2) then
+    if(value_place_integers_x1 == value_place_integers_x2 and value_place_decimals_x1 == nil) then
       grid_sequencer.activate_grid_key_at(14,7)
     end
 
@@ -951,10 +1004,15 @@ function sc.update_value_place_decimals(x, y, state)
     local min = control_spec[2]
     local min_length = #min
     local last_place_value = tonumber(string.sub(min,min_length))
+
+
+    
+    local first_selector = (is_last_decimal_place and  last_place_value > 0) and 5+last_place_value or 6
+    sc.value_selector_nums = grid_sequencer:register_ui_group("value_selector_nums",first_selector,6,14,6,4,3)
+
     local selector_length = (is_last_decimal_place and  last_place_value > 0) and 5+last_place_value or 14
+    -- sc.value_selector_nums = grid_sequencer:register_ui_group("value_selector_nums",6,6,selector_length,6,4,3)
 
-
-    sc.value_selector_nums = grid_sequencer:register_ui_group("value_selector_nums",6,6,selector_length,6,4,3)
 
     local existing_output_value = sc.get_active_output_table_slot().output_value
     local decimal_location = existing_output_value and string.find(existing_output_value,"%.") or 0
@@ -1077,7 +1135,7 @@ end
 
 
 function sc.update_value_selector_nums(x, y, state)
-  local x_offset = sc.value_selector_nums.grid_data.x1 - 1
+  local x_offset = 5 --sc.value_selector_nums.grid_data.x1 - 1
   if state == "on" then
     local selector_value = x - x_offset
     sc.value_number = selector_value
@@ -1107,7 +1165,7 @@ function sc.update_value_selector_nums(x, y, state)
     elseif sc.active_value_selector_place == "thousands" then
       sc.active_sequin_value.place_values.thousands =  0
     elseif sc.active_value_selector_place == "hundreds" then
-      sc.active_sequin_value.place_values.hundreds =  s0
+      sc.active_sequin_value.place_values.hundreds =  0
     elseif sc.active_value_selector_place == "ones" then
       sc.active_sequin_value.place_values.ones =  0
     elseif sc.active_value_selector_place == "tens" then
@@ -1151,7 +1209,15 @@ function sc.get_previous_active_sequin_value(selected_sequin)
   return previous_active_sequin_value, previous_active_sequin_value_index
 end
 
+function sc.get_active_control_min()
+  return tonumber(sequencer_controller.value_place_integers.control_spec[2])
+end
+function sc.get_active_control_max()
+  return tonumber(sequencer_controller.value_place_integers.control_spec[3])
+end
+
 function sc.update_sequin_output_value(x, y, state, press_type)
+  
   local output_value
   local value_selector_default_value
   if press_type == "long" then
@@ -1159,15 +1225,13 @@ function sc.update_sequin_output_value(x, y, state, press_type)
     value_selector_default_value = grid_sequencer.ui_groups[value_selector_group_id].default_value
     value_selector_default_value = value_selector_default_value and value_selector_default_value or 1
 
-    if sc.active_value_selector_place then
-      local reset_exception = sc.active_value_selector_place
-      print("reset_exception",reset_exception)
-      sc.reset_place_values(reset_exception)
-    else
-      print("reset_place_values to default",press_type)
-      sc.reset_place_values()
-      -- output_value = value_selector_default_value
-    end
+    -- if sc.active_value_selector_place then
+    --   local reset_exception = sc.active_value_selector_place
+    --   -- sc.reset_place_values(reset_exception)
+    --   sc.reset_place_values()
+    -- else
+    --   sc.reset_place_values()
+    -- end
 
   end
 
@@ -1184,32 +1248,43 @@ function sc.update_sequin_output_value(x, y, state, press_type)
     local polarity = sc.value_polarity and sc.value_polarity or 1
     output_value = tonumber(output_value * polarity)
 
-    -- here's where the number gets set according to the sequence_mode
+    if sequencer_controller.value_place_integers then
+      local spec_min = sc.get_active_control_min()
+      local spec_max = sc.get_active_control_max()
+      output_value = util.clamp(output_value,spec_min,spec_max)
+    end
+
+    -- here's where the number gets cleared or set according to the sequence_mode
     local sequence_mode = sc.sequence_mode and sc.sequence_mode or 1
-    
-    -- clear out the place values if press_type == "long" and value is already 0
-    if press_type == "long" and output_value == 0 then 
-      output_value = "clear" 
-    else 
+    if press_type == "long" then -- clear 
+      output_value = "-" 
+      sc.reset_place_values()
+    else -- set
       local sequence_mode = sc.sequence_mode 
       output_value = sequence_mode == 1 and output_value .. "r" or output_value    
-    end                    
+    end
+
+    -- if press_type == "long" and output_value == 0 then 
+    --   output_value = "-" 
+    -- else 
+    --   local sequence_mode = sc.sequence_mode 
+    --   output_value = sequence_mode == 1 and output_value .. "r" or output_value    
+    -- end                    
     
     sc.active_output_value_text = output_value
   elseif sc.active_sequin_value.value_type == "notes" then
     if press_type == "long" then
-      output_value = value_selector_default_value
-    else
+      -- output_value = value_selector_default_value
+      output_value = "-"
+    elseif sc.active_sequin_value.note_value then
       local num_notes_per_octave = fn.get_num_notes_per_octave()
       local octave_offset = sc.active_sequin_value.octave_value * num_notes_per_octave
       local sequence_mode = sc.sequence_mode 
       output_value = sc.active_sequin_value.note_value + octave_offset
       output_value = sequence_mode == 1 and output_value .. "r" or output_value    
     end
-    -- print("")
     -- local value_text = sc.get_options_text(output_value)
     sc.active_output_value_text = output_value
-    -- print("output value", output_value)
   elseif sc.active_sequin_value.value_type == "option" then
     if press_type == "long" then
       print("reset to default value",press_type)
@@ -1221,15 +1296,17 @@ function sc.update_sequin_output_value(x, y, state, press_type)
     sc.active_output_value_text = value_text
   end
 
-  local output_sequins_index = x-5
-  ---------------------------------------
-  -- !!!!!!!!!!!!!!!!!!!!!!!!!!
-  -- update the ouptut table
-  -- !!!!!!!!!!!!!!!!!!!!!!!!!!
-  ---------------------------------------
-  sc.update_outputs_table(output_value,output_sequins_index)
-  
-  sc.update_sequin(output_sequins_index)
+  if x then
+    local output_sequins_index = x - 5
+    ---------------------------------------
+    -- !!!!!!!!!!!!!!!!!!!!!!!!!!
+    -- update the ouptut table
+    -- !!!!!!!!!!!!!!!!!!!!!!!!!!
+    ---------------------------------------
+    sc.update_outputs_table(output_value,output_sequins_index)
+    
+    sc.update_sequin(output_sequins_index)
+  end
 end
 
 -- todo: implement subgroups
@@ -1268,21 +1345,21 @@ function sc.get_options_text(option_index)
 
   local map = sc.get_output_control_specs_map()
   local options_table
-  if mod and par then
+  if map[typ][out][mod] and map[typ][out][mod][par] then
     options_table = map[typ][out][mod][par][2]
-  elseif mod then
+  elseif map[typ][out][mod] then
     options_table = map[typ][out][mod][2]
-  else
+  elseif map[typ][out][par] then
     options_table = map[typ][out][par][2]
   end
-  if option_index then
+  if option_index and options_table then
     local active_option_text = options_table[option_index]
     return active_option_text
   elseif options_table then
     options_table = type(options_table) == "table" and options_table or nil 
     return options_table
   else
-    print("error",typ,out,mod,par)
+    -- print("error",typ,out,mod,par)
   end
 end
 
@@ -1329,7 +1406,6 @@ function sc.update_outputs_table(output_value,output_sequins_index)
     if sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod] == nil then 
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod] = {} 
     end
-    -- print("selected item table structure som",sgp,ssg,sqn,typ,out,som)
     local existing_output_data_at_location = sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data
     if output_value and output_value ~= "clear" then 
       if sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data == nil then
@@ -1338,14 +1414,18 @@ function sc.update_outputs_table(output_value,output_sequins_index)
       end
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].table_type = "mod" 
       -- sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.value = output_value
-      sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.seq[output_sequins_index] = output_value 
+      if output_value ~= "-" then
+        sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.seq[output_sequins_index] = output_value 
+      else
+        sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.seq[output_sequins_index] = "nil"
+      end
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.value_heirarchy = {sgp=sgp,ssg=ssg,sqn=sqn,typ=typ,out=out,mod=mod}
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.control_id = sc.active_sequin_control_id
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.control_name = sc.active_sequin_control_name
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.value_type = sc.active_sequin_value.value_type
       sc.active_value_heirarchy = {sgp=sgp,ssg=ssg,sqn=sqn,typ=typ,out=out,mod=mod}
     elseif output_value == "clear" then
-      print("clear")
+      -- print("clear all")
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod] = {}
     end
   else
@@ -1365,14 +1445,17 @@ function sc.update_outputs_table(output_value,output_sequins_index)
       end
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].table_type = "par" 
       -- sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.value = output_value 
-      sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.seq[output_sequins_index] = output_value 
+      if output_value ~= "-" then
+        sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.seq[output_sequins_index] = output_value 
+      else
+        sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.seq[output_sequins_index] = "nil"
+      end
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.value_heirarchy = {sgp=sgp,ssg=ssg,sqn=sqn,typ=typ,out=out,mod=mod,par=par}
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.control_id = sc.active_sequin_control_id
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.control_name = sc.active_sequin_control_name
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.value_type = sc.active_sequin_value.value_type
       sc.active_value_heirarchy = {sgp=sgp,ssg=ssg,sqn=sqn,typ=typ,out=out,mod=mod,par=par}
     elseif output_value == "clear" then
-      print("clear")
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par] = {}
     end
   end
@@ -1411,37 +1494,33 @@ function sc.update_active_value_heirarchy()
     -- local out = (sqn and type) and sc.sequins_outputs_table[a_map.sgp][a_map.ssg][a_map.sqn][a_map.typ][a_map.out]
     -- local mod = (sqn and type and out) and sc.sequins_outputs_table[a_map.sgp][a_map.ssg][a_map.sqn][a_map.typ][a_map.out][a_map.mod]
     -- local par = (sqn and type and out and mod) and sc.sequins_outputs_table[a_map.sgp][a_map.ssg][a_map.sqn][a_map.typ][a_map.out][a_map.mod][a_map.par]
-    -- print(a_map, sqn, type, out, mod, par, output_data)
     -- return output_data
     local output_data
     if a_map.par then 
       output_data = (a_map.sqn and a_map.type and a_map.out and a_map.mod and a_map.par) and sc.sequins_outputs_table[a_map.sgp][a_map.ssg][a_map.sqn][a_map.typ][a_map.out][a_map.mod][a_map.par].output_data
-      -- print ("found par",output_data )
       sc.active_value_heirarchy = {sgp=a_map.sgp,ssg=a_map.ssg,sqn=a_map.sqn,typ=a_map.typ,out=a_map.out,mod=a_map.mod,par=a_map.par}
     elseif a_map.mod then
       output_data = (sqn and type and out and mod and par) and sc.sequins_outputs_table[a_map.sgp][a_map.ssg][a_map.sqn][a_map.typ][a_map.out][a_map.mod].output_data
-      -- print ("found mod, no par",output_data)
       sc.active_value_heirarchy = {sgp=a_map.sgp,ssg=a_map.ssg,sqn=a_map.sqn,typ=a_map.typ,out=a_map.out,mod=a_map.mod}
     end
     if output_data then
-      -- print("found output data") 
       -- return output_data
       
     else
-      -- print("no output data") 
+      --print("no output data") 
     end
   -- else
-    -- print("no heirarchy")
+    --print("no heirarchy")
   -- end
 end
 
-function sc.get_selected_sequin_values(sgp,sqn,output_table)
-  -- print("sgp,sqn",sgp,sqn)
+function sc.refresh_selected_sequin_values(sgp,sqn,output_table,selected_sequin_values)
   sc.update_active_value_heirarchy()
   local output_table = output_table and output_table or sc.sequencers[sgp].seq[sqn].active_outputs
   local sequin_id = sqn
 
-  local selected_sequin_values 
+  sc.selected_sequin_values = selected_sequin_values and selected_sequin_values or nil
+  local selected_sequin_values = selected_sequin_values and selected_sequin_values or nil
   local selected_sequin_value_heirarchy
   for k, v in pairs(output_table) do 
     if k == "output_data" then
@@ -1461,12 +1540,6 @@ function sc.get_selected_sequin_values(sgp,sqn,output_table)
         -- if selected_sequin_output_group == sequin_output_group then
 
         local sel_ixs = sequencer_controller.get_selected_indices()
-          -- print(">>>>>>>>>>>")
-          -- print(sel_ixs.selected_sequin_group, sequin_group)
-          -- print(sel_ixs.selected_sequin_output_type, sequin_output_type)
-          -- print(sel_ixs.selected_sequin_output, sequin_output)
-          -- print(sel_ixs.selected_sequin_output_param, sequin_output_param)
-          -- print(sel_ixs.selected_sequin_output_mode, sequin_output_mode)
         
         
         if (
@@ -1479,23 +1552,27 @@ function sc.get_selected_sequin_values(sgp,sqn,output_table)
           selected_sequin_values = fn.deep_copy(v.seq.data)
           selected_sequin_value_heirarchy = v.value_heirarchy
           sc.selected_sequin_ix = v.seq.ix
+
+          -- if the selected control is an option, convert the values 
+          if sc.output_control_specs_selected[1]=="option" then
+            for i=1,#selected_sequin_values,1 do
+              local idx = selected_sequin_values[i]
+              selected_sequin_values[i]=sc.output_control_specs_selected[2][idx]
+            end
+          end
+          sc.selected_sequin_values = selected_sequin_values
+        else
+          -- print("no match")
+          -- selected_sequin_value_heirarchy = nil
+          -- sc.selected_sequin_ix = nil
+          -- selected_sequin_values = nil
         end
       end
-    elseif type(v) == "table" then
-      sc.get_selected_sequin_values(sgp,sqn,v)    
+    elseif type(v) == "table" and selected_sequin_values == nil then
+      sc.refresh_selected_sequin_values(sgp,sqn,v,sc.selected_sequin_values)    
     end
   end
-  if selected_sequin_values then
-
-    -- if the selected control is an option, convert the values 
-    if sc.output_control_specs_selected[1]=="option" then
-      for i=1,#selected_sequin_values,1 do
-        local idx = selected_sequin_values[i]
-        selected_sequin_values[i]=sc.output_control_specs_selected[2][idx]
-      end
-    end
-    sc.selected_sequin_values = selected_sequin_values
-  end
+  
 end
 
 function sc.get_output_values(vh)
@@ -1517,7 +1594,6 @@ function sc.get_output_values(vh)
       output_value = output_value == nil and "nil" or output_value
       local calculated_absolute_value = (sqn and output_data and output_data.calculated_absolute_value) and output_data.calculated_absolute_value or nil
       calculated_absolute_value = calculated_absolute_value == nil and "nil" or calculated_absolute_value
-      -- print(output_value,calculated_absolute_value)
       table.insert(outputs_table,{output_value,calculated_absolute_value})
     end
   elseif vh and vh.mod then
@@ -1534,15 +1610,8 @@ function sc.get_output_values(vh)
       output_value = output_value == nil and "nil" or output_value
       local calculated_absolute_value = (sqn and output_data and output_data.calculated_absolute_value) and output_data.calculated_absolute_value or nil
       calculated_absolute_value = calculated_absolute_value == nil and "nil" or calculated_absolute_value
-      -- print(output_value,calculated_absolute_value)
       table.insert(outputs_table,{output_value,calculated_absolute_value})
     end
-  end
-  if outputs_table then 
-    -- print(outputs_table)
-    -- tab.print(outputs_table[1],outputs_table[2])
-    -- tab.print(outputs_table[1])
-    -- tab.print(outputs_table[2])
   end
   return outputs_table
 end
@@ -1618,7 +1687,8 @@ function sc:update_group(group_name,x, y, state, press_type)
   elseif group_name == "sequin_output_values" then
     self.update_sequin_output_value(x, y, state, press_type)
   end
-  sc.update_active_value_heirarchy()
+  self.update_sequin_output_value()
+  self.update_active_value_heirarchy()
 
 end
 
