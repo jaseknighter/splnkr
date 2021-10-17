@@ -24,6 +24,7 @@ ideas:
 issues:
 * sound cuts out if env length is too long when enveloper is activated
 * pan_type and pan_max params don't do anything (issue with the `Out` statement in sc I think)
+* sub-sequins are not kept in sync with each other (maybe a feature?)
 ]]
 
 
@@ -71,6 +72,7 @@ function init()
   -- os.execute("sleep 9;")
 
   audio.level_eng_cut(0)
+  crow.reset()
   crow.output[1].action = "{to(5,0),to(0,0.25)}"
   crow.output[2].action = "{to(5,0),to(0,0.25)}"
   crow.output[3].action = "{to(5,0),to(0,0.25)}"
@@ -156,7 +158,6 @@ function init()
       softcut.loop_start(1,start)
       softcut.loop_end(1,start + (0.3))
       softcut.play(1, 1)
-      -- print("sample_pattern1_event",start)  
     end
   end
   ]]
@@ -202,19 +203,21 @@ function init()
     print("amplitudeDetect1",value)
   end)
   amplitude_detect_poll2 = poll.set("amplitudeDetect2", function(value)
-    -- print("amplitudeDetect2",value)
+    --print("amplitudeDetect2",value)
     detect_level = tonumber(value)
   end)
   amplitude_detect_poll3 = poll.set("amplitudeDetect3", function(value)
-    -- print("amplitudeDetect3",value)
+    --print("amplitudeDetect3",value)
     detect_level = tonumber(value)
   end)
   amplitude_detect_poll4 = poll.set("amplitudeDetect4", function(value)
-    -- print("amplitudeDetect4",value)
+    --print("amplitudeDetect4",value)
     detect_level = tonumber(value)
   end)
 
   frequency_detect_poll1 = poll.set("frequencyDetect1", function(value)
+    --print("freq",value)
+
     note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
     -- if note_num ~= last_note_num and detect_level >= 0.05 and (value > 200 and value < 1800) then 
     if note_num and note_num ~= last_note_num then 
@@ -249,7 +252,7 @@ function init()
   grid_pattern = lattice_grid:new_pattern{
     action = function(t) 
       -- samples:play() 
-      -- print("anim",g,g.cols)
+      --print("anim",g,g.cols)
       -- if g and g.cols > 0 then 
         grid_filter:animate() 
       -- end
@@ -271,7 +274,6 @@ function finish_init()
   engine.start_splnkring(0)
 
   clock.sleep(0.2)
-  
   amplitude_detect_poll1:start()
   amplitude_detect_poll2:start()
   amplitude_detect_poll3:start()
@@ -349,7 +351,7 @@ function set_redraw_timer()
       -- sample_player.update()
   
       controller.update_pages()
-      -- print("update")
+      --print("update")
       screen_dirty = false
       clear_subnav = true
       
