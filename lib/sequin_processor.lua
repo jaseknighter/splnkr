@@ -25,9 +25,7 @@ local previous_relative_values = {}
 
 function sequin_processor.find_outputs(output_table, sequin_id)
   if sequin_id then
-    --print("find_outputs")
     for k, v in pairs(output_table) do 
-      -- print("find outputs", k,v)
       if k == "output_data" then
         local selected_sequin = v.value_heirarchy.sqn
         if selected_sequin == sequin_id then
@@ -38,19 +36,15 @@ function sequin_processor.find_outputs(output_table, sequin_id)
           if selected_sequin_output_group == sequin_output_group then
 
             -- get the next value set in the output table's sequins
-            --print("output_data")
             local next_output_value
             if v.seq then
               -- v.seq:reset() 
               next_output_value = v.seq() 
             end
-            --print("output sequin value",sequin_output_type_processor,next_output_value)
             local value_type = v.value_type
             -- seq = v.sequins
             if sequin_output_type_processor and next_output_value ~= nil and next_output_value ~= "" then
-              -- local process_mode = string.find(v.value,"r") == nil and "absolute" or "relative"
               local process_mode = string.find(next_output_value,"r") == nil and "absolute" or "relative"
-              --print("next_output_value, value_type, process_mode",next_output_value,value_type,process_mode)
               
               if process_mode == "absolute" or (value_type ~= "number" and value_type ~= "notes" ) then 
                 v.value = next_output_value 
@@ -98,12 +92,10 @@ function sequin_processor.find_outputs(output_table, sequin_id)
           break
         end
       elseif type(v) == "table" then
-        --print("table",k)
         sequin_processor.find_outputs(v, sequin_id)
       end
     end
   end
-  -- sequin_processor.processors[]
 end
 
 return sequin_processor

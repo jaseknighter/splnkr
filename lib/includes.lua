@@ -30,12 +30,12 @@ sample_player = include "splnkr/lib/sample_player"
 sample_recorder = include "splnkr/lib/sample_recorder"
 
 devices_processor = include "splnkr/lib/sequin_processors/devices_processor"
-sequin_processor = include "splnkr/lib/sequin_processor"
 softcut_processor = include "splnkr/lib/sequin_processors/softcut_processor"
 devices_crow_processor = include "splnkr/lib/sequin_processors/devices_crow_processor"
 devices_jf_processor = include "splnkr/lib/sequin_processors/devices_jf_processor"
 devices_w_processor = include "splnkr/lib/sequin_processors/devices_w_processor"
 
+sequin_processor = include "splnkr/lib/sequin_processor"
 
 Sequin = include "splnkr/lib/Sequin"
 Sequinset = include "splnkr/lib/Sequinset"

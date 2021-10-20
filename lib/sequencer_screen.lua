@@ -97,8 +97,17 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
         control_labels[label_pos] = control_labels[label_pos] .. specs_map[1][1][i][5] .. " "
         label_pos = i%3 == 0 and label_pos + 1 or label_pos
       end  
-    if output_param then
+      if output_param then
         control_bcrumbs = control_bcrumbs .. specs_map[output_type][output_index][output_param][5]
+        -- if specs_map[output_type][output_index][output_param][1] == "option" then
+        --   local label_pos = 1
+        --   control_labels = {"","",""}
+        --   for i=1,#specs_map[output_type][output_index][output_param][2],1 do
+        --     local param = specs_map[output_type][output_index][output_param][2][i]
+        --     control_labels[label_pos] = control_labels[label_pos] .. param .. " "
+        --     label_pos = i%3 == 0 and label_pos + 1 or label_pos
+        --   end
+        -- end
       end
     end
   elseif output_type == 2 then
@@ -435,7 +444,6 @@ function sequencer_screen.update()
                                   active_control ==   "value selector nums"   or
                                   active_control ==   "value place integers"  or
                                   active_control ==   "value place digits"
-
     if show_sequence_values and sequence_values then
       -------------------------
       --  active sequence values for all sequin(s)
@@ -516,7 +524,8 @@ function sequencer_screen.update()
           ly = ly+7
         end
       end
-    elseif active_control == "value selector options" and options then
+    -- elseif active_control == "value selector options" and options then
+    elseif active_control == "value selector options" then
       control_labels = {}
       local options = sequencer_controller.get_options_text()
       local label_pos = 1
