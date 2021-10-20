@@ -11,6 +11,7 @@ sequin_processor.processors = {
 
 function sequin_processor.init()
   softcut_processor.init()
+  devices_midi_processor.init()
 end
 
 function sequin_processor.process(sequin_to_process)

@@ -26,7 +26,23 @@ function externals:new(active_notes)
     end
     midi_out_device:note_off(note_num, nil, channel)
   end
- 
+
+  ext.midi_note_off_beats = function(delay, note_num, channel, voice_id, note_location)
+    local note_off_delay
+    if voice_id == 1 then
+      note_off_delay = delay
+    elseif voice_id == 2 then
+      note_off_delay = delay
+    end
+    clock.sync(note_off_delay)
+    if note_location <= #active_notes then
+      table.remove(active_notes, note_location)
+    else
+    --print("note location is out of bounds!!!", note_location, #active_notes)
+    end
+    midi_out_device:note_off(note_num, nil, channel)
+  end
+
   ext.note_on = function(voice_id, value, beat_frequency, envelope_time_remaining, note_source, note_target)
     -- print("note_on:",voice_id, value, beat_frequency, envelope_time_remaining, note_source, note_target)
     -- local output_bandsaw = params:get("output_bandsaw")
@@ -68,6 +84,25 @@ function externals:new(active_notes)
       clock.run(ext.midi_note_off, envelope_length, value, midi_out_channel, voice_id, #active_notes)
     end
     
+    -- midi out (sequencer)
+    if (note_source == "sequencer" and note_target == "midi") then
+      -- if (output_jf ~= 2 and output_jf ~= 4) then params:set("output_jf",2) end
+      local mode = value.mode
+      if mode == 1 then -- play_voice
+        local channel = value.channel
+        local pitch = value.pitch
+        local velocity = value.velocity
+        midi_out_device:note_on(pitch, velocity, channel)
+        table.insert(active_notes, pitch)
+        clock.run(ext.midi_note_off_beats, 1, pitch, channel, 1, #active_notes)
+        -- print(pitch,velocity,channel)
+      elseif mode == 2 then -- stop/start
+        
+      end
+    end
+    
+
+
     -- crow out
     local asl_generator = function(env_length)
       local envelope_data = envelopes[1].get_envelope_arrays()

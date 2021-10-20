@@ -114,7 +114,40 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
     control_bcrumbs =  control_bcrumbs .. "dev "
     if output_index then 
       if output_index == 1 then -- midi
-        control_bcrumbs = control_bcrumbs .. "midi "
+        -- control_bcrumbs = control_bcrumbs .. "midi "
+        -- local label_pos = 1
+        -- for i=1,#specs_map[2][1],1 do
+        --   control_labels[label_pos] = control_labels[label_pos] .. specs_map[output_type][output_index][i][5] .. " "
+        --   label_pos = i%3 == 0 and label_pos + 1 or label_pos
+        -- end
+        -- if output_mode then
+        --   control_bcrumbs = control_bcrumbs .. specs_map[output_type][output_index][output_mode][5] .. " "
+        -- end        
+        control_bcrumbs =  control_bcrumbs .. "midi "
+        if output_mode == nil and output_param == nil then
+          control_labels[1] = "midi"
+          control_labels[2] = "vce1 vce2 vce3"
+          control_labels[3] = "start/stop"
+        elseif output_mode < 4 then
+          control_bcrumbs = control_bcrumbs .. "vce" .. output_mode 
+          if output_param == nil then 
+            control_bcrumbs = control_bcrumbs .. output_mode 
+            local label_pos = 1
+            for i=1,#specs_map[output_type][output_index][output_mode],1 do
+              control_labels[label_pos] = control_labels[label_pos] .. specs_map[output_type][output_index][output_mode][i][5] .. " "
+              label_pos = i%3 == 0 and label_pos + 1 or label_pos
+            end
+          else
+            control_bcrumbs = control_bcrumbs .. " " .. specs_map[output_type][output_index][output_mode][output_param][5]
+            -- local label_pos = 1
+            -- for i=1,#specs_map[output_type][output_index][output_mode][output_param],1 do
+            --   control_labels[label_pos] = control_labels[label_pos] .. specs_map[output_type][output_index][output_mode][output_param][5] .. " "
+            --   label_pos = i%3 == 0 and label_pos + 1 or label_pos
+            -- end
+          end
+        else
+          control_bcrumbs = control_bcrumbs .. "stp/str" 
+        end
       elseif output_index == 2 then -- crow
         control_bcrumbs = "dev crow "
         local label_pos = 1

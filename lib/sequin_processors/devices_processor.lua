@@ -11,6 +11,7 @@ local devices_processor = {}
 function devices_processor.process(output_table)
   -- tab.print(output_table.value_heirarchy)
   if output_table.value_heirarchy.out == 1 then -- midi
+    devices_midi_processor.process(output_table)
   elseif output_table.value_heirarchy.out == 2 then -- crow
     devices_crow_processor.process(output_table)
   elseif output_table.value_heirarchy.out == 3 then -- just friends

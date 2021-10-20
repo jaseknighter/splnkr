@@ -217,7 +217,7 @@ sc.outputs_map = {
 sc.output_mode_map = {
   {nil,nil,nil,nil,nil,nil},                        -- softcut 
   -- {nil,3,3,2},                  -- devices midi out (nil), crow(3), just_friends(3),w/(2)
-  {nil,2,7,5},                  -- devices midi out (nil), crow(2), just_friends(7),w/(5)
+  {4,2,7,5},                  -- devices midi out (4), crow(2), just_friends(7),w/(5)
   {nil,nil,nil,nil,8,nil,nil},  -- effects: amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (8)
   {nil},                        -- enveloper: on/off (nil), trig_rate(nil), overlap (nil)
   {nil,nil},                    -- pattern (division)
@@ -235,7 +235,7 @@ sc.output_params_map = {
     5,5,5,5,5,5
   }, 
   -- {nil,{nil,nil,nil},{2,3,nil},{nil,nil}}, -- device (midi out (nil), crow(3), just_friends(3),w/(2))
-  {nil,{nil,nil},{2,2,2,2,2,2,2},{9,9,9,4,9}}, -- device (midi out (nil), crow(2), just_friends(2),w/(2))
+  {{3,3,3,nil},{nil,nil},{2,2,2,2,2,2,2},{9,9,9,4,9}}, -- device (midi out (4), crow(2), just_friends(2),w/(2))
   {nil,nil,nil,nil,{nil,nil,nil,nil,nil,nil,nil,nil},nil,nil}, -- effect (amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (8)), phaser(nil), delay(nil)
   {nil,nil,nil}, -- enveloper 
   {nil,nil}, -- pattern
@@ -277,8 +277,17 @@ function sc.refresh_output_control_specs_map()
       {{"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
       {{"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
     }, 
-    { -- device (, crow(3), just_friends(3),w/(2))
-      {"note",min_note,max_note,nil,"midi_note","midi note"}, -- midi out
+    { -- device (midi(4), crow(2), just_friends(3),w/(2))
+      { -- midi note out 1-3 and stop/start
+        { 
+          {"note",min_note,max_note,nil,"pitch","pitch"},     -- note
+          {"number","0",127,80,"vel","vel"},                   -- velocity
+          {"number","1",16,1,"chan","chan"},                   -- channel
+        }, 
+        {{"note",min_note,max_note,nil,"pitch","pitch"},{"number","0",127,80,"vel","vel"},{"number","1",16,1,"chan","chan"}}, 
+        {{"note",min_note,max_note,nil,"pitch","pitch"},{"number","0",127,80,"vel","vel"},{"number","1",16,1,"chan","chan"}}, 
+        {"option",{"stop","start"},2,nil,"stp/srt","stp/srt"},        -- midi stop/start
+      }, 
       { -- crow
         {"note",min_note,max_note,nil,"c1_pitch","c1 pitch"}, -- crow1 pitch
         {"note",min_note,max_note,nil,"c3_pitch","c3 pitch"}, -- crow3 pitch
