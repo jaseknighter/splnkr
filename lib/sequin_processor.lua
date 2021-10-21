@@ -14,18 +14,18 @@ function sequin_processor.init()
   devices_midi_processor.init()
 end
 
-function sequin_processor.process(sequin_to_process)
+function sequin_processor.process(sequin_to_process,sub_seq_leader_ix)
   if(#sequin_to_process.active_outputs)>0 then
-    --print("process sequin for active sequin group",sequencer_controller.get_active_sequinset())
-    sequin_processor.find_outputs(sequin_to_process.active_outputs,sequin_to_process.id)
+    sequin_processor.process_outputs(sequin_to_process.active_outputs,sequin_to_process.id,sub_seq_leader_ix)
   end
 end
 
 local previous_absolute_value = 0
 local previous_relative_values = {}
 
-function sequin_processor.find_outputs(output_table, sequin_id)
+function sequin_processor.process_outputs(output_table, sequin_id,sub_seq_leader_ix)
   if sequin_id then
+    sub_seq_leader_ix = sub_seq_leader_ix > 1 and sub_seq_leader_ix or 1
     for k, v in pairs(output_table) do 
       if k == "output_data" then
         local selected_sequin = v.value_heirarchy.sqn
@@ -39,8 +39,17 @@ function sequin_processor.find_outputs(output_table, sequin_id)
             -- get the next value set in the output table's sequins
             local next_output_value
             if v.seq then
-              -- v.seq:reset() 
-              next_output_value = v.seq() 
+              --------------------------------------
+              --
+              --
+              --
+              v.seq:select(sub_seq_leader_ix)
+              next_output_value = v.seq() -- THIS IS WHERE THE SUB SEQUINS GET INCREMENTED 
+              -- print("sub_seq_leader_ix,v.seq.ix",sub_seq_leader_ix,v.seq.ix)
+              --
+              --
+              --
+              --------------------------------------
             end
             local value_type = v.value_type
             -- seq = v.sequins
@@ -93,7 +102,7 @@ function sequin_processor.find_outputs(output_table, sequin_id)
           break
         end
       elseif type(v) == "table" then
-        sequin_processor.find_outputs(v, sequin_id)
+        sequin_processor.process_outputs(v, sequin_id, sub_seq_leader_ix)
       end
     end
   end

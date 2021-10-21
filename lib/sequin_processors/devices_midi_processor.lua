@@ -6,42 +6,48 @@ function dmp.init()
   dmp.voice1 = {
     pitch    = 1,
     velocity = 80,
-    channel  = 1,  
+    duration = 1/4,
+    channel  = 1,
   }
   dmp.voice2 = {
     pitch    = 1,
     velocity = 80,
-    channel  = 1,  
+    duration = 1/4,
+    channel  = 1,
   }
   dmp.voice3 = {
     pitch    = 1,
     velocity = 80,
-    channel  = 1,  
+    duration = 1/4,
+    channel  = 1,
   }
   
 end
 
 function dmp.process(output_table)
+  -- tab.print(output_table)
   local value = output_table.calculated_absolute_value and output_table.calculated_absolute_value or output_table.value
   if output_table.value_heirarchy.mod < 4 then -- play_note
     local mod = output_table.value_heirarchy.mod
     local param = output_table.value_heirarchy.par
-    -- print("process",mod,param)
-    -- print("pitch",dmp["voice"..mod].pitch,value)
     if param == 1 then -- update pitch
       dmp["voice"..mod].pitch = value 
       local value_tab = {
-        channel   = dmp["voice"..mod].channel,
         pitch     = dmp["voice"..mod].pitch,
         velocity  = dmp["voice"..mod].velocity,
+        duration  = tonumber(dmp["voice"..mod].duration),
+        channel   = dmp["voice"..mod].channel,
         mode = 1
     
       }
-    
+      print(value_tab.pitch,value_tab.velocity,value_tab.duration,value_tab.channel)
       clock.run(dmp.play_note,value_tab)
     elseif param == 2 then -- update velocity
-      -- print("velocity",value)
       dmp["voice"..mod].velocity = math.floor(value)
+    elseif param == 3 then -- update duration
+      local dur_tab = fn.get_table_from_string(MIDI_DURATIONS[value],"/")
+      local duration = #dur_tab == 1 and dur_tab[1] or dur_tab[1]/dur_tab[2]
+      dmp["voice"..mod].duration = duration
     else -- update channel
       dmp["voice"..mod].channel = value 
     end
@@ -60,7 +66,8 @@ end
 function dmp.end_note(value_tab)
   clock.sleep(0.001)
   -- tab.print(value_tab)
-  externals1.note_off(1,value_tab,1,1,"sequencer", "midi")
+  print("end note")
+  externals1.midi_note_off_beats(value_tab.duration,value_tab.pitch,value_tab.channel,1,value_tab.pitch)
 end
 
 function dmp.stop_start()

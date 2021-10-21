@@ -12,6 +12,7 @@ function externals:new(active_notes)
 
 
   ext.midi_note_off = function(delay, note_num, channel, voice_id, note_location)
+    print("off")
     local note_off_delay
     if voice_id == 1 then
       note_off_delay = midi_out_envelope_override1 or delay
@@ -28,13 +29,7 @@ function externals:new(active_notes)
   end
 
   ext.midi_note_off_beats = function(delay, note_num, channel, voice_id, note_location)
-    local note_off_delay
-    if voice_id == 1 then
-      note_off_delay = delay
-    elseif voice_id == 2 then
-      note_off_delay = delay
-    end
-    clock.sync(note_off_delay)
+    clock.sync(delay)
     if note_location <= #active_notes then
       table.remove(active_notes, note_location)
     else
@@ -92,10 +87,12 @@ function externals:new(active_notes)
         local channel = value.channel
         local pitch = value.pitch
         local velocity = value.velocity
+        local duration = value.duration 
         midi_out_device:note_on(pitch, velocity, channel)
         table.insert(active_notes, pitch)
-        clock.run(ext.midi_note_off_beats, 1, pitch, channel, 1, #active_notes)
-        -- print(pitch,velocity,channel)
+        -- print("duration,type(duration)",duration,type(duration))
+        clock.run(ext.midi_note_off_beats, duration, pitch, channel, 1, #active_notes)
+        -- print(pitch,velocity,channel,duration)
       elseif mode == 2 then -- stop/start
         
       end

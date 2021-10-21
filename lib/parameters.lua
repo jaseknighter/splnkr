@@ -601,7 +601,7 @@ function parameters.init()
 
   params:add{type = "option", id = "output_midi", name = "midi out",
     options = {"off","engine", "midi", "engine + midi"},
-    default = 1,
+    default = 2,
   }
 
   params:add{
@@ -692,7 +692,7 @@ function parameters.init()
   params:add_group("just friends",2)
   params:add{type = "option", id = "output_jf", name = "just friends",
     options = {"off","engine", "midi", "engine + midi"},
-    default = 2,
+    default = 1,
     action = function(value)
       if value > 1 then 
         -- crow.output[2].action = "{to(5,0),to(0,0.25)}"

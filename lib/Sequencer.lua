@@ -10,6 +10,7 @@ function Sequencer:new(lattice,id)
   s.sequin_set = Sequinset.new(9)
 
   s.seq = Sequins{table.unpack(s.sequin_set)}
+  s.sub_seq_leader = Sequins{table.unpack(DEFAULT_SUB_SEQUINS_TAB)}
 
   s.division = 1
   s.enabled = true
@@ -39,12 +40,16 @@ function Sequencer:new(lattice,id)
     else
       s.seq:select(starting_sequin)
       s.next_sequin = s.seq()
+      s.sub_seq_leader()
     end
+    s.sub_seq_leader_ix = fn.deep_copy(s.sub_seq_leader.ix)
+    -- print("s.sub_seq_leader_ix",s.sub_seq_leader_ix)
+    
     -- if sequencer_controller.sequencers and sequencer_controller.sequencers[1] and sequencer_controller.sequencers[1].next_sequin then
     -- end
     local flicker_time = 1/16 
     grid_sequencer:register_flicker_at(5+s.next_sequin.id, 1, flicker_time)
-    sequin_processor.process(s.next_sequin)
+    sequin_processor.process(s.next_sequin,s.sub_seq_leader_ix)
   end
   
   function s:start()

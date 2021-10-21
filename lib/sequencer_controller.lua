@@ -235,7 +235,7 @@ sc.output_params_map = {
     5,5,5,5,5,5
   }, 
   -- {nil,{nil,nil,nil},{2,3,nil},{nil,nil}}, -- device (midi out (nil), crow(3), just_friends(3),w/(2))
-  {{3,3,3,nil},{nil,nil},{2,2,2,2,2,2,2},{9,9,9,4,9}}, -- device (midi out (4), crow(2), just_friends(2),w/(2))
+  {{4,4,4,nil},{nil,nil},{2,2,2,2,2,2,2},{9,9,9,4,9}}, -- device (midi out (4), crow(2), just_friends(2),w/(2))
   {nil,nil,nil,nil,{nil,nil,nil,nil,nil,nil,nil,nil},nil,nil}, -- effect (amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (8)), phaser(nil), delay(nil)
   {nil,nil,nil}, -- enveloper 
   {nil,nil}, -- pattern
@@ -282,10 +282,11 @@ function sc.refresh_output_control_specs_map()
         { 
           {"note",min_note,max_note,nil,"pitch","pitch"},     -- note
           {"number","0",127,80,"vel","vel"},                   -- velocity
+          {"option",MIDI_DURATIONS,3,nil,"dur","dur"},        -- midi stop/start
           {"number","1",16,1,"chan","chan"},                   -- channel
         }, 
-        {{"note",min_note,max_note,nil,"pitch","pitch"},{"number","0",127,80,"vel","vel"},{"number","1",16,1,"chan","chan"}}, 
-        {{"note",min_note,max_note,nil,"pitch","pitch"},{"number","0",127,80,"vel","vel"},{"number","1",16,1,"chan","chan"}}, 
+        {{"note",min_note,max_note,nil,"pitch","pitch"},{"number","0",127,80,"vel","vel"},{"option",{"1","1/2","1/4","1/8","1/16"},3,nil,"dur","dur"},{"number","1",16,1,"chan","chan"}}, 
+        {{"note",min_note,max_note,nil,"pitch","pitch"},{"number","0",127,80,"vel","vel"},{"option",{"1","1/2","1/4","1/8","1/16"},3,nil,"dur","dur"},{"number","1",16,1,"chan","chan"}}, 
         {"option",{"stop","start"},2,nil,"stp/srt","stp/srt"},        -- midi stop/start
       }, 
       { -- crow
@@ -1419,11 +1420,12 @@ function sc.update_outputs_table(output_value,output_sequins_index)
     if output_value and output_value ~= "clear" then 
       if sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data == nil then
         sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data = {}
-        sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.seq = Sequins{"","","","",""}
+        sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.seq = Sequins{table.unpack(DEFAULT_SUB_SEQUINS_TAB)}
       end
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].table_type = "mod" 
       -- sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.value = output_value
       if output_value ~= "-" then
+        print("output_sequins_index",output_sequins_index)
         sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.seq[output_sequins_index] = output_value 
       else
         sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.seq[output_sequins_index] = "nil"
@@ -1450,11 +1452,12 @@ function sc.update_outputs_table(output_value,output_sequins_index)
     if output_value and output_value ~= "clear" then 
       if sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data == nil then
         sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data = {}
-        sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.seq = Sequins{"","","","",""}
+        sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.seq = Sequins{table.unpack(DEFAULT_SUB_SEQUINS_TAB)}
       end
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].table_type = "par" 
       -- sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.value = output_value 
       if output_value ~= "-" then
+        print("output_sequins_index",output_sequins_index)
         sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.seq[output_sequins_index] = output_value 
       else
         sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.seq[output_sequins_index] = "nil"

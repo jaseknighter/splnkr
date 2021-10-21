@@ -5,6 +5,7 @@
 -- here's a version that handles recursive tables here:
 --  http://lua-users.org/wiki/CopyTable
 fn = {}
+
 function fn.deep_copy(orig, copies)
   copies = copies or {}
   local orig_type = type(orig)
@@ -36,6 +37,17 @@ function fn.round_decimals (value_to_round, num_decimals, rounding_direction)
   end
   return rounded_val
 end
+
+function fn.get_table_from_string(str,delimiter)
+  local result = {};
+  for match in (str..delimiter):gmatch("(.-)"..delimiter) do
+      table.insert(result, match);
+  end
+  return result;
+end
+
+
+
 -- scale/note functions
 scale_length = 35 --128
 root_note_default = 33 --(A0)
@@ -119,10 +131,12 @@ saving_elipses = ""
 pre_save_play_mode = false
 
 sequencer_playing = false
+DEFAULT_SUB_SEQUINS_TAB = {"","","","",""}
 
 midi_in_channel1_default = 1
 midi_in_command1 = 144
 midi_devices = nil
+MIDI_DURATIONS = {"1","1/2","1/4","1/8","1/16"}
 
 -----------------------------------------
 -- ENVELOPES
