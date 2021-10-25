@@ -217,7 +217,7 @@ sc.outputs_map = {
 sc.output_mode_map = {
   {nil,nil,nil,nil,nil,nil},                        -- softcut 
   -- {nil,3,3,2},                  -- devices midi out (nil), crow(3), just_friends(3),w/(2)
-  {4,2,7,5},                  -- devices midi out (4), crow(2), just_friends(7),w/(5)
+  {7,2,7,5},                  -- devices midi out (4), crow(2), just_friends(7),w/(5)
   {nil,nil,nil,nil,8,nil,nil},  -- effects: amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (8)
   {nil},                        -- enveloper: on/off (nil), trig_rate(nil), overlap (nil)
   {nil,nil},                    -- pattern (division)
@@ -235,7 +235,7 @@ sc.output_params_map = {
     5,5,5,5,5,5
   }, 
   -- {nil,{nil,nil,nil},{2,3,nil},{nil,nil}}, -- device (midi out (nil), crow(3), just_friends(3),w/(2))
-  {{4,4,4,nil},{nil,nil},{2,2,2,2,2,2,2},{9,9,9,4,9}}, -- device (midi out (4), crow(2), just_friends(2),w/(2))
+  {{4,4,4,3,3,3,nil},{nil,nil},{2,2,2,2,2,2,2},{9,9,9,4,9}}, -- device (midi out (4), crow(2), just_friends(2),w/(2))
   {nil,nil,nil,nil,{nil,nil,nil,nil,nil,nil,nil,nil},nil,nil}, -- effect (amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (8)), phaser(nil), delay(nil)
   {nil,nil,nil}, -- enveloper 
   {nil,nil}, -- pattern
@@ -287,7 +287,14 @@ function sc.refresh_output_control_specs_map()
         }, 
         {{"note",min_note,max_note,nil,"pitch","pitch"},{"number","0",127,80,"vel","vel"},{"option",{"1","1/2","1/4","1/8","1/16"},3,nil,"dur","dur"},{"number","1",16,1,"chan","chan"}}, 
         {{"note",min_note,max_note,nil,"pitch","pitch"},{"number","0",127,80,"vel","vel"},{"option",{"1","1/2","1/4","1/8","1/16"},3,nil,"dur","dur"},{"number","1",16,1,"chan","chan"}}, 
-        {"option",{"stop","start"},2,nil,"stp/srt","stp/srt"},        -- midi stop/start
+        { 
+          {"number","0",127,1,"cc","cc cc"},                   -- cc cc
+          {"number","0",127,1,"val","cc val"},                   -- cc value
+          {"number","1",16,1,"chan","chan"},                   -- cc channel
+        }, 
+        {{"number","0",127,1,"cc","cc"},{"number","0",127,1,"val","val"},{"number","1",16,1,"chan","chan"}}, 
+        {{"number","0",127,1,"cc","cc"},{"number","0",127,1,"val","val"},{"number","1",16,1,"chan","chan"}}, 
+        {"option",{"stop","start"},2,nil,"stp_strt","stp/strt"},        -- midi stop/start
       }, 
       { -- crow
         {"note",min_note,max_note,nil,"c1_pitch","c1 pitch"}, -- crow1 pitch
@@ -1430,7 +1437,7 @@ function sc.update_outputs_table(output_value,output_sequins_index)
     if sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod] == nil then 
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod] = {} 
     end
-    local existing_output_data_at_location = sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data
+    -- local existing_output_data_at_location = sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data
     if output_value and output_value ~= "clear" then 
       if sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data == nil then
         local num_outputs = sc.sequins_outputs_table[sgp][ssg][sqn].num_outputs
@@ -1465,7 +1472,7 @@ function sc.update_outputs_table(output_value,output_sequins_index)
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par] = {} 
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].table_type = "par" 
     end
-    local existing_output_data_at_location = sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data
+    -- local existing_output_data_at_location = sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data
     if output_value and output_value ~= "clear" then 
       if sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data == nil then
         local num_outputs = sc.sequins_outputs_table[sgp][ssg][sqn].num_outputs

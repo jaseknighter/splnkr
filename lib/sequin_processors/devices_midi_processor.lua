@@ -21,6 +21,21 @@ function dmp.init()
     duration = 1/4,
     channel  = 1,
   }
+  dmp.cc1 = {
+    cc = 1,
+    value = 1,
+    channel = 1
+  }
+  dmp.cc2 = {
+    cc = 1,
+    value = 1,
+    channel = 1
+  }
+  dmp.cc3 = {
+    cc = 1,
+    value = 1,
+    channel = 1
+  }
   
 end
 
@@ -42,6 +57,19 @@ function dmp.process(output_table)
     else -- update channel
       dmp["voice"..mod].channel = value 
     end
+  elseif output_table.value_heirarchy.mod < 7 then -- cc val
+    local mod = output_table.value_heirarchy.mod - 3
+    local param = output_table.value_heirarchy.par
+    if param == 1 then -- update channel
+      dmp["cc"..mod].cc = value 
+      dmp.set_cc(mod)
+    elseif param == 2 then -- update value
+      dmp["cc"..mod].value = value
+      dmp.set_cc(mod)
+    elseif param == 3 then -- update channel
+      dmp["cc"..mod].channel = value 
+      dmp.set_cc(mod)
+    end
   elseif output_table.value_heirarchy.mod == 4 then -- stop/start
     -- dmp.stop_start = value
     dmp.stop_start(value)
@@ -57,11 +85,17 @@ function dmp.play_note(mod)
     channel   = dmp["voice"..mod].channel,
     mode = 1
   }
-  -- print(value_tab.pitch,value_tab.velocity,value_tab.duration,value_tab.channel)
-
-  -- tab.print(value_tab)
   externals1.note_on(1,value_tab,1,1,"sequencer", "midi")
 end
+
+function dmp.set_cc(mod)
+  local cc        = dmp["cc"..mod].cc
+  local value     = dmp["cc"..mod].value
+  local channel   = dmp["cc"..mod].channel
+
+  externals1.set_midi_cc(cc,value,channel)
+end
+
 
 function dmp.end_note(value_tab)
   clock.sleep(0.001)

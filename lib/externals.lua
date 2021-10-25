@@ -10,6 +10,10 @@ function externals:new(active_notes)
 
   
 
+  function ext.set_midi_cc(cc,value,channel)
+    -- print("cc",cc,value,channel)
+    midi_out_device:cc (cc, value, channel)
+  end
 
   ext.midi_note_off = function(delay, note_num, channel, voice_id, note_location)
     print("off")

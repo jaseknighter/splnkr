@@ -228,7 +228,30 @@ local enc = function (n, d)
     elseif n==2 then
       -- do something
     elseif n==3 then
-      -- do something
+      -- check if number values are being selected
+      local sc = sequencer_controller
+      if sc.active_sequin_value.value_type == 'number' then
+        local selecting_number = false
+        local number_selected = 0
+        local last_selection
+        for i=6,14,1 do
+          if grid_sequencer:find_ui_group_num_by_xy(i,6) then
+            selecting_number = true
+            if grid_sequencer:find_flickering_at(i,6) then
+              number_selected = i-5
+            end
+            last_selection = i-5
+          end
+        end
+        if selecting_number then
+          local next_num = util.clamp(number_selected+d,0,last_selection)
+          if number_selected == 1 and d < 1 then 
+            grid_sequencer.activate_grid_key_at(6,6)
+          elseif((number_selected == 0 and d > 0) or (number_selected+d <= last_selection)) then
+            grid_sequencer.activate_grid_key_at(5+next_num,6)
+          end
+        end
+      end
     end
   elseif pages.index == 4 then
 
