@@ -569,7 +569,7 @@ end
 -- UI functions
 function sc.update_sequins_mods(x, y, state)
   if state == "on" then
-  
+
   else
   
   end
@@ -702,8 +702,19 @@ function sc.update_sequin_output_modes(x, y, state)
     local output_type_selected = sc.selected_sequin_output_type
     local output_selected = sc.selected_sequin_output
     local num_output_mode_params = sc.output_params_map[output_type_selected][output_selected][output_mode_selected]
-    if sc.sequin_output_params then
+    if sc.sequin_output_params or sc.value_option then
+      sc:unregister_ui_group(6,6)
       sc:unregister_ui_group(6,5)
+      sc.selected_sequin_output_param = nil
+      sc.value_place_integer = nil
+      sc.value_place_decimal = nil
+      sc.value_polarity = nil
+      sc.sequence_mode = nil
+      sc.value_number = nil
+      sc.value_option = nil
+      sc.value_note_num = nil
+      sc.value_octave = nil
+      sc.active_output_value_text = nil  
     end
     for i=1,14,1 do
       if grid_sequencer:find_ui_group_num_by_xy(i,7) then
@@ -718,7 +729,9 @@ function sc.update_sequin_output_modes(x, y, state)
       sc.set_sequin_output_value_controls()
     end
   else
+    sc:unregister_ui_group(6,6)
     sc:unregister_ui_group(6,5)
+
     for i=1,14,1 do
       if grid_sequencer:find_ui_group_num_by_xy(i,7) then
         sc:unregister_ui_group(i,7)
@@ -1362,7 +1375,8 @@ function sc.get_options_text(option_index)
   elseif map[typ][out][par] then
     options_table = map[typ][out][par][2]
   end
-  if option_index and options_table then
+  -- tab.print(options_table)
+  if option_index and type(options_table) == 'table' then
     local active_option_text = options_table[option_index]
     return active_option_text
   elseif options_table then
@@ -1419,13 +1433,16 @@ function sc.update_outputs_table(output_value,output_sequins_index)
     local existing_output_data_at_location = sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data
     if output_value and output_value ~= "clear" then 
       if sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data == nil then
+        local num_outputs = sc.sequins_outputs_table[sgp][ssg][sqn].num_outputs
+        num_outputs = num_outputs == nil and 1 or num_outputs + 1
+        sc.sequins_outputs_table[sgp][ssg][sqn].num_outputs = num_outputs
+        sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].num_outputs = num_outputs
         sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data = {}
         sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.seq = Sequins{table.unpack(DEFAULT_SUB_SEQUINS_TAB)}
       end
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].table_type = "mod" 
       -- sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.value = output_value
       if output_value ~= "-" then
-        print("output_sequins_index",output_sequins_index)
         sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.seq[output_sequins_index] = output_value 
       else
         sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod].output_data.seq[output_sequins_index] = "nil"
@@ -1451,6 +1468,10 @@ function sc.update_outputs_table(output_value,output_sequins_index)
     local existing_output_data_at_location = sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data
     if output_value and output_value ~= "clear" then 
       if sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data == nil then
+        local num_outputs = sc.sequins_outputs_table[sgp][ssg][sqn].num_outputs
+        num_outputs = num_outputs == nil and 1 or num_outputs + 1
+        sc.sequins_outputs_table[sgp][ssg][sqn].num_outputs = num_outputs
+        sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].num_outputs = num_outputs
         sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data = {}
         sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.seq = Sequins{table.unpack(DEFAULT_SUB_SEQUINS_TAB)}
       end
@@ -1468,6 +1489,8 @@ function sc.update_outputs_table(output_value,output_sequins_index)
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.value_type = sc.active_sequin_value.value_type
       sc.active_value_heirarchy = {sgp=sgp,ssg=ssg,sqn=sqn,typ=typ,out=out,mod=mod,par=par}
     elseif output_value == "clear" then
+      local num_outputs = sc.sequins_outputs_table[sgp][ssg][sqn].num_outputs
+      sc.sequins_outputs_table[sgp][ssg][sqn].num_outputs = num_outputs - 1
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par] = {}
     end
   end
@@ -1668,14 +1691,14 @@ function sc:update_group(group_name,x, y, state, press_type)
     self.update_sequin_selector(x, y, state)
   elseif group_name == "sequin_output_types" then
     self.update_sequin_output_types(x, y, state)
+  elseif group_name == "sequins_mods" then
+    self.update_sequins_mods(x, y, state)
   elseif group_name == "sequin_outputs" then
     self.update_sequin_outputs(x, y, state)
   elseif group_name == "sequin_output_modes" then
     self.update_sequin_output_modes(x, y, state)
   elseif group_name == "sequin_output_params" then
     self.update_sequin_output_params(x, y, state)
-  elseif group_name == "sequins_mods" then
-    self.update_sequins_mods(x, y, state)
   elseif group_name == "value_selector_notes" then
     self.set_active_sequin_value_type("notes")
     self.update_value_selector_notes(x, y, state)

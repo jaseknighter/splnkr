@@ -43,7 +43,7 @@ function externals:new(active_notes)
     -- local output_bandsaw = params:get("output_bandsaw")
     local note_offset = params:get("note_center_frequency") - root_note_default
     if type(value) == "table" then
-      value.pitch  = notes[value.pitch+note_offset]
+      value.pitch  = value.pitch and notes[value.pitch+note_offset]
     else
       value = notes[value+note_offset]
     end
@@ -75,7 +75,7 @@ function externals:new(active_notes)
       midi_out_device:note_on(value, level, midi_out_channel)
       table.insert(active_notes, value)
       -- Note off timeout
-      local note_duration_param = voice_id == 1 and "voice_1_note_duration" or "voice_2_note_duration"
+      -- local note_duration_param = voice_id == 1 and "voice_1_note_duration" or "voice_2_note_duration"
       clock.run(ext.midi_note_off, envelope_length, value, midi_out_channel, voice_id, #active_notes)
     end
     
@@ -94,7 +94,11 @@ function externals:new(active_notes)
         clock.run(ext.midi_note_off_beats, duration, pitch, channel, 1, #active_notes)
         -- print(pitch,velocity,channel,duration)
       elseif mode == 2 then -- stop/start
-        
+        if value.stop_start == 1 then -- stop
+          midi_out_device:stop()
+        else -- start
+          midi_out_device:start()
+        end
       end
     end
     

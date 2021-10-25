@@ -129,7 +129,7 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
           control_labels[2] = "vce1 vce2 vce3"
           control_labels[3] = "start/stop"
         elseif output_mode < 4 then
-          control_bcrumbs = control_bcrumbs .. "vce" .. output_mode 
+          control_bcrumbs = control_bcrumbs .. "vce"
           if output_param == nil then 
             control_bcrumbs = control_bcrumbs .. output_mode 
             local label_pos = 1
@@ -138,7 +138,7 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
               label_pos = i%3 == 0 and label_pos + 1 or label_pos
             end
           else
-            control_bcrumbs = control_bcrumbs .. " " .. specs_map[output_type][output_index][output_mode][output_param][5]
+            control_bcrumbs = control_bcrumbs  .. output_mode .. " " .. specs_map[output_type][output_index][output_mode][output_param][5]
             -- local label_pos = 1
             -- for i=1,#specs_map[output_type][output_index][output_mode][output_param],1 do
             --   control_labels[label_pos] = control_labels[label_pos] .. specs_map[output_type][output_index][output_mode][output_param][5] .. " "
@@ -557,8 +557,8 @@ function sequencer_screen.update()
           ly = ly+7
         end
       end
-    -- elseif active_control == "value selector options" and options then
     elseif active_control == "value selector options" then
+    -- elseif active_control == "value selector options" then
       control_labels = {}
       local options = sequencer_controller.get_options_text()
       local label_pos = 1
