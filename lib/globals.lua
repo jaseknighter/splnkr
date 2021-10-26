@@ -75,7 +75,7 @@ fn.set_scale_length = function()
 end
 
 fn.get_num_notes_per_octave = function()
-  local num_notes_per_octave
+  -- local num_notes_per_octave
   local starting_note = notes[1]
   for i=2,#notes,1 do
     if notes[i]-starting_note < 12 then

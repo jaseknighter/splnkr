@@ -20,44 +20,47 @@
 local sequencer_controller = {}
 sc = sequencer_controller
 
--- placeholder until views are implemented for the sequencer controller
-sc.from_view = 1
 
--- UI data
-sc.selected_sequin_group = nil
-sc.selected_sequin_subgroup = nil 
-sc.selected_sequin = nil
-sc.selected_sequin_output_type = nil
-sc.selected_sequin_output = nil
-sc.selected_sequin_output_mode = nil
-sc.selected_sequin_output_param = nil
-sc.value_place_integer = nil
-sc.value_place_decimal = nil
-sc.sequence_mode = nil
-sc.value_number = nil
-sc.value_option = nil
-sc.value_note_num = nil
-sc.value_octave = nil
-
-sc.selectors_x_offset = 5
-sc.value_polarity = 1
--- value data 
-sc.sequins_outputs_table = {}
-
-sc.grid_input_processors = {}
-
-sc.active_sequin_value = {}
-sc.active_sequin_value.place_values = {}
-sc.active_sequin_value.place_values.ten_thousands  =  0
-sc.active_sequin_value.place_values.thousands      =  0
-sc.active_sequin_value.place_values.hundreds       =  0
-sc.active_sequin_value.place_values.tens           =  0
-sc.active_sequin_value.place_values.ones           =  0
-sc.active_sequin_value.place_values.tenths         =  0
-sc.active_sequin_value.place_values.hundredths     =  0
-sc.active_sequin_value.place_values.thousandths    =  0
 
 function sc.init()
+
+  -- placeholder until views are implemented for the sequencer controller
+  sc.from_view = 1
+
+  -- UI data
+  sc.selected_sequin_group = nil
+  sc.selected_sequin_subgroup = nil 
+  sc.selected_sequin = nil
+  sc.selected_sequin_output_type = nil
+  sc.selected_sequin_output = nil
+  sc.selected_sequin_output_mode = nil
+  sc.selected_sequin_output_param = nil
+  sc.value_place_integer = nil
+  sc.value_place_decimal = nil
+  sc.sequence_mode = nil
+  sc.value_number = nil
+  sc.value_option = nil
+  sc.value_note_num = nil
+  sc.value_octave = nil
+
+  sc.selectors_x_offset = 5
+  sc.value_polarity = 1
+  -- value data 
+  sc.sequins_outputs_table = {}
+
+  sc.grid_input_processors = {}
+
+  sc.active_sequin_value = {}
+  sc.active_sequin_value.place_values = {}
+  sc.active_sequin_value.place_values.ten_thousands  =  0
+  sc.active_sequin_value.place_values.thousands      =  0
+  sc.active_sequin_value.place_values.hundreds       =  0
+  sc.active_sequin_value.place_values.tens           =  0
+  sc.active_sequin_value.place_values.ones           =  0
+  sc.active_sequin_value.place_values.tenths         =  0
+  sc.active_sequin_value.place_values.hundredths     =  0
+  sc.active_sequin_value.place_values.thousandths    =  0
+
   sc.lattice = Lattice:new{
     auto = true,
     meter = 1/4,
@@ -82,7 +85,6 @@ function sc.copy_paste_sequinsets(target_sequinset,source_sequinset)
   sc.sequins_outputs_table[target_sequinset] = {}
   sc.sequins_outputs_table[target_sequinset] = fn.deep_copy(sc.sequins_outputs_table[source_sequinset])
   clock.run(sc.activate_sequinset,target_sequinset)
-  
   -- sc.reset_sequinset_value_heirarcy(target_sequinset)
   -- clock.run(grid_sequencer.activate_grid_key_at,target_sequinset,1,0.1)
   
@@ -91,6 +93,7 @@ end
 function sc.activate_sequinset(target_sequinset)
   -- clock.run(grid_sequencer.activate_grid_key_at,target_sequinset,1,0.01)
   clock.sleep(0.1)
+  print("act",target_sequinset)
   sc.reset_sequinset_value_heirarcy(target_sequinset)
 end
 
@@ -127,8 +130,7 @@ function sc.clear_sequence_data(source_id, data_path, end_node)
     source_table = sc.sequins_outputs_table[data_path[1]][data_path[2]][source_id]
   end
   sc.update_value_heirarcy(end_node, source_id, source_table)
-  sc.update_sequin(source_id)
-  -- clock.run(sc.activate_target,source_id)
+  sc.update_sequin()
 end
 
 function sc.copy_paste_sequence_data(source_id, target_id, data_path, end_node)
@@ -496,6 +498,7 @@ function sc.update_selected_sequin_group(index,state, seq_ix)
     if sc.lattice.enabled == true then 
       sc.lattice:stop()
     end
+    sc.selected_sequin_group = nil
     -- sc:unregister_ui_group(6,1)
     -- sc.selected_sequin_group = nil
     -- sc.selected_sequin_subgroup = nil
@@ -1335,25 +1338,25 @@ function sc.update_sequin_output_value(x, y, state, press_type)
     ---------------------------------------
     sc.update_outputs_table(output_value,output_sequins_index)
     
-    sc.update_sequin(output_sequins_index)
+    sc.update_sequin()
   end
 end
 
 -- todo: implement subgroups
 
-function sc.update_sequin(output_sequins_index)
+function sc.update_sequin()
   local selected_indices = sc.get_selected_indices()
   local sgp = selected_indices.selected_sequin_group
-  local ssg = selected_indices.selected_sequin_subgroup
-  local sqn = sequin and sequin or selected_indices.selected_sequin
+  local sqn = selected_indices.selected_sequin
+  -- print("update_sequin",sgp, sqn, sc.sequencers[sgp], sc.sequencers)
   local sequin_to_update = sc.sequencers[sgp].sequin_set[sqn]
   sequin_to_update.set_output_table(sc.sequins_outputs_table)
 end
 
 function sc.get_selected_indices()
   local indices = {
-    selected_sequin_group        = sc.selected_sequin_group,         -- selected_sequin_group:  value table level 1
-    selected_sequin_subgroup     = sc.selected_sequin_subgroup,      -- selected_sequin_group:  value table level 2
+    selected_sequin_group         = sc.selected_sequin_group,         -- selected_sequin_group:  value table level 1
+    selected_sequin_subgroup      = sc.selected_sequin_subgroup,      -- selected_sequin_group:  value table level 2
     selected_sequin               = sc.selected_sequin,          -- selected_sequin:  value table level 3
     selected_sequin_output_type   = sc.selected_sequin_output_type,    -- output_type_selected:  value table level 4
     selected_sequin_output        = sc.selected_sequin_output,         -- output_selected:  value table level 5
@@ -1485,7 +1488,7 @@ function sc.update_outputs_table(output_value,output_sequins_index)
       sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].table_type = "par" 
       -- sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.value = output_value 
       if output_value ~= "-" then
-        print("output_sequins_index",output_sequins_index)
+        -- print("output_sequins_index",output_sequins_index)
         sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.seq[output_sequins_index] = output_value 
       else
         sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod][par].output_data.seq[output_sequins_index] = "nil"
@@ -1684,15 +1687,20 @@ function sc.get_active_sequin_value_type()
 end
 
 function sc:update_group(group_name,x, y, state, press_type)
+  -- print("group_name,x, y, state, press_type",group_name,x, y, state, press_type)
   -- local sequin_groups_start, sequin_groups_finish = string.find(group_name,"sequin_groups")
   -- sequencer_screen.update_screen_instructions(group_name, state)
   sc.active_output_value_text = nil
   if string.sub(group_name,1,13) == "sequin_groups" then 
     -- sync the sequin index 
-    local seq_ix
-    if sc.selected_sequin_group then
-      seq_ix = sc.sequencers[sc.selected_sequin_group].seq.ix
-    end
+    sc.selected_sequin_group = x
+    local seq_ix = sc.sequencers[sc.selected_sequin_group].seq.ix
+
+    -- local seq_ix
+    -- if sc.selected_sequin_group then
+      -- seq_ix = sc.sequencers[sc.selected_sequin_group].seq.ix
+    -- end
+    -- print("sc.selected_sequin_group,seq_ix",sc.selected_sequin_group,seq_ix)
     self.update_selected_sequin_group(x,state,seq_ix)
   elseif group_name == "sequin_selector" then
     self.update_sequin_selector(x, y, state)

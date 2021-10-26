@@ -15,9 +15,9 @@ function sequin_processor.init()
 end
 
 function sequin_processor.process(sequin_to_process,sub_seq_leader_ix)
+  -- print("#sequin_to_process.active_outputs",#sequin_to_process,#sequin_to_process.active_outputs)
   if(#sequin_to_process.active_outputs)>0 then
-    -- tab.print(sequin_to_process.)
-    local num_outputs = sequin_processor.gather_outputs(sequin_to_process.active_outputs,sequin_to_process.id,sub_seq_leader_ix)
+    sequin_processor.gather_outputs(sequin_to_process.active_outputs, sequin_to_process.id, sub_seq_leader_ix)
   end
 end
 
@@ -41,7 +41,11 @@ function sequin_processor.gather_outputs(output_table, sequin_id, sub_seq_leader
         if selected_sequin_output_group == sequin_output_group then
 
           -- get the next value set in the output table's sequins
+          -- however, if the select function is nil, define the sequin with its data because a deep_copy function has been performed (long story...)
           if v.seq then
+            if type(v.seq.select) ~= 'function' then
+              v.seq = Sequins{table.unpack(v.seq.data)}
+            end
             --------------------------------------
             -- THIS IS WHERE THE SUB SEQUINS GET INCREMENTED 
             v.seq:select(sub_seq_leader_ix)

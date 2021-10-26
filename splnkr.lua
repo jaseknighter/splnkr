@@ -178,7 +178,7 @@ function init()
   parameters.init()
   fn.build_scale()
 
-  parameters.init_envelope_controls(1)
+  -- parameters.init_envelope_controls(1)
 
 
   -- startup all sc effects  

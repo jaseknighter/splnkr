@@ -49,6 +49,7 @@ sequencer_screen = include "splnkr/lib/sequencer_screen"
 include "splnkr/lib/Cutter"
 cut_detector = include "splnkr/lib/cut_detector"
 
+save_load = include "splnkr/lib/save_load"
 parameters = include "splnkr/lib/parameters"
 instructions = include "splnkr/lib/instructions"
 

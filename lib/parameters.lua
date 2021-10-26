@@ -10,8 +10,21 @@ function parameters.init()
   -- root note: the lowest note in the scale
   -- note_center_frequency: the note to use as "1" in the sequencer
   --------------------------------
+  params:add_separator("SAVE SAMPLES")
+  params:add_trigger("set_", "save samples")
+  params:set_action("set_", function(x)
+    if Namesizer ~= nil then
+      textentry.enter(pre_save,Namesizer.phonic_nonsense().."_"..Namesizer.phonic_nonsense())
+    else
+      textentry.enter(sample_recorder.save_samples)
+    end
+  end)
+
+  save_load.init()
 
 
+  params:add_separator()
+  params:add_separator("SCALES AND NOTES")
   params:add{type = "option", id = "scale_mode", name = "scale mode",
   options = scale_names, default = 5,
   action = function() fn.build_scale() end}
@@ -736,8 +749,8 @@ function parameters.init()
   --------------------------------
   -- envelope parameters
   --------------------------------
-  params:add_group("envelopes",2+(num_envelopes*(MAX_ENVELOPE_NODES*3)))
-  -- params:add_group("envelopes",2+4+(num_envelopes*(MAX_ENVELOPE_NODES*3))+19)
+  
+  -- params:add_group("envelopes",2+(num_envelopes*(MAX_ENVELOPE_NODES*3)))
   params:add_separator("env controls")  
   -- params:add_separator("envelope")
   
@@ -1014,9 +1027,6 @@ function parameters.init()
   end
 
 
-
-  -- init_envelope_controls(2)
-
   -- params:add_separator("env mod params")
   -- params:add{type = "option", id = "show_env_mod_params", name = "show env mod params",
   -- options = {"off","on"}, default = 1,
@@ -1053,18 +1063,10 @@ function parameters.init()
   --     envelopes[2].set_env_nav_active_control(x-envelopes[2].env_nav_active_control) 
   --   end  
   -- end )
+  
 
+  params:add_separator("ENVELOPE CONTROLS")
   parameters.init_envelope_controls(1)
-
-  params:add_separator("save_samples")
-  params:add_trigger("set_", "save samples")
-  params:set_action("set_", function(x)
-    if Namesizer ~= nil then
-      textentry.enter(pre_save,Namesizer.phonic_nonsense().."_"..Namesizer.phonic_nonsense())
-    else
-      textentry.enter(sample_recorder.save_samples)
-    end
-  end)
 
 end
 

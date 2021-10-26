@@ -25,7 +25,6 @@ function Sequencer:new(lattice,id)
   }
 
   function s:pattern_event()
-    --print("s.seq.ix",s.seq.ix,params:get("num_sequin"))
     local starting_sequin = params:get("starting_sequin")
     if s.seq.ix < starting_sequin then
       s.next_sequin = starting_sequin
@@ -49,6 +48,9 @@ function Sequencer:new(lattice,id)
     -- end
     local flicker_time = 1/16 
     grid_sequencer:register_flicker_at(5+s.next_sequin.id, 1, flicker_time)
+    if sns == nil then 
+      sns = s.next_sequin
+    end
     sequin_processor.process(s.next_sequin,s.sub_seq_leader_ix)
   end
   
