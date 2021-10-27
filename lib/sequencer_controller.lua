@@ -220,8 +220,10 @@ sc.output_mode_map = {
   {nil,nil,nil,nil,nil,nil},                        -- softcut 
   -- {nil,3,3,2},                  -- devices midi out (nil), crow(3), just_friends(3),w/(2)
   {7,2,7,5},                  -- devices midi out (4), crow(2), just_friends(7),w/(5)
-  {nil,nil,nil,nil,8,nil,nil},  -- effects: amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (8)
-  {nil},                        -- enveloper: on/off (nil), trig_rate(nil), overlap (nil)
+  {nil,nil,nil,nil,5,nil,nil,3},  -- effects: amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (5)
+  {nil},                        -- sequins:
+                                --  main sequins: every(1-9), times(1-9), count(1-9), all(), reset(), swap with (1-9), copy from (1-9), 
+                                --  sub-sequins: : every(1-9), times(1-9), count(1-9), all(), reset(), swap with (1-9), copy from (1-9), 
   {nil,nil},                    -- pattern (division)
   {nil,nil,nil,nil,nil}         -- lattice: set_meter (nil), auto_pulses (nil), ppqn (nil))
 }
@@ -238,7 +240,7 @@ sc.output_params_map = {
   }, 
   -- {nil,{nil,nil,nil},{2,3,nil},{nil,nil}}, -- device (midi out (nil), crow(3), just_friends(3),w/(2))
   {{4,4,4,3,3,3,nil},{nil,nil},{2,2,2,2,2,2,2},{9,9,9,4,9}}, -- device (midi out (4), crow(2), just_friends(2),w/(2))
-  {nil,nil,nil,nil,{nil,nil,nil,nil,nil,nil,nil,nil},nil,nil}, -- effect (amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (8)), phaser(nil), delay(nil)
+  {nil,nil,nil,nil,{nil,nil,nil,nil,nil},nil,nil}, -- effect (amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (5)), phaser(nil), delay(nil), enveloper (3)
   {nil,nil,nil}, -- enveloper 
   {nil,nil}, -- pattern
   {nil,nil,nil,nil,nil,nil},  -- lattice 
@@ -383,12 +385,14 @@ function sc.refresh_output_control_specs_map()
         {"note",min_note,max_note,"pitchshift_note_3","pitchshift note 3"},
         {"note",min_note,max_note,"pitchshift_note_4","pitchshift note 4"},
         {"note",min_note,max_note,"pitchshift_note_5","pitchshift note 5"},
-        {"note",min_note,max_note,"pitchshift_note_6","pitchshift note 6"},
-        {"note",min_note,max_note,"pitchshift_note_7","pitchshift note 7"},
-        {"note",min_note,max_note,"pitchshift_note_8","pitchshift note 8"}
       },
       {"number",'0.00',10,nil,"phaser","phaser"}, -- phaser
-      {"number",'0.00',10,nil,"delay","delay"} -- delay
+      {"number",'0.00',10,nil,"delay","delay"}, -- delay
+      {   -- enveloper 
+        {"option",{"off","on"},nil,nil,"enveloper_off_on","enveloper off/on"},        -- off/on
+        {"number", 0.01, 50,nil,"trig_rate","trig rate"},        -- trig_rate 0.01 - 50.00
+        {"number",'0.00',1,nil,"overlap","overlap"}                  -- overlap 0-1
+      },
     }, 
     {   -- enveloper 
       {"option",{"off","on"},nil,nil,"enveloper_off_on","enveloper off/on"},        -- off/on

@@ -248,40 +248,140 @@ function parameters.init()
   -- effect params
   ------------------------------
 
-  
+  DELAY_SPEC = controlspec.def{
+    min=0.0,
+    max=5.0,
+    warp='linear',
+    step=0.01,
+    default=1,
+    quantum=0.001,
+    wrap=false,
+    -- units='khz'
+  }
 
-    trig_spec = controlspec.def{
-      min=-0.0,
-      max=50.0,
-      warp='linear',
-      step=0.001,
-      default=5,
-      quantum=0.0001,
-      wrap=false,
-      -- units='khz'
-    }
+  BITCRUSH_RATE_SPEC = controlspec.def{
+    min=100,
+    max=10000,
+    warp='log',
+    -- step=1,
+    default=1000,
+    -- quantum=1,
+    wrap=false,
+    -- units='khz'
+  }
+
+  TRIG_SPEC = controlspec.def{
+    min=-0.0,
+    max=50.0,
+    warp='linear',
+    step=0.01,
+    default=5,
+    quantum=0.001,
+    wrap=false,
+    -- units='khz'
+  }
   
   local effect_params = {
     -- {vinyl,vinyl,0,10,0,engine.vinyl}
     -- effect_name,effect_id,effect_min,effect_max,effect_default, effect_fn, effect_type
 
     {"amp","amp",0,1,1,engine.amp,"control",},
-    {"drywet","drywet",0,1,1,engine.drywet,"control",},
-    {"pitchshift","pitchshift",0,1,0,engine.pitchshift,"control",},
-    {"pitchshift offset","pitchshift_midi_offset",-100,100,0,engine.pitchshift_midi_offset,"number",},
-    {"phaser","phaser",0,1,0,engine.phaser,"control",},
+    -- {"drywet","drywet",0,1,1,engine.drywet,"control",},
+    -- {"  pitchshift offset","pitchshift_midi_offset",-100,100,0,engine.pitchshift_midi_offset,"number",},
+    -- {"phaser","phaser",0,1,0,engine.phaser,"control",},
     {"delay","delay",0,1,0,engine.delay,"control",},
+    {"  delay time","delay_time",0,5,0.25,engine.delaytime,"control",},
+    {"  delay decay","delay_decay",0,5,4.0,engine.delaydecaytime,"control",},
+    {"  delay amp","delay_amp",0,5,2,engine.delaymul,"control",},
+    {"bitcrush","bitcrush",0,1,0,engine.bitcrush,"control",},
+    {"  bitcrush bits","bitcrush_bits",1,16,8,engine.bitcrush,"number",},
+    {"  bitcrush rate","bitcrush_rate",100,48000,1000,engine.bitcrush,"control",},
     -- {"strobe","strobe",0,1,0,engine.strobe,"control",},
-    {"flutter and wow","flutter_and_wow",0,1,0,engine.flutter_and_wow,"control",},
+    -- {"flutter and wow","flutter_and_wow",0,1,0,engine.flutter_and_wow,"control",},
     {"enveloper","enveloper",1,2,1,engine.enveloper,"option",{"off","on"},},
-    {"trig rate","trig_rate",1,20,5,engine.trig_rate,"number",},
-    {"overlap","overlap",0.01,0.99,0.5,engine.overlap,"control",},
-    {"pan_type","pan type",0,1,0,engine.pan_type,"number",},
-    {"pan_max","pan max",0,1,0.5,engine.pan_max,"control",},
+    {"  trig rate","trig_rate",1,20,5,engine.trig_rate,"number",},
+    {"  overlap","overlap",0.01,0.99,0.99,engine.overlap,"control",},
+    -- {"pan_type","pan type",0,1,0,engine.pan_type,"number",},
+    -- {"pan_max","pan max",0,1,0.5,engine.pan_max,"control",},
+    {"pitchshift","pitchshift",0,1,0,engine.pitchshift,"control",},
+    {"   pitchshift note1","pitchshift_note1",-scale_length,scale_length,1,engine.pitchshift_note1,"number",},
+    {"   pitchshift note2","pitchshift_note2",-scale_length,scale_length,3,engine.pitchshift_note2,"number",},
+    {"   pitchshift note3","pitchshift_note3",-scale_length,scale_length,5,engine.pitchshift_note3,"number",},
+    {"   pitchshift note4","pitchshift_note4",-scale_length,scale_length,1,engine.pitchshift_note4,"number",},
+    {"   pitchshift note5","pitchshift_note5",-scale_length,scale_length,3,engine.pitchshift_note5,"number",},
+    {"   grain size","grain_size",0.1,1,0.1,engine.grain_size,"control",},
+    {"   time dispersion","time_dispersion",0.01,1,0.01,engine.time_dispersion,"control",},
+
+
+
+
+
+
+
   }
 
   function parameters.add_effect_param(effect_name,effect_id,effect_min,effect_max,effect_default, effect_fn, effect_type, effect_options)
-    if effect_id ~= "trig_rate" and effect_type ~= "option" then
+    if effect_id == "bitcrush" then
+      params:add{
+        type = effect_type, id = effect_id, name = effect_name, default = effect_default,
+        min=effect_min,max=effect_max, options=effect_options,
+        action = function(x) 
+          if initializing == false then
+            local args = {x, params:get("bitcrush_bits"), params:get("bitcrush_rate")}
+            effect_fn(table.unpack(args))
+          end
+        end
+      }
+    elseif effect_id == "bitcrush_bits" then
+      params:add{
+        type = effect_type, id = effect_id, name = effect_name, default = effect_default,
+        min=effect_min,max=effect_max, options=effect_options,
+        action = function(x) 
+          if initializing == false then
+            local args = {params:get("bitcrush"), x, params:get("bitcrush_rate")}
+            effect_fn(table.unpack(args))
+          end
+        end
+      }
+    elseif effect_id == "bitcrush_rate" then
+      params:add_control(effect_id,effect_name,BITCRUSH_RATE_SPEC)
+      params:set_action(effect_id,function(x) 
+        if initializing == false then
+          local args = {params:get("bitcrush"), params:get("bitcrush_bits"), x}
+          effect_fn(table.unpack(args))
+        end
+      end)
+    elseif effect_id == "delay_time" or effect_id == "delay_decay" or effect_id == "delay_amp" then
+        params:add_control(effect_id,effect_name,DELAY_SPEC)
+        params:set_action(effect_id,function(x) 
+          effect_fn(x)
+        end)
+    elseif effect_id == "pitchshift" or effect_id == "grain_size" or effect_id == "time_dispersion" then
+      params:add{
+        type = effect_type, id = effect_id, name = effect_name, default = effect_default,
+        min=effect_min,max=effect_max, options=effect_options,
+        action = function(x) 
+          if initializing == false then
+            -- local num = fn.round_decimals (x, 2, "up")
+            effect_fn(x)
+            if effect_id == "pitchshift" then
+              -- engine.pitchshift(params:get("pitchshift"))  
+              engine.grain_size(params:get("grain_size"))  
+              engine.time_dispersion(params:get("time_dispersion"))  
+            elseif effect_id == "grain_size" then
+              engine.pitchshift(params:get("pitchshift"))  
+              -- engine.grain_size(params:get("grain_size"))  
+              engine.time_dispersion(params:get("time_dispersion"))  
+            elseif effect_id == "time_dispersion" then
+              engine.pitchshift(params:get("pitchshift"))  
+              engine.grain_size(params:get("grain_size"))  
+              -- engine.time_dispersion(params:get("time_dispersion"))  
+            end
+            engine.start_splnkring(1)
+          end
+        end
+      }
+    elseif effect_id ~= "trig_rate" and effect_type ~= "option" then
       params:add{
         type = effect_type, id = effect_id, name = effect_name, default = effect_default,
         min=effect_min,max=effect_max,
@@ -290,7 +390,7 @@ function parameters.init()
         end
       }
     elseif effect_id == "trig_rate" then
-      params:add_control(effect_id,effect_name,trig_spec)
+      params:add_control(effect_id,effect_name,TRIG_SPEC)
       params:set_action(effect_id,function(x) 
         effect_fn(x)
       end)
@@ -309,7 +409,8 @@ function parameters.init()
 
   params:add_separator("effects")
 
-  for i=1,7,1
+  -- for i=1,10,1
+  for i=1,#effect_params,1
   do
     parameters.add_effect_param(
     effect_params[i][1],
@@ -325,6 +426,7 @@ function parameters.init()
   --------------------------------
   -- wow and flutter parameters
   --------------------------------
+  --[[
   params:add_separator("")
 
   -- params:add_group("wow and flutter",6)
@@ -411,21 +513,21 @@ function parameters.init()
       engine.flutter_variationfreq(x) 
     end
   }
+  ]]
+    -- params:add_separator("enveloping")
 
-    params:add_separator("enveloping")
-
-    for i=8,#effect_params,1
-    do
-      parameters.add_effect_param(
-        effect_params[i][1],
-        effect_params[i][2],
-        effect_params[i][3],
-        effect_params[i][4],
-        effect_params[i][5],
-        effect_params[i][6],
-        effect_params[i][7],
-        effect_params[i][8])
-    end
+    -- for i=11,#effect_params,1
+    -- do
+    --   parameters.add_effect_param(
+    --     effect_params[i][1],
+    --     effect_params[i][2],
+    --     effect_params[i][3],
+    --     effect_params[i][4],
+    --     effect_params[i][5],
+    --     effect_params[i][6],
+    --     effect_params[i][7],
+    --     effect_params[i][8])
+    -- end
 
   -- end
 
