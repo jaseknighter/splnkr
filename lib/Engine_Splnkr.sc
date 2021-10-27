@@ -13,7 +13,7 @@ Engine_Splnkr : CroneEngine {
   var maxsegments = 20;
   var numSegs=3, envLevels, envTimes, envCurves;
   var splnkrDef, splnkrVoice;
-  var enveloper = 1, trigRate = 5, overlap = 0.5, panMax = 0.5, panType=0;
+  var enveloper = 1, trigRate = 5, overlap = 0.99, panMax = 0.5, panType=0;
   var id=0;
   var pollFunc;
   var outArray;
@@ -23,8 +23,16 @@ Engine_Splnkr : CroneEngine {
   var amp=1,bpm=120,drywet=1;
   var effect_phaser=0,effect_distortion=0,effect_delay=0,
       effect_bitcrush,bitcrush_bits=10,bitcrush_rate=12000, // this has parameters
-      effect_strobe=0,effect_vinyl=0, effect_pitchshift=0, effect_flutter_and_wow=0,
-      pitchshift_midi_offset=0;
+      effect_strobe=0,effect_vinyl=0, effect_flutter_and_wow=0,
+      effect_pitchshift=0, pitchshift_offset=0, 
+      pitchshift_note1=1, pitchshift_note2=3, pitchshift_note3=5, pitchshift_note4=1, pitchshift_note5=3;
+  var trigger_frequency=1, base_note=0;
+  var grain_size, time_dispersion;
+
+      // pitchshi
+      // pitchshift_midi_offset=0;
+  var effect_delaytime = 0.25, effect_delaydecaytime = 4.0, effect_delaymul = 2.0;
+
   var wobble_rpm=33, wobble_amp=0.05, wobble_exp=3, flutter_amp=0.0, flutter_fixedfreq=6, flutter_variationfreq=2; 
   // var bpfLevelsArray, bpfCenterFreqsArray, bpfRQsArray;
   var filterLevel0=1,centerFrequency0=440, reciprocalQuality0=1;
@@ -80,12 +88,16 @@ Engine_Splnkr : CroneEngine {
       ampMin=ampMinArray, ampMax=ampMaxArray,
       freqMin=freqMinArray, freqMax=freqMaxArray,
       effect_phaser=0,effect_distortion=0,effect_delay=0,
-      effect_bitcrush,bitcrush_bits=10,bitcrush_rate=12000, // this has parameters
-      effect_strobe=0,effect_vinyl=0, effect_pitchshift=0, effect_flutter_and_wow=0,
-      pitchshift_midi_offset=0,
+      effect_bitcrush,bitcrush_bits=10,bitcrush_rate=12000, 
+      effect_strobe=0,effect_vinyl=0, effect_flutter_and_wow=0,
+      // pitchshift_midi_offset=0,
+      trigger_frequency=1, effect_pitchshift=0, pitchshift_offset=0, base_note=24,
+      pitchshift_note1=1, pitchshift_note2=3, pitchshift_note3=5, pitchshift_note4=1, pitchshift_note5=3,
+      grain_size=0.1, time_dispersion=0.01,
+      effect_delaytime = 0.25, effect_delaydecaytime = 4.0, effect_delaymul = 2.0,
       envBuf,
       bpfs,
-      enveloper = 1, trigRate = 5, overlap = 0.5, panMax = 0.5,
+      enveloper = 1, trigRate = 5, overlap = 0.99, panMax = 0.5,
       panType = 0, minGrainDur = 0.001, interpolation = 4,
       wobble_rpm=33, wobble_amp=0.05, wobble_exp=39, flutter_amp=0.03, flutter_fixedfreq=6, flutter_variationfreq=2;
 
@@ -99,6 +111,8 @@ Engine_Splnkr : CroneEngine {
       var wow = Select.kr(signed_wobble > 0, signed_wobble, 0);
       var flutter = flutter_amp*SinOsc.kr(flutter_fixedfreq+LFNoise2.kr(flutter_variationfreq));
       var combined_defects = 1 + wow + flutter;
+      var pitchshift_note, trigger, pitch_ratio;
+      // var sig = In.ar(in, 2), pitch_ratio;
       
       // bpfLevels = Array.fill(16,{0.5});
       // bpfCenterFreqs = Array.fill(16,{440});
@@ -208,12 +222,9 @@ Engine_Splnkr : CroneEngine {
       // other effects
       //////////////////////////////////////////
 
-      // TODO: what is a good order for these?
-      // TODO: explode mode options
-
       // delay
       combBuf1 = Buffer.alloc(context.server,48000,2);
-      wet = (wet*(1-effect_delay))+(effect_delay*BufCombC.ar(combBuf1,wet,5,0.2,4));
+      wet = (wet*(1-effect_delay))+(effect_delay*BufCombC.ar(combBuf1,wet,effect_delaytime,effect_delaydecaytime,effect_delaymul));
 
       // flutter + wow
       signed_wobble = wobble_amp*(SinOsc.kr(wobble_rpm/60)**wobble_exp);
@@ -222,27 +233,42 @@ Engine_Splnkr : CroneEngine {
       combined_defects = 1 + ((wow + flutter)*effect_flutter_and_wow);
       
       // wet = wet * combined_defects;
-      // wet =(effect_flutter_and_wow<1*wet)+(effect_flutter_and_wow>0 * wet * combined_defects);
+      // wet =(effect_flutter_and_wow<1*wet)+(effect_flutter_and_wow>0 * wet *   combined_defects);
 
-      // // pitch shift
-      trig = Impulse.ar(4);
-      // notes = Dseq([0,4,5], inf);
-      notes = Dseq([0], inf);
-
+      // pitch shift
+      trigger = Impulse.ar(trigger_frequency);
+      pitchshift_note = Dseq([pitchshift_note1,pitchshift_note2,pitchshift_note3,pitchshift_note4,pitchshift_note5], inf);
+      pitch_ratio = ((Demand.ar(trigger, 0, pitchshift_note) + (base_note.cpsmidi + pitchshift_offset)).midicps / base_note);
+      (pitchshift_note).poll;
       wet = (wet*(1-effect_pitchshift))+(effect_pitchshift*PitchShift.ar(
         wet,
-        0.1,
-        // ((Demand.ar(trig, 0, notes)).midicps / freq),
-        // ((Demand.ar(trig, 0, notes) + (54 * combined_defects)).midicps / freq),
-        ((Demand.ar(trig, 0, notes) + (freq.cpsmidi + pitchshift_midi_offset)).midicps / freq) * combined_defects,
+        grain_size, //0.1, 
+        pitch_ratio,
         0,
-        0.01
+        time_dispersion //0.01 
       ));
+
+
+
+      // trig = Impulse.ar(4);
+      // notes = Dseq([0,4,5], inf);
+      // notes = Dseq([0], inf);
+
+      // wet = (wet*(1-effect_pitchshift))+(effect_pitchshift*PitchShift.ar(
+      //   wet,
+      //   0.1,
+      //   // ((Demand.ar(trig, 0, notes)).midicps / freq),
+      //   // ((Demand.ar(trig, 0, notes) + (54 * combined_defects)).midicps / freq),
+      //   ((Demand.ar(trig, 0, notes) + (freq.cpsmidi + pitchshift_midi_offset)).midicps / freq) * combined_defects,
+      //   0,
+      //   0.01
+      // ));
 
       // phaser
       // wet = (wet*(1-effect_phaser))+(effect_phaser*CombC.ar(wet,1,SinOsc.kr(1/7).range(500,1000).reciprocal,0.05*SinOsc.kr(1/7.1).range(-1,1)));
-      combBuf2 = Buffer.alloc(context.server,48000,2);
-      wet = (wet*(1-effect_phaser))+(effect_phaser*BufCombC.ar(combBuf2,wet,1,SinOsc.kr(1/7).range(500,550).reciprocal,0.05*SinOsc.kr(1/7.1).range(-1,1)));
+
+      // combBuf2 = Buffer.alloc(context.server,48000,2);
+      // wet = (wet*(1-effect_phaser))+(effect_phaser*BufCombC.ar(combBuf2,wet,1,SinOsc.kr(1/7).range(500,1000).reciprocal,0.05*SinOsc.kr(1/7.1).range(-1,1),4));
 
       // distortion
       effect_distortion = Lag.kr(effect_distortion,0.5);
@@ -253,7 +279,7 @@ Engine_Splnkr : CroneEngine {
       wet = (wet*(1-effect_bitcrush))+(effect_bitcrush*Decimator.ar(wet,Lag.kr(bitcrush_rate,1),Lag.kr(bitcrush_bits,1)));
 
       // strobe
-      wet = ((effect_strobe<1)*wet)+((effect_strobe>0)*wet*SinOsc.ar(bpm/60));
+      // wet = ((effect_strobe<1)*wet)+((effect_strobe>0)*wet*SinOsc.ar(bpm/60));
 
       // vinyl wow + compressor
       // wet=(effect_vinyl<1*wet)+(effect_vinyl>0* Limiter.ar(Compander.ar(wet,wet,0.5,1.0,0.1,0.1,1,2),dur:0.0008));
@@ -284,14 +310,23 @@ Engine_Splnkr : CroneEngine {
     //trigger Polls
     pollFunc = OSCFunc({
       arg msg;
-      var ampDetectVal = msg[4];
-      var freqDetectVal = msg[3];
-
+      var ampDetectVal = msg[4].asStringPrec(3).asFloat;
+      var freqDetectVal = msg[3].asStringPrec(3).asFloat;
       for (0, 3, { arg i;
+        // (ampDetectVal,ampMinArray[i],ampMaxArray[i], freqDetectVal,freqMinArray[i],freqMaxArray[i]).postln;
+        // (">>>>>>>>>>").postln;
+        // (ampDetectVal).postln;
+        // (ampDetectVal > ampMinArray[i]).postln;
+        // (ampDetectVal < ampMaxArray[i]).postln;
+        // (freqDetectVal > freqMinArray[i]).postln;
+        // (freqDetectVal < freqMaxArray[i]).postln;
         if (
             ((ampDetectVal > ampMinArray[i]) && (ampDetectVal < ampMaxArray[i])) &&
             ((freqDetectVal > freqMinArray[i]) && (freqDetectVal < freqMaxArray[i]))
         ) {
+          (freqDetectVal).postln;
+          (freqMinArray).postln;
+          (freqMaxArray).postln;
           case
             {i==0} {amplitudeDetectPoll1.update(ampDetectVal)}
             {i==1} {amplitudeDetectPoll2.update(ampDetectVal)}
@@ -387,9 +422,19 @@ Engine_Splnkr : CroneEngine {
             \effect_phaser,effect_phaser,
             \effect_distortion,effect_distortion,
             \effect_delay,effect_delay,
+            \effect_delaytime, effect_delaytime, 
+            \effect_delaydecaytime, effect_delaydecaytime,
+            \effect_delaymul, effect_delaymul,
             \effect_pitchshift,effect_pitchshift, 
+            \pitchshift_note1,pitchshift_note1,
+            \pitchshift_note2,pitchshift_note2,
+            \pitchshift_note3,pitchshift_note3,
+            \pitchshift_note4,pitchshift_note4,
+            \pitchshift_note5,pitchshift_note5,
+            \grain_size,grain_size,
+            \time_dispersion,time_dispersion,
             \effect_flutter_and_wow,effect_flutter_and_wow,
-            \pitchshift_midi_offset,pitchshift_midi_offset,
+            // \pitchshift_midi_offset,pitchshift_midi_offset,
           ],
           target: voiceGroup).onFree({ 
               voiceList.remove(newVoice); 
@@ -642,6 +687,29 @@ Engine_Splnkr : CroneEngine {
       };
     });
 
+    this.addCommand("delaytime", "f", { arg msg;
+      if (voiceList.size > 0){ 
+        splnkrVoice.theSynth.set(\effect_delaytime, msg[1]);
+        effect_delaytime = msg[1];    
+      };
+    });
+
+    this.addCommand("delaydecaytime", "f", { arg msg;
+      if (voiceList.size > 0){ 
+        splnkrVoice.theSynth.set(\effect_delaydecaytime, msg[1]);
+        effect_delaydecaytime = msg[1];    
+      };
+    });
+
+    this.addCommand("delaymul", "f", { arg msg;
+      if (voiceList.size > 0){ 
+        splnkrVoice.theSynth.set(\effect_delaymul, msg[1]);
+        effect_delaymul = msg[1];    
+      };
+    });
+
+
+
     this.addCommand("strobe", "f", { arg msg;
       if (voiceList.size > 0){ 
         splnkrVoice.theSynth.set(\effect_strobe, msg[1]);
@@ -668,12 +736,59 @@ Engine_Splnkr : CroneEngine {
       };
     });
 
-    this.addCommand("pitchshift_midi_offset", "f", { arg msg;
+    this.addCommand("pitchshift_note1", "f", { arg msg;
       if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\pitchshift_midi_offset, msg[1]);
-        pitchshift_midi_offset = msg[1];
+        splnkrVoice.theSynth.set(\pitchshift_note1, msg[1]);
       };
     });
+
+    this.addCommand("pitchshift_note2", "f", { arg msg;
+      if (voiceList.size > 0){ 
+        splnkrVoice.theSynth.set(\pitchshift_note2, msg[1]);
+      };
+    });
+
+    this.addCommand("pitchshift_note3", "f", { arg msg;
+      if (voiceList.size > 0){ 
+        splnkrVoice.theSynth.set(\pitchshift_note3, msg[1]);
+      };
+    });
+
+    this.addCommand("pitchshift_note4", "f", { arg msg;
+      if (voiceList.size > 0){ 
+        splnkrVoice.theSynth.set(\pitchshift_note4, msg[1]);
+      };
+    });
+
+    this.addCommand("pitchshift_note5", "f", { arg msg;
+      if (voiceList.size > 0){ 
+        splnkrVoice.theSynth.set(\pitchshift_note5, msg[1]);
+      };
+    });
+
+    this.addCommand("grain_size", "f", { arg msg;
+      if (voiceList.size > 0){ 
+        // splnkrVoice.theSynth.set(\grain_size, msg[1]);
+        grain_size = msg[1];
+        (msg[1]).postln;
+      };
+    });
+
+    this.addCommand("time_dispersion", "f", { arg msg;
+      if (voiceList.size > 0){ 
+        (msg[1]).postln;
+        // splnkrVoice.theSynth.set(\time_dispersion, msg[1]);
+        time_dispersion = msg[1];
+      };
+    });
+
+
+    // this.addCommand("pitchshift_midi_offset", "f", { arg msg;
+    //   if (voiceList.size > 0){ 
+    //     splnkrVoice.theSynth.set(\pitchshift_midi_offset, msg[1]);
+    //     pitchshift_midi_offset = msg[1];
+    //   };
+    // });
       
 
     this.addCommand("bitcrush", "fff", { arg msg;
