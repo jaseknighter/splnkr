@@ -15,10 +15,9 @@ Engine_Splnkr : CroneEngine {
   var splnkrDef, splnkrVoice;
   var enveloper = 1, trigRate = 5, overlap = 0.99, panMax = 0.5, panType=0;
   var id=0;
-  var pollFunc;
+  var ampPollFunc, onsetDetectAmpPollFunc, freqPollFunc;
   var outArray;
-  var amplitudeDetectPoll1,amplitudeDetectPoll2,amplitudeDetectPoll3,amplitudeDetectPoll4;
-  var frequencyDetectPoll1, frequencyDetectPoll2, frequencyDetectPoll3, frequencyDetectPoll4;
+  var amplitudeDetectPoll,onsetAmplitudeDetectPoll, frequencyDetectPoll;
   var ampMinArray, ampMaxArray, freqMinArray, freqMaxArray;
   var amp=1,bpm=120,drywet=1;
   var effect_phaser=0,effect_distortion=0,effect_delay=0,
@@ -26,7 +25,7 @@ Engine_Splnkr : CroneEngine {
       effect_strobe=0,effect_vinyl=0, effect_flutter_and_wow=0,
       effect_pitchshift=0, pitchshift_offset=0, 
       pitchshift_note1=1, pitchshift_note2=3, pitchshift_note3=5, pitchshift_note4=1, pitchshift_note5=3;
-  var trigger_frequency=1, base_note=0;
+  var pitch_shift_trigger_frequency=1, pitch_shift_base_note=0;
   var grain_size, time_dispersion;
 
       // pitchshi
@@ -91,7 +90,7 @@ Engine_Splnkr : CroneEngine {
       effect_bitcrush,bitcrush_bits=10,bitcrush_rate=12000, 
       effect_strobe=0,effect_vinyl=0, effect_flutter_and_wow=0,
       // pitchshift_midi_offset=0,
-      trigger_frequency=1, effect_pitchshift=0, pitchshift_offset=0, base_note=24,
+      pitch_shift_trigger_frequency=1, effect_pitchshift=0, pitchshift_offset=0, pitch_shift_base_note=24,
       pitchshift_note1=1, pitchshift_note2=3, pitchshift_note3=5, pitchshift_note4=1, pitchshift_note5=3,
       grain_size=0.1, time_dispersion=0.01,
       effect_delaytime = 0.25, effect_delaydecaytime = 4.0, effect_delaymul = 2.0,
@@ -104,7 +103,7 @@ Engine_Splnkr : CroneEngine {
       var envTime1=0, envLevel1=1, envCurve1=0, envTime2=1, envLevel2=1, envCurve2=0, envTime3=1, envLevel3=1, envCurve3=0, envTime4=1, envLevel4=1, envCurve4=0, envTime5=1, envLevel5=1, envCurve5=0, envTime6=1, envLevel6=1, envCurve6=0, envTime7=1, envLevel7=1, envCurve7=0, envTime8=0, envLevel8=0, envCurve8=0;
       var sweptEnv, envctl, inSig, numFrames, startTrig, grainDur;
       var latchedTrigRate, latchedStartTrig, latchedOverlap, pan, sweep;
-      var detect,detectAmp,detectFreq;
+      var onsetDetect, onsetDetectAmp, detectAmp, detectFreq;
       var in,freq,hasFreq,out,trig,notes,noteAdder=0; // autotune vars
       var bpf0,bpf1,bpf2,bpf3,bpf4,bpf5,bpf6,bpf7,bpf8,bpf9,bpf10,bpf11,bpf12,bpf13,bpf14,bpf15;
       var signed_wobble = wobble_amp*(SinOsc.kr(wobble_rpm/60)**wobble_exp);
@@ -162,28 +161,31 @@ Engine_Splnkr : CroneEngine {
       //////////////////////////////////////////
 
       // amplitude based onset detection
-      detect = PinkNoise.ar(
+      onsetDetect = PinkNoise.ar(
         Decay.kr(
           Coyote.kr(
             wet,
-            fastMul: 0.6,
-            thresh: 0.001),
+            // fastMul: 0.4,
+            thresh: 0.001
+            ),
           0.2
         )
       );
 
-      detectAmp = Amplitude.kr(detect);
+      onsetDetectAmp = Amplitude.kr(onsetDetect);
+      detectAmp = Amplitude.kr(wet);
 
       //frequency detector
+
       # freq, hasFreq = Tartini.kr(wet);
 
-      freq = Clip.ar(freq, 40.midicps, 70.midicps);
+      freq = Clip.ar(freq, 0.midicps, 127.midicps);
 
       // outputArray to send to polls
       outArray = Array.fill(numOutValues, 0);
-      outArray[0] = detectAmp; // amplitude detection
-      outArray[1] = freq; // frequency
-      SendReply.kr(Impulse.kr(1), '/triggerPolls', outArray);
+      SendReply.kr(Impulse.kr(50), '/triggerAmpPoll', detectAmp);
+      SendReply.kr(Impulse.kr(50), '/triggerOnsetDetectAmpPoll', onsetDetectAmp);
+      SendReply.kr(Impulse.kr(50), '/triggerFreqPoll', freq);
 
 
       //////////////////////////////////////////
@@ -236,10 +238,11 @@ Engine_Splnkr : CroneEngine {
       // wet =(effect_flutter_and_wow<1*wet)+(effect_flutter_and_wow>0 * wet *   combined_defects);
 
       // pitch shift
-      trigger = Impulse.ar(trigger_frequency);
+      trigger = Impulse.ar(pitch_shift_trigger_frequency);
       pitchshift_note = Dseq([pitchshift_note1,pitchshift_note2,pitchshift_note3,pitchshift_note4,pitchshift_note5], inf);
-      pitch_ratio = ((Demand.ar(trigger, 0, pitchshift_note) + (base_note.cpsmidi + pitchshift_offset)).midicps / base_note);
-      (pitchshift_note).poll;
+      pitch_ratio = (
+        (Demand.ar(trigger, 0, pitchshift_note) + (pitch_shift_base_note.cpsmidi + pitchshift_offset)).midicps 
+        / pitch_shift_base_note);
       wet = (wet*(1-effect_pitchshift))+(effect_pitchshift*PitchShift.ar(
         wet,
         grain_size, //0.1, 
@@ -247,22 +250,6 @@ Engine_Splnkr : CroneEngine {
         0,
         time_dispersion //0.01 
       ));
-
-
-
-      // trig = Impulse.ar(4);
-      // notes = Dseq([0,4,5], inf);
-      // notes = Dseq([0], inf);
-
-      // wet = (wet*(1-effect_pitchshift))+(effect_pitchshift*PitchShift.ar(
-      //   wet,
-      //   0.1,
-      //   // ((Demand.ar(trig, 0, notes)).midicps / freq),
-      //   // ((Demand.ar(trig, 0, notes) + (54 * combined_defects)).midicps / freq),
-      //   ((Demand.ar(trig, 0, notes) + (freq.cpsmidi + pitchshift_midi_offset)).midicps / freq) * combined_defects,
-      //   0,
-      //   0.01
-      // ));
 
       // phaser
       // wet = (wet*(1-effect_phaser))+(effect_phaser*CombC.ar(wet,1,SinOsc.kr(1/7).range(500,1000).reciprocal,0.05*SinOsc.kr(1/7.1).range(-1,1)));
@@ -308,48 +295,32 @@ Engine_Splnkr : CroneEngine {
     //////////////////////////////////////////
     
     //trigger Polls
-    pollFunc = OSCFunc({
+    ampPollFunc = OSCFunc({
       arg msg;
-      var ampDetectVal = msg[4].asStringPrec(3).asFloat;
+      var ampDetectVal = msg[3].asStringPrec(3).asFloat;
+      (msg).postln;
+      amplitudeDetectPoll.update(ampDetectVal)
+    }, path: '/triggerAmpPoll', srcID: context.server.addr);
+
+    onsetDetectAmpPollFunc = OSCFunc({
+      arg msg;
+      var onsetAmpDetectVal = msg[3].asStringPrec(3).asFloat;
+      (msg).postln;
+      onsetAmplitudeDetectPoll.update(onsetAmpDetectVal)
+    }, path: '/triggerOnsetDetectAmpPoll', srcID: context.server.addr);
+
+    freqPollFunc = OSCFunc({
+      arg msg;
       var freqDetectVal = msg[3].asStringPrec(3).asFloat;
-      for (0, 3, { arg i;
-        // (ampDetectVal,ampMinArray[i],ampMaxArray[i], freqDetectVal,freqMinArray[i],freqMaxArray[i]).postln;
-        // (">>>>>>>>>>").postln;
-        // (ampDetectVal).postln;
-        // (ampDetectVal > ampMinArray[i]).postln;
-        // (ampDetectVal < ampMaxArray[i]).postln;
-        // (freqDetectVal > freqMinArray[i]).postln;
-        // (freqDetectVal < freqMaxArray[i]).postln;
-        if (
-            ((ampDetectVal > ampMinArray[i]) && (ampDetectVal < ampMaxArray[i])) &&
-            ((freqDetectVal > freqMinArray[i]) && (freqDetectVal < freqMaxArray[i]))
-        ) {
-          (freqDetectVal).postln;
-          (freqMinArray).postln;
-          (freqMaxArray).postln;
-          case
-            {i==0} {amplitudeDetectPoll1.update(ampDetectVal)}
-            {i==1} {amplitudeDetectPoll2.update(ampDetectVal)}
-            {i==2} {amplitudeDetectPoll3.update(ampDetectVal)}
-            {i==3} {amplitudeDetectPoll4.update(ampDetectVal)};
-          case
-            {i==0} {frequencyDetectPoll1.update(freqDetectVal)}
-            {i==1} {frequencyDetectPoll2.update(freqDetectVal)}
-            {i==2} {frequencyDetectPoll3.update(freqDetectVal)}
-            {i==3} {frequencyDetectPoll4.update(freqDetectVal)};
-        };
-      });
-    }, path: '/triggerPolls', srcID: context.server.addr);
+      (msg).postln;
+      frequencyDetectPoll.update(freqDetectVal)
+    }, path: '/triggerFreqPoll', srcID: context.server.addr);
 
     // add polls
-    amplitudeDetectPoll1 = this.addPoll(name: "amplitudeDetect1", periodic: false);
-    amplitudeDetectPoll2 = this.addPoll(name: "amplitudeDetect2", periodic: false);
-    amplitudeDetectPoll3 = this.addPoll(name: "amplitudeDetect3", periodic: false);
-    amplitudeDetectPoll4 = this.addPoll(name: "amplitudeDetect4", periodic: false);
-    frequencyDetectPoll1 = this.addPoll(name: "frequencyDetect1", periodic: false);
-    frequencyDetectPoll2 = this.addPoll(name: "frequencyDetect2", periodic: false);
-    frequencyDetectPoll3 = this.addPoll(name: "frequencyDetect3", periodic: false);
-    frequencyDetectPoll4 = this.addPoll(name: "frequencyDetect4", periodic: false);
+    amplitudeDetectPoll = this.addPoll(name: "amplitudeDetect", periodic: false);
+    onsetAmplitudeDetectPoll = this.addPoll(name: "onsetAmplitudeDetect", periodic: false);
+    frequencyDetectPoll = this.addPoll(name: "frequencyDetect", periodic: false);
+    
     //////////////////////////////////////////
     // Commands
     //////////////////////////////////////////
@@ -448,29 +419,6 @@ Engine_Splnkr : CroneEngine {
           id = id+1;
         });
       // };
-    });
-
-    //////////////////////////////////////////
-    // amplitude/frequency detection +
-    // filter parameters commands
-    this.addCommand("set_detect_amp_min", "if", { arg msg;
-      ampMinArray.put(msg[1], msg[2]);
-      splnkrVoice.theSynth.set(\ampMin, ampMinArray);
-    });
-
-    this.addCommand("set_detect_amp_max", "ff", { arg msg;
-      ampMaxArray.put(msg[1], msg[2]);
-      splnkrVoice.theSynth.set(\ampMax, ampMaxArray);
-    });
-
-    this.addCommand("set_detect_frequency_min", "ff", { arg msg;
-      freqMinArray.put(msg[1], msg[2]);
-      splnkrVoice.theSynth.set(\freqMin, freqMinArray);
-    });
-
-    this.addCommand("set_detect_frequency_max", "ff", { arg msg;
-      freqMaxArray.put(msg[1], msg[2]);
-      splnkrVoice.theSynth.set(\freqMax, freqMaxArray);
     });
 
     this.addCommand("set_filter_level", "ff", { arg msg;
@@ -836,7 +784,8 @@ Engine_Splnkr : CroneEngine {
     voiceGroup.free;
     voiceList.free;
     wet.free;
-    // pollFunc.free;
+    ampPollFunc.free;
+    onsetDetectAmpPollFunc.free;
   }
 }
 

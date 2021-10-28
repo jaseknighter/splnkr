@@ -87,6 +87,3 @@ function devices_jf_processor.portamento()
 end
 
 return devices_jf_processor
-
-
--- externals1.note_on(1,60,1,1,1,"engine")dp process

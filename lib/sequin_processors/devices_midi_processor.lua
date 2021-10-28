@@ -113,6 +113,3 @@ function dmp.stop_start(val)
 end
 
 return dmp
-
-
--- externals1.note_on(1,60,1,1,1,"engine")dp process

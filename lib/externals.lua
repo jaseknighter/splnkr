@@ -16,7 +16,6 @@ function externals:new(active_notes)
   end
 
   ext.midi_note_off = function(delay, note_num, channel, voice_id, note_location)
-    print("off")
     local note_off_delay
     if voice_id == 1 then
       note_off_delay = midi_out_envelope_override1 or delay
@@ -42,14 +41,17 @@ function externals:new(active_notes)
     midi_out_device:note_off(note_num, nil, channel)
   end
 
+  -- externals1.note_on(1, note_num, 1, 1, nil,"engine")
   ext.note_on = function(voice_id, value, beat_frequency, envelope_time_remaining, note_source, note_target)
-    -- print("note_on:",voice_id, value, beat_frequency, envelope_time_remaining, note_source, note_target)
     -- local output_bandsaw = params:get("output_bandsaw")
     local note_offset = params:get("note_center_frequency") - root_note_default
     if type(value) == "table" then
-      value.pitch  = value.pitch and notes[value.pitch+note_offset]
+      value.pitch  = note_source == "engine" and value.pitch or notes[value.pitch+note_offset]
+      -- print("note_on:",voice_id, value.pitch, beat_frequency, envelope_time_remaining, note_source, note_target)
     else
-      value = notes[value+note_offset]
+      -- print("eng",value,note_offset)
+      -- value = notes[value+note_offset]
+      -- print("note_on:",voice_id, value, beat_frequency, envelope_time_remaining, note_source, note_target)
     end
     
     local output_midi = params:get("output_midi")
@@ -72,19 +74,19 @@ function externals:new(active_notes)
 
     -- MIDI out
     -- if (note_source == "engine" and output_bandsaw == 4) or output_midi > 1 then
-    if (note_source == "engine" and (output_midi == 2 or output_midi == 4)) or
-      (note_source == "midi" and (output_midi == 3 or output_midi == 4))  then
-      local level = voice_id == 1 and params:get("envelope1_max_level") or params:get("envelope2_max_level")
-      level = math.floor(util.linlin(0,10,0,127,level))
-      midi_out_device:note_on(value, level, midi_out_channel)
-      table.insert(active_notes, value)
-      -- Note off timeout
-      -- local note_duration_param = voice_id == 1 and "voice_1_note_duration" or "voice_2_note_duration"
-      clock.run(ext.midi_note_off, envelope_length, value, midi_out_channel, voice_id, #active_notes)
-    end
+    -- if note_target == "midi" and (note_source == "engine" and (output_midi == 2 or output_midi == 4)) or
+    --   (note_source == "midi" and (output_midi == 3 or output_midi == 4))  then
+    --   local level = voice_id == 1 and params:get("envelope1_max_level") or params:get("envelope2_max_level")
+    --   level = math.floor(util.linlin(0,10,0,127,level))
+    --   midi_out_device:note_on(value, level, midi_out_channel)
+    --   table.insert(active_notes, value)
+    --   -- Note off timeout
+    --   -- local note_duration_param = voice_id == 1 and "voice_1_note_duration" or "voice_2_note_duration"
+    --   clock.run(ext.midi_note_off, envelope_length, value, midi_out_channel, voice_id, #active_notes)
+    -- end
     
     -- midi out (sequencer)
-    if (note_source == "sequencer" and note_target == "midi") then
+    if (note_target == "midi") then
       -- if (output_jf ~= 2 and output_jf ~= 4) then params:set("output_jf",2) end
       local mode = value.mode
       if mode == 1 then -- play_voice
@@ -94,9 +96,7 @@ function externals:new(active_notes)
         local duration = value.duration 
         midi_out_device:note_on(pitch, velocity, channel)
         table.insert(active_notes, pitch)
-        -- print("duration,type(duration)",duration,type(duration))
         clock.run(ext.midi_note_off_beats, duration, pitch, channel, 1, #active_notes)
-        -- print(pitch,velocity,channel,duration)
       elseif mode == 2 then -- stop/start
         if value.stop_start == 1 then -- stop
           midi_out_device:stop()
@@ -156,17 +156,13 @@ function externals:new(active_notes)
     -- note, trigger, envelope, gate check
     -- voice_id, value, pitch_frequency, beat_frequency, envelope_time_remaining, note_source
     if (voice_id == 1 and 
-        (
-          (
-            ( note_source == "sequencer" and note_target == "crow") or 
-              note_source == "engine"
-          ) and 
-          (output_crow1 == 2 or output_crow1 == 3 or output_crow1 == 4)
-      )) or
-      (note_source == "midi" and (output_crow1 == 4 or output_crow1 == 5)
+        ((note_target == "crow" and ( note_source == "sequencer" or note_source == "engine")) 
+          and 
+         (output_crow1 == 2 or output_crow3 == 3 or output_crow3 == 4)) or
+        (note_source == "midi" and (output_crow3 == 4 or output_crow3 == 5))
     ) then
-      -- if output_crow > 1 then
       local volts
+      -- print("crow value", value)
       if note_source == "engine" then
         volts = (value-60)/12
       else
@@ -201,14 +197,10 @@ function externals:new(active_notes)
     -- (note_source == "midi" and (output_crow3 == 3 or output_crow3 == 4)) then
 
     if (voice_id == 3 and 
-          (
-            (
-              ( note_source == "sequencer" and note_target == "crow") or 
-                note_source == "engine"
-            ) and 
-            (output_crow1 == 2 or output_crow3 == 3 or output_crow3 == 4)
-        )) or
-        (note_source == "midi" and (output_crow3 == 4 or output_crow3 == 5)
+        ((note_target == "crow" and ( note_source == "sequencer" or note_source == "engine")) 
+          and 
+         (output_crow1 == 2 or output_crow3 == 3 or output_crow3 == 4)) or
+        (note_source == "midi" and (output_crow3 == 4 or output_crow3 == 5))
     ) then
       local volts
       if note_source == "engine" then
@@ -248,7 +240,7 @@ function externals:new(active_notes)
     end
           
     -- just friends out (engine)
-    if (note_source == "engine" and (output_jf == 2 or output_jf == 4)) or
+    if (note_source == "engine" and note_target == "jf" and (output_jf == 2 or output_jf == 4)) or
     (note_source == "midi" and (output_jf == 3 or output_jf == 4)) then
       if jf_mode == 1 then
         if voice_id == 1 then
@@ -269,7 +261,6 @@ function externals:new(active_notes)
       if (output_jf ~= 2 and output_jf ~= 4) then params:set("output_jf",2) end
       
       mode = value.mode
-        print("jf process",note_source,note_target, output_jf,value.mode,value.level)
       if mode == 1 then -- play_note
         local pitch = value.pitch
         local level = value.level

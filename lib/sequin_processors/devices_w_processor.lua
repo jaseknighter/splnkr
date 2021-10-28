@@ -91,6 +91,3 @@ function devices_w_processor.process_w_del(output_table)
 end
 
 return devices_w_processor
-
-
--- externals1.note_on(1,60,1,1,1,"engine")dp process

@@ -5,6 +5,8 @@
 --
 -- <script description>
 
+-- CREDITS: CATFACT, SPIKE, INFINITE, MATTLOWERY, AND OTHERS?!?!?!
+
 -- before running the script, execute this code:
 -- ~/norns/stop.sh; sleep 1; ~/norns/start.sh; sleep 9; jack_disconnect crone:output_5 SuperCollider:in_1; jack_disconnect crone:output_6 SuperCollider:in_2; jack_connect softcut:output_1 SuperCollider:in_1; jack_connect softcut:output_2 SuperCollider:in_2
 
@@ -195,54 +197,65 @@ function init()
   ----------------------------
   
     -- Init polls
-  local detect_level, note_num
+  --detect_level, detect_freq, note_num
   local last_note_num = 0
 
-  amplitude_detect_poll1 = poll.set("amplitudeDetect1", function(value)
-    detect_level = tonumber(value)
-    print("amplitudeDetect1",value)
-  end)
-  amplitude_detect_poll2 = poll.set("amplitudeDetect2", function(value)
-    --print("amplitudeDetect2",value)
-    detect_level = tonumber(value)
-  end)
-  amplitude_detect_poll3 = poll.set("amplitudeDetect3", function(value)
-    --print("amplitudeDetect3",value)
-    detect_level = tonumber(value)
-  end)
-  amplitude_detect_poll4 = poll.set("amplitudeDetect4", function(value)
-    --print("amplitudeDetect4",value)
-    detect_level = tonumber(value)
-  end)
-
-  frequency_detect_poll1 = poll.set("frequencyDetect1", function(value)
-    --print("freq",value)
-
-    note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
-    -- if note_num ~= last_note_num and detect_level >= 0.05 and (value > 200 and value < 1800) then 
-    if note_num and note_num ~= last_note_num then 
-      clock.run(externals1.note_on,1, note_num, note_num, 1, nil,"engine")
-    end
-  end)
-  frequency_detect_poll2 = poll.set("frequencyDetect2", function(value)
-    note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
-    if note_num and note_num ~= last_note_num then 
-      clock.run(externals1.note_on,1, note_num, note_num, 1, nil,"engine")
-    end
-  end)
-  frequency_detect_poll3 = poll.set("frequencyDetect3", function(value)
-    note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
-    if note_num and note_num ~= last_note_num then 
-      clock.run(externals1.note_on,1, note_num, note_num, 1, nil,"engine")
-    end
-  end)
-  frequency_detect_poll4 = poll.set("frequencyDetect4", function(value)
-    note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
-    if note_num and note_num ~= last_note_num then 
-      clock.run(externals1.note_on,1, note_num, note_num, 1, nil,"engine")
+  amplitude_detect_poll = poll.set("amplitudeDetect", function(value)
+    detect_level = fn.round_decimals(value,5,"up")
+    if detect_level > 0.0002
+    then 
+      -- print("amplitudeDetect,detect_freq",tonumber(detect_level),detect_freq) 
     end
   end)
 
+  last_onset_amplitude = nil
+  last_onset_frequency = nil
+
+  onset_amplitude_detect_poll = poll.set("onsetAmplitudeDetect", function(value)
+    detect_level = fn.round_decimals(value,5,"up")
+    if detect_level > 0.03 and (last_onset_amplitude < detect_level or math.abs(last_onset_frequency - detect_freq) > 5)
+    then 
+      note_num = MusicUtil.freq_to_note_num (detect_freq) 
+      -- print(counter,"onsetAmplitudeDetect,detect_freq,note_num",tonumber(detect_level),last_onset_amplitude,detect_freq,note_num) 
+      
+      -- if params:get("detect_to_crow") > 1 then
+      -- if params:get("detect_to_crow") == 2 then
+      --   local value_tab = {
+      --     pitch     = note_num,
+      --     velocity  = util.linlin(0,0.05,1,127,detect_level),
+      --     duration  = 1/4,
+      --     channel   = params:get("detect_to_midi_out_channel"),
+      --     mode = 1
+      --   }      
+      --   clock.run(externals1.note_on,1, value_tab, 1, 1,"engine","crow")
+        -- clock.run(externals1.note_on,1, note_num, 1, 1,"engine","crow")
+      -- end
+
+      if params:get("detect_to_midi") == 2 then
+        local value_tab = {
+          pitch     = note_num,
+          velocity  = util.linlin(0,0.05,1,127,detect_level),
+          duration  = 1/4,
+          channel   = params:get("detect_to_midi_out_channel"),
+          mode = 1
+        }      
+        clock.run(externals1.note_on,1, value_tab, 1, 1,"engine","midi")
+      end
+
+    end
+    last_onset_amplitude = detect_level
+    last_onset_frequency = detect_freq
+  end)
+  
+  frequency_detect_poll = poll.set("frequencyDetect", function(value)
+    value = tonumber(value)
+    detect_freq = value
+    -- note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
+    if note_num and note_num ~= last_note_num then 
+      -- clock.run(externals1.note_on,1, note_num, note_num, 1, nil,"engine")
+    end
+  end)
+  
   lattice_grid = Lattice:new{
     auto = true,
     meter = 4,
@@ -274,15 +287,10 @@ function finish_init()
   engine.start_splnkring(0)
 
   clock.sleep(0.2)
-  amplitude_detect_poll1:start()
-  amplitude_detect_poll2:start()
-  amplitude_detect_poll3:start()
-  amplitude_detect_poll4:start()
-  frequency_detect_poll1:start()
-  frequency_detect_poll2:start()
-  frequency_detect_poll3:start()
-  frequency_detect_poll4:start()
-
+  amplitude_detect_poll:start()
+  onset_amplitude_detect_poll:start()
+  frequency_detect_poll:start()
+  
   sample_player.set_play_mode(1,0)
   lattice_grid:start()
   -- lattice_sample_sequencer:start()
@@ -370,6 +378,8 @@ end
 
 function cleanup ()
   if _print then print = _print end
+  print("cleanup")
+  metro.free_all()
   os.execute("jack_disconnect softcut:output_1 SuperCollider:in_1;")  
   os.execute("jack_disconnect softcut:output_2 SuperCollider:in_2;")
   os.execute("jack_connect crone:output_5 SuperCollider:in_1;")  

@@ -50,6 +50,7 @@ function fn.round_decimals (value_to_round, num_decimals, rounding_direction)
   return rounded_val
 end
 
+
 function fn.get_table_from_string(str,delimiter)
   local result = {};
   for match in (str..delimiter):gmatch("(.-)"..delimiter) do

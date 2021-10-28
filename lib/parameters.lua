@@ -362,22 +362,36 @@ function parameters.init()
         min=effect_min,max=effect_max, options=effect_options,
         action = function(x) 
           if initializing == false then
-            -- local num = fn.round_decimals (x, 2, "up")
-            effect_fn(x)
             if effect_id == "pitchshift" then
-              -- engine.pitchshift(params:get("pitchshift"))  
               engine.grain_size(params:get("grain_size"))  
               engine.time_dispersion(params:get("time_dispersion"))  
+              engine.start_splnkring(1)
+              effect_fn(x)
             elseif effect_id == "grain_size" then
               engine.pitchshift(params:get("pitchshift"))  
-              -- engine.grain_size(params:get("grain_size"))  
-              engine.time_dispersion(params:get("time_dispersion"))  
+              local td = params:get("time_dispersion")
+              engine.time_dispersion(td)  
+              if x < td then 
+                params:set("grain_size",td)
+              else
+                engine.start_splnkring(1)
+                effect_fn(x)
+              end
             elseif effect_id == "time_dispersion" then
               engine.pitchshift(params:get("pitchshift"))  
               engine.grain_size(params:get("grain_size"))  
-              -- engine.time_dispersion(params:get("time_dispersion"))  
+              local gs = params:get("grain_size")
+              engine.grain_size(gs)  
+              if x > gs then 
+                params:set("time_dispersion",gs)
+              else
+                engine.start_splnkring(1)
+                effect_fn(x)
+              end
             end
-            engine.start_splnkring(1)
+            for i=1,5,1 do 
+              engine["pitchshift_note" .. i](params:get("pitchshift_note" .. i)) 
+            end
           end
         end
       }
@@ -614,22 +628,35 @@ function parameters.init()
     end
   end
 
+  function temp_fn()
+    -- print("temp_fn")
+  end
+  
   amp_params = {
-    {"amp_min","amp min",controlspec.AMP:copy(),engine.set_detect_amp_min,0.1,},
-    {"amp_max","amp max",controlspec.AMP:copy(),engine.set_detect_amp_max,0.99,},
+    {"amp_min","amp min",controlspec.AMP:copy(),temp_fn,0.1,},
+    {"amp_max","amp max",controlspec.AMP:copy(),temp_fn,0.99,},
   }
 
   freq_params = {
-    {"frequency_min","freq min",controlspec.FREQ:copy(),engine.set_detect_frequency_min,40,true},
-    {"frequency_max","freq max",controlspec.FREQ:copy(),engine.set_detect_frequency_max,800,true},
+    {"frequency_min","freq min",controlspec.FREQ:copy(),temp_fn,40,true},
+    {"frequency_max","freq max",controlspec.FREQ:copy(),temp_fn,800,true},
   }
 
-  --[[
-  params:add_group("amp detection",8)
-  parameters.create_amp_freq_params(amp_params)
-  params:add_group("freq detection",8)
-  parameters.create_amp_freq_params(freq_params)
-  ]]
+
+  params:add{
+    type = "option", id = "detect_to_midi", name = "send to midi", 
+    options = {"off","on"}, default = 2, 
+  }
+
+  params:add{
+    type = "number", id = "detect_to_midi_out_channel", name = "midi channel", 
+    min=1,max=16,default=1, 
+  }
+
+  -- params:add_group("amp detection",2)
+  -- parameters.create_amp_freq_params(amp_params)
+  -- params:add_group("freq detection",2)
+  -- parameters.create_amp_freq_params(freq_params)
 
 
   --------------------------------
@@ -770,7 +797,7 @@ function parameters.init()
 
   params:add{type = "option", id = "output_crow2", name = "crow out2 mode",
     options = {"off","envelope","trigger","gate","clock"},
-    default = 2,
+    default = 3,
     action = function(value)
       if value == 3 then 
         crow.output[2].action = "{to(5,0),to(0,0.25)}"
@@ -782,7 +809,7 @@ function parameters.init()
 
   params:add{type = "option", id = "output_crow3", name = "crow out3 mode",
     -- options = {"off","on"},
-    options = {"off","engine", "sequencer", "midi", "engine + midi", "clock"},
+    options = {"off","engine", "sequencer", "midi", "clock"},
     default = 3,
     action = function(value)
       if value == 5 then 
@@ -807,7 +834,7 @@ function parameters.init()
   params:add_group("just friends",2)
   params:add{type = "option", id = "output_jf", name = "just friends",
     options = {"off","engine", "midi", "engine + midi"},
-    default = 1,
+    default = 2,
     action = function(value)
       if value > 1 then 
         -- crow.output[2].action = "{to(5,0),to(0,0.25)}"

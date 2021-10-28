@@ -40,6 +40,3 @@ function devices_crow_processor.play_drum(value)
 end
 
 return devices_crow_processor
-
-
--- externals1.note_on(1,60,1,1,1,"engine")dp process
