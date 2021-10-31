@@ -269,17 +269,17 @@ function sc.refresh_output_control_specs_map()
       --    rate_direction: -1, 1
       --    level: 0-1
       {
-        {"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"v_mode","v_mode"},      -- play mode
+        {"option",{"stp","la", "ac", "sc"},2,nil,"v_mode","v_mode"},      -- play mode
         {"option",cutters,nil,"cutter","cutter"},  -- cutter
         {"number","0.00",20,1,"rate","rate"},    -- rate
         {"option",{-1,1},2,nil,"direction","direction"},      -- direction
         {"number",'0.00',10,0.20,"level","level"}         -- level (amp)
       },  
-      {{"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
-      {{"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
-      {{"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
-      {{"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
-      {{"option",{"stop","loop all", "all cuts", "sel cut"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
+      {{"option",{"stp","lp", "ac", "sc"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
+      {{"option",{"stp","lp", "ac", "sc"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
+      {{"option",{"stp","lp", "ac", "sc"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
+      {{"option",{"stp","lp", "ac", "sc"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
+      {{"option",{"stp","lp", "ac", "sc"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
     }, 
     { -- device (midi(4), crow(2), just_friends(3),w/(2))
       { -- midi note out 1-3 and stop/start
@@ -374,30 +374,30 @@ function sc.refresh_output_control_specs_map()
         },          
       }, 
     },
-    {   -- effects (, pitchshift array (8))
-      {"number",'0.00',1,nil,{"level","level"}},                -- level (amp)
-      {"number",'0.00',1,nil,"drywet","drywet"},                -- drywet
+    {   -- effects
+      {"number",'0.00',1,nil,{"level","level"}},                        -- level (amp)
+      {"number",'0.00',1,nil,"drywet","drywet"},                        -- drywet
       {"number",'0.00',1,nil,"pitchshift","pitchshift"},                -- pitchshift
-      {"note",'0.00',10,nil,"pitchshift_offset","pitchshift offset"},                -- pitchshift offset
-      {                               -- pitchshift array
+      {"note",'0.00',10,nil,"pitchshift_offset","pitchshift offset"},   -- pitchshift offset
+      {                                                                 -- pitchshift array
         {"note",min_note,max_note,"pitchshift_note_1","pitchshift note 1"},
         {"note",min_note,max_note,"pitchshift_note_2","pitchshift note 2"},
         {"note",min_note,max_note,"pitchshift_note_3","pitchshift note 3"},
         {"note",min_note,max_note,"pitchshift_note_4","pitchshift note 4"},
         {"note",min_note,max_note,"pitchshift_note_5","pitchshift note 5"},
       },
-      {"number",'0.00',10,nil,"phaser","phaser"}, -- phaser
-      {"number",'0.00',10,nil,"delay","delay"}, -- delay
+      {"number",'0.00',10,nil,"phaser","phaser"},                       -- phaser
+      {"number",'0.00',10,nil,"delay","delay"},                         -- delay
       {   -- enveloper 
         {"option",{"off","on"},nil,nil,"enveloper_off_on","enveloper off/on"},        -- off/on
-        {"number", 0.01, 50,nil,"trig_rate","trig rate"},        -- trig_rate 0.01 - 50.00
-        {"number",'0.00',1,nil,"overlap","overlap"}                  -- overlap 0-1
+        {"number", 0.01, 50,nil,"trig_rate","trig rate"},                             -- trig_rate 0.01 - 50.00
+        {"number",'0.00',1,nil,"overlap","overlap"}                                   -- overlap 0-1
       },
     }, 
     {   -- enveloper 
-      {"option",{"off","on"},nil,nil,"enveloper_off_on","enveloper off/on"},        -- off/on
-      {"number", 0.01, 50,nil,"trig_rate","trig rate"},        -- trig_rate 0.01 - 50.00
-      {"number",'0.00',1,nil,"overlap","overlap"}                  -- overlap 0-1
+      {"option",{"off","on"},nil,nil,"enveloper_off_on","enveloper off/on"},  -- off/on
+      {"number", 0.01, 50,nil,"trig_rate","trig rate"},                       -- trig_rate 0.01 - 50.00
+      {"number",'0.00',1,nil,"overlap","overlap"}                             -- overlap 0-1
     },
     {   -- pattern (TODO: replace with more flexible pattern division selector)
       {"option",{1,1/2,1/4,1/8,1/16,1/3,2/3,1/4,3/4,1/8,1},nil,nil,"pattern_division","pattern division"},                   -- pattern division 1-18/1-18

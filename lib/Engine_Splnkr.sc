@@ -278,14 +278,16 @@ Engine_Splnkr : CroneEngine {
       // apply drywet, lag, remove DC bias, and send the signal out
       //////////////////////////////////////////
 
+      wet = (Pan2.ar(wet * sweptEnv * amp, pan) * EnvGate.new * enveloper) + (wet*((enveloper+1)%2));
+      
       wet = wet*Lag.kr(amp*drywet,1);
       wet = LeakDC.ar(wet, 0.995);
       dry = dry*Lag.kr(amp*(1-drywet),1);
 
 
-      wet = (Pan2.ar(wet * sweptEnv * amp, pan) * EnvGate.new * enveloper) + (wet*((enveloper+1)%2));
-      // Out.ar(0,wet);      
-      Out.ar(0,Balance2.ar(dry, wet, 0));
+      wet = Mix.new([wet,dry*(2-drywet)]);
+      Out.ar(0,wet);      
+      // Out.ar(0,Balance2.ar(wet, dry, 0));
 
       // Out.ar(0,Balance2.ar(wet, wet, 0));
     }).add;

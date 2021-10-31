@@ -43,7 +43,8 @@ this script is something like an amplitude/frequency tracking sequencer/sampler/
   * k1 + e3: scrub playhead
 * Screen 2: play mode
   * k2/k3: delete/add cutter
-  * e3: change play mode
+  * e3: set play mode sel
+  * k1 + e3: set play mode all
 * Screen 3: adjust cut ends
   * k2/k3: delete/add cutter
   * k1 + e2: select cutter

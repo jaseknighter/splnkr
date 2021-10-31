@@ -17,7 +17,9 @@ instructions.display = function ()
   elseif (sample_player.nav_active_control == 2) then
     screen.text("k2/k3: delete/add cutter")
     screen.move(5, 36)
-    screen.text("e3: change play mode")
+    screen.text("e3: set play mode sel")
+    screen.move(5, 44)
+    screen.text("k1 + e3: set play mode all")
   elseif (sample_player.nav_active_control == 3) then
     screen.text("k2/k3: delete/add cutter")
     screen.move(5, 36)

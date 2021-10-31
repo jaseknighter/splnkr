@@ -279,9 +279,6 @@ function init()
   clock.run(finish_init)
 end
 
-function new_sample_load_completed()
-  -- envelopes[1].update_envelope()
-end
 
 function finish_init()
   engine.start_splnkring(0)

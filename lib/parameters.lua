@@ -286,7 +286,7 @@ function parameters.init()
     -- effect_name,effect_id,effect_min,effect_max,effect_default, effect_fn, effect_type
 
     {"amp","amp",0,1,1,engine.amp,"control",},
-    -- {"drywet","drywet",0,1,1,engine.drywet,"control",},
+    {"drywet","drywet",0,1,1,engine.drywet,"control",},
     -- {"  pitchshift offset","pitchshift_midi_offset",-100,100,0,engine.pitchshift_midi_offset,"number",},
     -- {"phaser","phaser",0,1,0,engine.phaser,"control",},
     {"delay","delay",0,1,0,engine.delay,"control",},

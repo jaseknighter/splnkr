@@ -78,23 +78,23 @@ function Cutter:rotate_cutter_edge(d)
   self.active_edge = util.clamp(self.active_edge + d,1, 2)
 end
 
-function Cutter:key(n,z)
-  if n==1 and z==1 then
-    -- do something
-  elseif n==2 and z==1 then
-    -- if waveform_loaded then
-    --   Cutter:copy_cut()
-    --   -- if not dismiss_K2_message then dismiss_K2_message = true end
-    -- end
-  elseif n==3 and z==1 then
-    -- if nav_active_control == 1 and waveform_loaded then
-    --   playing = playing == 1 and 0 or 1
-    --   softcut.play(1, playing)
-    -- end
-    -- saved = "ss7-"..string.format("%04.0f",10000*math.random())..".wav"
-    -- softcut.buffer_write_mono(_path.dust.."/audio/"..saved,1,length,1)
-  end
-end
+-- function Cutter:key(n,z)
+--   if n==1 and z==1 then
+--     -- do something
+--   elseif n==2 and z==1 then
+--     -- if waveform_loaded then
+--     --   Cutter:copy_cut()
+--     --   -- if not dismiss_K2_message then dismiss_K2_message = true end
+--     -- end
+--   elseif n==3 and z==1 then
+--     -- if nav_active_control == 1 and waveform_loaded then
+--     --   playing = playing == 1 and 0 or 1
+--     --   softcut.play(1, playing)
+--     -- end
+--     -- saved = "ss7-"..string.format("%04.0f",10000*math.random())..".wav"
+--     -- softcut.buffer_write_mono(_path.dust.."/audio/"..saved,1,length,1)
+--   end
+-- end
 
 --       cutters[cutter_id].start_x = util.clamp(cutters[cutter_id].start_x+(d*1),0,cutters[cutter_id].finish_x)
 --       cutters[cutter_id].finish_x = util.clamp(cutters[cutter_id].finish_x+(d*1),cutters[cutter_id].start_x, 128)
