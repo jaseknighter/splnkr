@@ -233,7 +233,7 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
         elseif output_index == 5 then -- enveloper
           control_bcrumbs =  control_bcrumbs .. "env "
         elseif output_index == 6 then -- pitchshift
-          control_bcrumbs =  control_bcrumbs .. "pitchshift "
+          control_bcrumbs =  control_bcrumbs .. "p_shift "
         end
         local label_pos = 1
         for i=1,#specs_map[output_type][output_index],1 do
