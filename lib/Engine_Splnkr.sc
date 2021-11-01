@@ -299,7 +299,7 @@ Engine_Splnkr : CroneEngine {
 
       out = Mix.new([wet,dry*(2-drywet)]);
       
-      Out.ar(0,(crossfade*out))
+      Out.ar(0,(crossfade*out*0.5))
 
       // Out.ar(0,out);      
       // Out.ar(0,Balance2.ar(wet, dry, 0));

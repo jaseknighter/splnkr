@@ -291,13 +291,13 @@ function parameters.init()
     {"delay","delay",0,1,0,engine.delay,"control",},
     {"  delay time","delay_time",0,5,0.25,engine.delaytime,"control",},
     {"  delay decay","delay_decay",0,5,4.0,engine.delaydecaytime,"control",},
-    {"  delay amp","delay_amp",0,5,2,engine.delaymul,"control",},
+    {"  delay amp","delay_amp",0,5,1,engine.delaymul,"control",},
     {"bitcrush","bitcrush",0,1,0,engine.bitcrush,"control",},
     {"  bitcrush bits","bitcrush_bits",1,16,8,engine.bitcrush,"number",},
     {"  bitcrush rate","bitcrush_rate",100,48000,1000,engine.bitcrush,"control",},
     -- {"strobe","strobe",0,1,0,engine.strobe,"control",},
     -- {"flutter and wow","flutter_and_wow",0,1,0,engine.flutter_and_wow,"control",},
-    {"enveloper","enveloper",1,2,2,engine.enveloper,"option",{"off","on"},},
+    {"enveloper","enveloper",1,2,1,engine.enveloper,"option",{"off","on"},},
     {"  trig rate","trig_rate",1,20,5,engine.trig_rate,"number",},
     {"  overlap","overlap",0.01,0.99,0.99,engine.overlap,"control",},
     -- {"pan_type","pan type",0,1,0,engine.pan_type,"number",},
@@ -309,15 +309,8 @@ function parameters.init()
     {"   pitchshift note3","pitchshift_note3",-scale_length,scale_length,0,engine.pitchshift_note3,"number",},
     {"   pitchshift note4","pitchshift_note4",-scale_length,scale_length,0,engine.pitchshift_note4,"number",},
     {"   pitchshift note5","pitchshift_note5",-scale_length,scale_length,0,engine.pitchshift_note5,"number",},
-    {"   grain size","grain_size",0.1,1,0.1,engine.grain_size,"control",},
-    {"   time dispersion","time_dispersion",0.01,1,0.01,engine.time_dispersion,"control",},
-
-
-
-
-
-
-
+    {"   grain size","grain_size","0.1",1,0.1,engine.grain_size,"control",},
+    {"   time dispersion","time_dispersion","0.01",1,0.01,engine.time_dispersion,"control",},
   }
 
   function parameters.add_effect_param(effect_name,effect_id,effect_min,effect_max,effect_default, effect_fn, effect_type, effect_options)

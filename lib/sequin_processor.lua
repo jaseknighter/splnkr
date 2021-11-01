@@ -112,7 +112,7 @@ function sequin_processor.process_sub_sequins(sub_sequins)
     end
   else 
     if sequin_output_type_processor == nil then
-      print("ERROR, can't find processor for sequin output type")
+      -- print("ERROR, can't find processor for sequin output type")
     else
       --print("no value defined at sequin step")
     end

@@ -216,25 +216,36 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
             control_bcrumbs = control_bcrumbs_base .. "wdel"
           end
         end
-
-
-
-        -- if output_mode then
-        --   if output_mode == 1 then 
-        --     if output_param then
-        --       control_bcrumbs = control_bcrumbs .. specs_map[output_type][output_index][output_mode][output_param][5] .. " "
-        --     end
-        --   elseif output_mode == 2 then 
-        --     control_bcrumbs = control_bcrumbs .. specs_map[output_type][output_index][output_mode][5] .. " "
-        --   end
-        -- end
-
       end
     end
-    local label_pos = 1
-    
+  elseif output_type == 3 then
+    control_bcrumbs =  control_bcrumbs .. "eff "
+    if output_index then 
+      if output_index == 1 then -- amp
+        control_bcrumbs =  control_bcrumbs .. "amp "
+      elseif output_index == 2 then -- drywet
+        control_bcrumbs =  control_bcrumbs .. "drywet "
+      else 
+        if output_index == 3 then -- delay
+          control_bcrumbs =  control_bcrumbs .. "delay "
+        elseif output_index == 4 then -- bitcrush
+          control_bcrumbs =  control_bcrumbs .. "bitcrush "
+        elseif output_index == 5 then -- enveloper
+          control_bcrumbs =  control_bcrumbs .. "env "
+        elseif output_index == 6 then -- pitchshift
+          control_bcrumbs =  control_bcrumbs .. "pitchshift "
+        end
+        local label_pos = 1
+        for i=1,#specs_map[output_type][output_index],1 do
+          control_labels[label_pos] = control_labels[label_pos] .. specs_map[output_type][output_index][i][5] .. " "
+          label_pos = i%3 == 0 and label_pos + 1 or label_pos
+        end
+        if output_mode then
+          control_bcrumbs = control_bcrumbs .. specs_map[output_type][output_index][output_mode][5] .. " "
+        end
+      end
+    end
   end
-
 
   -- set more control labels
   if active_ui_group_name == "sequin groups" then
@@ -246,15 +257,16 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
   elseif active_ui_group_name == "sequin outputs" then
     if output_type == 1 then
       -- control_bcrumbs =  control_bcrumbs .. "softcut"
-      control_labels[1] = "voices 1-6"
+      control_labels[1] = "softcut:"
+      control_labels[2] = "voices 1-6"
     elseif output_type == 2 then
       control_labels[1] = "devices:"
       control_labels[2] = "midi_note crow jf w/"
       -- control_bcrumbs =  control_bcrumbs .. "dev"
     elseif output_type == 3 then
       control_labels[1] = "effects:"
-      control_labels[2] = "level drywet pshift"
-      control_labels[3] = "p_offset phaser delay"
+      control_labels[2] = "amp drywet delay"
+      control_labels[3] = "bitcrshr env pshift"
       -- control_bcrumbs =  control_bcrumbs .. "eff"
     elseif output_type == 4 then
       control_labels[1] = "enveloper:"
@@ -485,6 +497,7 @@ function sequencer_screen.update()
       -- local output_labels = {"(1/3) ","(4/6) ","(7/9) "}
       -- local line_num = 1
       for i=1,#sequence_values do
+        -- tab.print(sequence_values[i])
         screen.move(lx,ly)
         local val = sequence_values[i][1]
         if string.find(val,"%.0") then
@@ -558,18 +571,20 @@ function sequencer_screen.update()
     -- elseif active_control == "value selector options" then
       control_labels = {}
       local options = sequencer_controller.get_options_text()
-      local label_pos = 1
-      for i=1,#options,1 do
-        control_labels[i] = control_labels[i] and control_labels[1] or ""
-        control_labels[label_pos] = control_labels[label_pos] .. options[i] .. "  "
-        label_pos = i%3 == 0 and label_pos + 1 or label_pos
+      if options then
+        local label_pos = 1
+        for i=1,#options,1 do
+          control_labels[i] = control_labels[i] and control_labels[1] or ""
+          control_labels[label_pos] = control_labels[label_pos] .. options[i] .. "  "
+          label_pos = i%3 == 0 and label_pos + 1 or label_pos
+        end   
+        local lx,ly = 5,32
+        for i=1,#control_labels do
+          screen.move(lx,ly)
+          screen.text(control_labels[i])
+          ly = ly+7
+        end
       end  
-      local lx,ly = 5,32
-      for i=1,#control_labels do
-        screen.move(lx,ly)
-        screen.text(control_labels[i])
-        ly = ly+7
-      end
     elseif active_control == "value place integers" or active_control == "value place decimals" then
        screen.move(5,32)
        screen.text(active_control)

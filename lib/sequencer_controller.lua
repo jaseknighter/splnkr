@@ -209,8 +209,8 @@ end
 sc.outputs_map = {
   6, -- softcut voices NOTE: the sequencer will only allow 6 voices to play at once
   4, -- devices (midi, crow, just friends, w/)
-  7, -- effects (amp, drywet, pitchshift, pitchshift offset, pitchshift array (8)
-  3, -- enveloper 
+  6, -- effects (amp, drywet, delay, bitcrush, enveloper, pitchshift
+  2, -- sequins
   2, -- pattern 
   5, -- lattice
 }
@@ -220,8 +220,8 @@ sc.output_mode_map = {
   {nil,nil,nil,nil,nil,nil},                        -- softcut 
   -- {nil,3,3,2},                  -- devices midi out (nil), crow(3), just_friends(3),w/(2)
   {7,2,7,5},                  -- devices midi out (4), crow(2), just_friends(7),w/(5)
-  {nil,nil,nil,nil,5,nil,nil,3},  -- effects: amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (5)
-  {nil},                        -- sequins:
+  {nil,nil,4,3,3,7},  -- effects: amp(nil), drywet(nil), delay(4),bitcrush(3),enveloper(3),pitchshift(7)
+  {nil,nil},                        -- sequins:
                                 --  main sequins: every(1-9), times(1-9), count(1-9), all(), reset(), swap with (1-9), copy from (1-9), 
                                 --  sub-sequins: : every(1-9), times(1-9), count(1-9), all(), reset(), swap with (1-9), copy from (1-9), 
   {nil,nil},                    -- pattern (division)
@@ -240,7 +240,7 @@ sc.output_params_map = {
   }, 
   -- {nil,{nil,nil,nil},{2,3,nil},{nil,nil}}, -- device (midi out (nil), crow(3), just_friends(3),w/(2))
   {{4,4,4,3,3,3,nil},{nil,nil},{2,2,2,2,2,2,2},{9,9,9,4,9}}, -- device (midi out (4), crow(2), just_friends(2),w/(2))
-  {nil,nil,nil,nil,{nil,nil,nil,nil,nil},nil,nil}, -- effect (amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (5)), phaser(nil), delay(nil), enveloper (3)
+  {nil,nil,{nil,nil,nil,nil},{nil,nil,nil},{nil,nil,nil},{nil,nil,nil,nil,nil,nil,nil}}, -- effect (amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (5)), phaser(nil), delay(nil), enveloper (3)
   {nil,nil,nil}, -- enveloper 
   {nil,nil}, -- pattern
   {nil,nil,nil,nil,nil,nil},  -- lattice 
@@ -375,30 +375,39 @@ function sc.refresh_output_control_specs_map()
       }, 
     },
     {   -- effects
-      {"number",'0.00',1,nil,{"level","level"}},                        -- level (amp)
+      {"number",'0.00',1,nil,{"amp","amp"}},                        -- level (amp)
       {"number",'0.00',1,nil,"drywet","drywet"},                        -- drywet
-      {"number",'0.00',1,nil,"pitchshift","pitchshift"},                -- pitchshift
-      {"note",'0.00',10,nil,"pitchshift_offset","pitchshift offset"},   -- pitchshift offset
-      {                                                                 -- pitchshift array
-        {"note",min_note,max_note,"pitchshift_note_1","pitchshift note 1"},
-        {"note",min_note,max_note,"pitchshift_note_2","pitchshift note 2"},
-        {"note",min_note,max_note,"pitchshift_note_3","pitchshift note 3"},
-        {"note",min_note,max_note,"pitchshift_note_4","pitchshift note 4"},
-        {"note",min_note,max_note,"pitchshift_note_5","pitchshift note 5"},
-      },
-      {"number",'0.00',10,nil,"phaser","phaser"},                       -- phaser
-      {"number",'0.00',10,nil,"delay","delay"},                         -- delay
+      { -- delay
+        {"number",'0.00',1,1,"amt","delay"}, 
+        {"number",'0.00',5,0.25,"del_time","delay time"},                         
+        {"number",'0.00',5,4,"del_dcy","delay decay"},                         
+        {"number",'0.00',5,1,"del_amp","delay amp"},    
+      },                     
+      { -- bitcrush
+        {"number",'0.00',1,nil,"amt","bitcrush"}, 
+        {"number",'1',16,nil,"bits","bitcrush bits"},                         
+        {"number",'100',48000,nil,"rate","bitcrush rate"},    
+      },                     
       {   -- enveloper 
-        {"option",{"off","on"},nil,nil,"enveloper_off_on","enveloper off/on"},        -- off/on
-        {"number", 0.01, 50,nil,"trig_rate","trig rate"},                             -- trig_rate 0.01 - 50.00
-        {"number",'0.00',1,nil,"overlap","overlap"}                                   -- overlap 0-1
+        {"option",{"off","on"},1,nil,"off_on","enveloper off/on"},        -- off/on
+        {"number", "1", 20,5,"rate","trig rate"},                             -- trig_rate 0.01 - 50.00
+        {"number",'0.01',0.99,0.99,"ovrlap","overlap"}                                   -- overlap 0-1
+      },
+      {   -- pitchshift                                                        -- pitchshift array
+        {"number",'0.00',1,nil,"amt","pitchshift"},                -- pitchshift
+        {"number",'1',50,1,"rate","ps_freq"},                -- pitchshift
+        {"note",min_note,max_note,nil,"ps_1","ps note 1"},
+        {"note",min_note,max_note,nil,"ps_2","ps note 2"},
+        {"note",min_note,max_note,nil,"ps_3","ps note 3"},
+        {"note",min_note,max_note,nil,"ps_4","ps note 4"},
+        {"note",min_note,max_note,nil,"ps_5","ps note 5"},
       },
     }, 
-    {   -- enveloper 
-      {"option",{"off","on"},nil,nil,"enveloper_off_on","enveloper off/on"},  -- off/on
-      {"number", 0.01, 50,nil,"trig_rate","trig rate"},                       -- trig_rate 0.01 - 50.00
-      {"number",'0.00',1,nil,"overlap","overlap"}                             -- overlap 0-1
-    },
+    {   -- sequins (TODO: replace with more flexible pattern division selector)
+      {"option",{1,1/2,1/4,1/8,1/16,1/3,2/3,1/4,3/4,1/8,1},nil,nil,"pattern_division","pattern division"},                   -- pattern division 1-18/1-18
+      {"option",{"stop","start","toggle"},nil,"stop_start_toggle","stop/start/toggle"} -- stop/start/toggle pattern 
+      
+    }, 
     {   -- pattern (TODO: replace with more flexible pattern division selector)
       {"option",{1,1/2,1/4,1/8,1/16,1/3,2/3,1/4,3/4,1/8,1},nil,nil,"pattern_division","pattern division"},                   -- pattern division 1-18/1-18
       {"option",{"stop","start","toggle"},nil,"stop_start_toggle","stop/start/toggle"} -- stop/start/toggle pattern 
@@ -889,7 +898,7 @@ function sc.set_output_values(control_spec)
     -- local integer_num_places = decimal_location > 0 and control_max_length - (control_max_length - decimal_location) or control_max_length
     local integer_num_places = control_max_length
     integer_num_places = (control_max <= -1 or control_max >= 1) and integer_num_places or nil
-    local value_selector_length = integer_num_places + decimal_num_places
+    -- local value_selector_length = integer_num_places + decimal_num_places
     local value_place_decimals_x1, value_place_decimals_x2
     if decimal_location > 0 then
       value_place_decimals_x1 = decimal_num_places and 14 - decimal_num_places + 1 or nil
@@ -907,20 +916,21 @@ function sc.set_output_values(control_spec)
       sc.selector_sequence_mode = grid_sequencer:register_ui_group("selector_sequence_mode",4,7,5,7,10,6,control_spec, 5)
     end
 
-    local value_place_integers_x1, value_place_integers_x2
-    if decimal_num_places and integer_num_places then
-      value_place_integers_x1 = 14 - integer_num_places - decimal_num_places
-      value_place_integers_x2 = value_place_integers_x1 + integer_num_places - 1
-    elseif integer_num_places then
-      value_place_integers_x1 = 14 - integer_num_places
-      value_place_integers_x2 = value_place_integers_x1 + integer_num_places - 1
-    end
-    sc.value_place_integers = grid_sequencer:register_ui_group("value_place_integers",value_place_integers_x1,7,value_place_integers_x2,7,4,3,control_spec, control_default_index)
-    
-    -- if there's just 1 value for the integer place auto-select it
-    if(value_place_integers_x1 == value_place_integers_x2 and value_place_decimals_x1 == nil) then
-      grid_sequencer.activate_grid_key_at(14,7)
-    end
+    if integer_num_places then
+      local value_place_integers_x1, value_place_integers_x2
+      if decimal_num_places and integer_num_places then
+        value_place_integers_x1 = 14 - integer_num_places - decimal_num_places
+        value_place_integers_x2 = value_place_integers_x1 + integer_num_places - 1
+      elseif integer_num_places then
+        value_place_integers_x1 = 14 - integer_num_places
+        value_place_integers_x2 = value_place_integers_x1 + integer_num_places - 1
+      end
+      sc.value_place_integers = grid_sequencer:register_ui_group("value_place_integers",value_place_integers_x1,7,value_place_integers_x2,7,4,3,control_spec, control_default_index)
+      -- if there's just 1 value for the integer place auto-select it
+      if(value_place_integers_x1 == value_place_integers_x2 and value_place_decimals_x1 == nil) then
+        grid_sequencer.activate_grid_key_at(14,7)
+      end
+    end  
 
     
   elseif control_type == "fraction" then

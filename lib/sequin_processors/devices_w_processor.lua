@@ -49,8 +49,6 @@ function devices_w_processor.process_w_del_ks(output_table)
   local param = output_table.value_heirarchy.par
   local voice = output_table.value_heirarchy.mod
   local value = output_table.calculated_absolute_value and output_table.calculated_absolute_value or output_table.value
-
-  local value = output_table.calculated_absolute_value and output_table.calculated_absolute_value or output_table.value
   if param == 1 then     -- w_del: pitch
     externals1.note_on(voice,value,1,1,"sequencer", "wdel_ks")
   elseif param == 2 then -- -- w_del: mix
