@@ -98,13 +98,18 @@ Engine_Splnkr : CroneEngine {
       bpfs,
       enveloper = 1, trigRate = 5, overlap = 0.99, panMax = 0.5,
       panType = 0, minGrainDur = 0.001, interpolation = 4,
-      wobble_rpm=33, wobble_amp=0.05, wobble_exp=39, flutter_amp=0.03, flutter_fixedfreq=6, flutter_variationfreq=2;
+      wobble_rpm=33, wobble_amp=0.05, wobble_exp=39, flutter_amp=0.03, flutter_fixedfreq=6, flutter_variationfreq=2,
+      start=0, end=1, t_trig=0;
+
+      var out;
+      var startA,endA,startB,endB,crossfade,aOrB;
+
 
       var envTime1=0, envLevel1=1, envCurve1=0, envTime2=1, envLevel2=1, envCurve2=0, envTime3=1, envLevel3=1, envCurve3=0, envTime4=1, envLevel4=1, envCurve4=0, envTime5=1, envLevel5=1, envCurve5=0, envTime6=1, envLevel6=1, envCurve6=0, envTime7=1, envLevel7=1, envCurve7=0, envTime8=0, envLevel8=0, envCurve8=0;
       var sweptEnv, envctl, inSig, numFrames, startTrig, grainDur;
       var latchedTrigRate, latchedStartTrig, latchedOverlap, pan, sweep;
       var onsetDetect, onsetDetectAmp, detectAmp, detectFreq;
-      var in,freq,hasFreq,out,trig,notes,noteAdder=0; // autotune vars
+      var in,freq,hasFreq,trig,notes,noteAdder=0; // autotune vars
       var bpf0,bpf1,bpf2,bpf3,bpf4,bpf5,bpf6,bpf7,bpf8,bpf9,bpf10,bpf11,bpf12,bpf13,bpf14,bpf15;
       var signed_wobble = wobble_amp*(SinOsc.kr(wobble_rpm/60)**wobble_exp);
       var wow = Select.kr(signed_wobble > 0, signed_wobble, 0);
@@ -279,14 +284,24 @@ Engine_Splnkr : CroneEngine {
       //////////////////////////////////////////
 
       wet = (Pan2.ar(wet * sweptEnv * amp, pan) * EnvGate.new * enveloper) + (wet*((enveloper+1)%2));
-      
+
       wet = wet*Lag.kr(amp*drywet,1);
       wet = LeakDC.ar(wet, 0.995);
       dry = dry*Lag.kr(amp*(1-drywet),1);
 
+      // latch to change trigger between the two
+      aOrB=ToggleFF.kr(t_trig);
+      startA=Latch.kr(start,aOrB);
+      endA=Latch.kr(end,aOrB);
+      startB=Latch.kr(start,1-aOrB);
+      endB=Latch.kr(end,1-aOrB);
+      crossfade=Lag.ar(K2A.ar(aOrB),1);
 
-      wet = Mix.new([wet,dry*(2-drywet)]);
-      Out.ar(0,wet);      
+      out = Mix.new([wet,dry*(2-drywet)]);
+      
+      Out.ar(0,(crossfade*out))
+
+      // Out.ar(0,out);      
       // Out.ar(0,Balance2.ar(wet, dry, 0));
 
       // Out.ar(0,Balance2.ar(wet, wet, 0));
@@ -300,21 +315,18 @@ Engine_Splnkr : CroneEngine {
     ampPollFunc = OSCFunc({
       arg msg;
       var ampDetectVal = msg[3].asStringPrec(3).asFloat;
-      (msg).postln;
       amplitudeDetectPoll.update(ampDetectVal)
     }, path: '/triggerAmpPoll', srcID: context.server.addr);
 
     onsetDetectAmpPollFunc = OSCFunc({
       arg msg;
-      var onsetAmpDetectVal = msg[3].asStringPrec(3).asFloat;
-      (msg).postln;
+      var onsetAmpDetectVal = msg[3].asStringPrec(3).asFloat;      
       onsetAmplitudeDetectPoll.update(onsetAmpDetectVal)
     }, path: '/triggerOnsetDetectAmpPoll', srcID: context.server.addr);
 
     freqPollFunc = OSCFunc({
       arg msg;
       var freqDetectVal = msg[3].asStringPrec(3).asFloat;
-      (msg).postln;
       frequencyDetectPoll.update(freqDetectVal)
     }, path: '/triggerFreqPoll', srcID: context.server.addr);
 
@@ -330,97 +342,91 @@ Engine_Splnkr : CroneEngine {
 
     //////////////////////////////////////////
     // create splnkr synth instance command
-    this.addCommand("start_splnkring", "f", { arg msg;
+    this.addCommand("splnk", "f", { arg msg;
       var voicesToRemove, newVoice;
       var env;
       var envSig, envBuf;
       var newEnv, envLength;
-      
+
+      context.server.makeBundle(nil, {
+        //free the envBuf and create a new one to go with the new Synth
+        envLength = envTimes[numSegs-1] * 1000;
+        newEnv = Array.new(numSegs-1);
+        for (0, numSegs-1, { arg i;
+          var xycSegment = Array.new(3);
+          xycSegment.insert(0, envTimes[i]);
+          xycSegment.insert(1, envLevels[i]);
+          xycSegment.insert(2, envCurves[i]);
+          newEnv.insert(i,xycSegment);
+        });
+        envSig = Env.xyc(newEnv).asSignal(envLength);
+        envBuf = Buffer.loadCollection(context.server, envSig, 1).bufnum;
+        
+        // (["wobble_amp, wobble_rpm,wobble_exp,flutter_amp,flutter_fixedfreq,flutter_variationfreq"]).postln;
+        // ([wobble_amp, wobble_rpm,wobble_exp,flutter_amp,flutter_fixedfreq,flutter_variationfreq]).postln;
+        
+        newVoice = (id: id, theSynth: Synth("SplnkrSynth",
+        [
+          \amp, amp,
+          // \env, env,
+          \envBuf, envBuf,
+          \enveloper,enveloper,
+          \trigRate,trigRate,
+          \overlap,overlap,
+          \panType,panType,
+          \panMax,panMax,
+          \wobble_rpm, wobble_rpm,
+          \wobble_amp, wobble_amp,
+          \wobble_exp, wobble_exp, // best an odd power, higher values produce sharper, smaller peak
+          \flutter_amp, flutter_amp,
+          \flutter_fixedfreq, flutter_fixedfreq,
+          \flutter_variationfreq, flutter_variationfreq,
+          \effect_phaser,effect_phaser,
+          \effect_distortion,effect_distortion,
+          \effect_delay,effect_delay,
+          \effect_delaytime, effect_delaytime, 
+          \effect_delaydecaytime, effect_delaydecaytime,
+          \effect_delaymul, effect_delaymul,
+          \effect_pitchshift,effect_pitchshift, 
+          \pitchshift_note1,pitchshift_note1,
+          \pitchshift_note2,pitchshift_note2,
+          \pitchshift_note3,pitchshift_note3,
+          \pitchshift_note4,pitchshift_note4,
+          \pitchshift_note5,pitchshift_note5,
+          \grain_size,grain_size,
+          \time_dispersion,time_dispersion,
+          \effect_flutter_and_wow,effect_flutter_and_wow,
+          // \pitchshift_midi_offset,pitchshift_midi_offset,
+        ],
+        target: voiceGroup).onFree({ 
+            voiceList.remove(newVoice); 
+          })
+        );
+
+        voiceList.addFirst(newVoice);
+
+        // set splnkrVoice to the most recent voice instantiated
+        splnkrVoice = voiceList.detect({ arg item, i; item.id == id; });
+        id = id+1;
+      });
 
       // Free the existing voice if it exists
       if((voiceList.size > 0), {
-        ("free").postln;
         voiceList.do{ arg v,i; 
-          i.postln;
-          v.theSynth.set(\gate, 0);
-          v.theSynth.free;
+          v.theSynth.set(\t_trig, 1);
+          if (i > 1){
+            v.theSynth.set(\gate, 0);
+            v.theSynth.free;
+          }
         };
       });
 
-      // if((voiceList.size > 0), {
-      //   voiceList.do{ arg v,i; 
-      //     v.theSynth.set(\gate, 0);
-      //     v.theSynth.free;
-      //   };
-      // });
+    });
 
-
-      // if (voiceList.size < 3){
-
-        context.server.makeBundle(nil, {
-          //free the envBuf and create a new one to go with the new Synth
-          envLength = envTimes[numSegs-1] * 1000;
-          // ([trigRate,overlap,panType,panMax]).postln;
-          newEnv = Array.new(numSegs-1);
-          // (["set env",envLevels, envTimes, envCurves]).postln;
-          for (0, numSegs-1, { arg i;
-            var xycSegment = Array.new(3);
-            xycSegment.insert(0, envTimes[i]);
-            xycSegment.insert(1, envLevels[i]);
-            xycSegment.insert(2, envCurves[i]);
-            newEnv.insert(i,xycSegment);
-          });
-          envSig = Env.xyc(newEnv).asSignal(envLength);
-          envBuf = Buffer.loadCollection(context.server, envSig, 1).bufnum;
-          
-          // (["wobble_amp, wobble_rpm,wobble_exp,flutter_amp,flutter_fixedfreq,flutter_variationfreq"]).postln;
-          // ([wobble_amp, wobble_rpm,wobble_exp,flutter_amp,flutter_fixedfreq,flutter_variationfreq]).postln;
-          
-          newVoice = (id: id, theSynth: Synth("SplnkrSynth",
-          [
-            \amp, amp,
-            // \env, env,
-            \envBuf, envBuf,
-            \enveloper,enveloper,
-            \trigRate,trigRate,
-            \overlap,overlap,
-            \panType,panType,
-            \panMax,panMax,
-            \wobble_rpm, wobble_rpm,
-            \wobble_amp, wobble_amp,
-            \wobble_exp, wobble_exp, // best an odd power, higher values produce sharper, smaller peak
-            \flutter_amp, flutter_amp,
-            \flutter_fixedfreq, flutter_fixedfreq,
-            \flutter_variationfreq, flutter_variationfreq,
-            \effect_phaser,effect_phaser,
-            \effect_distortion,effect_distortion,
-            \effect_delay,effect_delay,
-            \effect_delaytime, effect_delaytime, 
-            \effect_delaydecaytime, effect_delaydecaytime,
-            \effect_delaymul, effect_delaymul,
-            \effect_pitchshift,effect_pitchshift, 
-            \pitchshift_note1,pitchshift_note1,
-            \pitchshift_note2,pitchshift_note2,
-            \pitchshift_note3,pitchshift_note3,
-            \pitchshift_note4,pitchshift_note4,
-            \pitchshift_note5,pitchshift_note5,
-            \grain_size,grain_size,
-            \time_dispersion,time_dispersion,
-            \effect_flutter_and_wow,effect_flutter_and_wow,
-            // \pitchshift_midi_offset,pitchshift_midi_offset,
-          ],
-          target: voiceGroup).onFree({ 
-              voiceList.remove(newVoice); 
-            })
-          );
-
-          voiceList.addFirst(newVoice);
-
-          // set splnkrVoice to the most recent voice instantiated
-          splnkrVoice = voiceList.detect({ arg item, i; item.id == id; });
-          id = id+1;
-        });
-      // };
+    this.addCommand("crossfade", "f", { arg msg;
+      if (voiceList.size > 0){ 
+        splnkrVoice.theSynth.set(\t_trig, msg[1]);
+      };
     });
 
     this.addCommand("set_filter_level", "ff", { arg msg;
@@ -720,13 +726,11 @@ Engine_Splnkr : CroneEngine {
       if (voiceList.size > 0){ 
         // splnkrVoice.theSynth.set(\grain_size, msg[1]);
         grain_size = msg[1];
-        (msg[1]).postln;
       };
     });
 
     this.addCommand("time_dispersion", "f", { arg msg;
       if (voiceList.size > 0){ 
-        (msg[1]).postln;
         // splnkrVoice.theSynth.set(\time_dispersion, msg[1]);
         time_dispersion = msg[1];
       };

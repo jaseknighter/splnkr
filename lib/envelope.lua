@@ -299,7 +299,7 @@ function Envelope:new(id, num_envelopes, env_nodes)
       engine.set_env_levels(table.unpack(env_arrays.levels))
       engine.set_env_curves(table.unpack(env_arrays.curves))
       engine.set_env_times(table.unpack(env_arrays.times))
-      engine.start_splnkring(0)
+      engine.splnk(0)
       
       set_dirty = true
     end

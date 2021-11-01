@@ -6,7 +6,7 @@
 -- <script description>
 
 -- CREDITS: CATFACT, SPIKE, INFINITE, MATTLOWERY, AND OTHERS?!?!?!
-
+-- crossfading from: https://schollz.com/blog/sampler/
 -- before running the script, execute this code:
 -- ~/norns/stop.sh; sleep 1; ~/norns/start.sh; sleep 9; jack_disconnect crone:output_5 SuperCollider:in_1; jack_disconnect crone:output_6 SuperCollider:in_2; jack_connect softcut:output_1 SuperCollider:in_1; jack_connect softcut:output_2 SuperCollider:in_2
 
@@ -281,7 +281,7 @@ end
 
 
 function finish_init()
-  engine.start_splnkring(0)
+  engine.splnk(0)
 
   clock.sleep(0.2)
   amplitude_detect_poll:start()

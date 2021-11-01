@@ -298,7 +298,7 @@ function parameters.init()
     {"  bitcrush rate","bitcrush_rate",100,48000,1000,engine.bitcrush,"control",},
     -- {"strobe","strobe",0,1,0,engine.strobe,"control",},
     -- {"flutter and wow","flutter_and_wow",0,1,0,engine.flutter_and_wow,"control",},
-    {"enveloper","enveloper",1,2,1,engine.enveloper,"option",{"off","on"},},
+    {"enveloper","enveloper",1,2,2,engine.enveloper,"option",{"off","on"},},
     {"  trig rate","trig_rate",1,20,5,engine.trig_rate,"number",},
     {"  overlap","overlap",0.01,0.99,0.99,engine.overlap,"control",},
     -- {"pan_type","pan type",0,1,0,engine.pan_type,"number",},
@@ -365,7 +365,7 @@ function parameters.init()
             if effect_id == "pitchshift" then
               engine.grain_size(params:get("grain_size"))  
               engine.time_dispersion(params:get("time_dispersion"))  
-              engine.start_splnkring(1)
+              engine.splnk(1)
               effect_fn(x)
             elseif effect_id == "grain_size" then
               engine.pitchshift(params:get("pitchshift"))  
@@ -374,7 +374,7 @@ function parameters.init()
               if x < td then 
                 params:set("grain_size",td)
               else
-                engine.start_splnkring(1)
+                engine.splnk(1)
                 effect_fn(x)
               end
             elseif effect_id == "time_dispersion" then
@@ -385,7 +385,7 @@ function parameters.init()
               if x > gs then 
                 params:set("time_dispersion",gs)
               else
-                engine.start_splnkring(1)
+                engine.splnk(1)
                 effect_fn(x)
               end
             end
