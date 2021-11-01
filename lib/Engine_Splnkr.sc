@@ -393,6 +393,7 @@ Engine_Splnkr : CroneEngine {
           \pitchshift_note3,pitchshift_note3,
           \pitchshift_note4,pitchshift_note4,
           \pitchshift_note5,pitchshift_note5,
+          \pitch_shift_trigger_frequency,pitch_shift_trigger_frequency,
           \grain_size,grain_size,
           \time_dispersion,time_dispersion,
           \effect_flutter_and_wow,effect_flutter_and_wow,
@@ -689,6 +690,13 @@ Engine_Splnkr : CroneEngine {
       if (voiceList.size > 0){ 
         splnkrVoice.theSynth.set(\effect_pitchshift, msg[1]);
         effect_pitchshift = msg[1];    
+      };
+    });
+
+    this.addCommand("pitch_shift_trigger_frequency", "f", { arg msg;
+      if (voiceList.size > 0){ 
+        splnkrVoice.theSynth.set(\pitch_shift_trigger_frequency, msg[1]);
+        pitch_shift_trigger_frequency = msg[1];    
       };
     });
 
