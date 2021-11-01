@@ -8,18 +8,24 @@ function dmp.init()
     velocity = 80,
     duration = 1/4,
     channel  = 1,
+    repeats  = 0,
+    repeat_freq = 1
   }
   dmp.voice2 = {
     pitch    = 1,
     velocity = 80,
     duration = 1/4,
     channel  = 1,
+    repeats  = 0,
+    repeat_freq = 1
   }
   dmp.voice3 = {
     pitch    = 1,
     velocity = 80,
     duration = 1/4,
     channel  = 1,
+    repeats  = 0,
+    repeat_freq = 1
   }
   dmp.cc1 = {
     cc = 1,
@@ -48,12 +54,16 @@ function dmp.process(output_table)
     if param == 1 then -- update pitch
       dmp["voice"..mod].pitch = value 
       clock.run(dmp.play_note,mod)
-    elseif param == 2 then -- update velocity
-      dmp["voice"..mod].velocity = math.floor(value)
-    elseif param == 3 then -- update duration
+    elseif param == 2 then -- update note repeats
+      dmp["voice"..mod].repeats = value       
+    elseif param == 3 then -- update note repeat frequency      
+      dmp["voice"..mod].repeat_freq = value 
+    elseif param == 4 then -- update duration
       local dur_tab = fn.get_table_from_string(MIDI_DURATIONS[value],"/")
       local duration = #dur_tab == 1 and dur_tab[1] or dur_tab[1]/dur_tab[2]
       dmp["voice"..mod].duration = duration
+    elseif param == 5 then -- update velocity
+      dmp["voice"..mod].velocity = math.floor(value)
     else -- update channel
       dmp["voice"..mod].channel = value 
     end
@@ -76,8 +86,41 @@ function dmp.process(output_table)
   end
 end
 
+function dmp.repeat_note(repeat_data)
+  local sync_time = tonumber(repeat_data.repeat_freq)
+  clock.sync(sync_time)
+  local value_tab = {
+    pitch     = repeat_data.pitch,
+    velocity  = repeat_data.velocity,
+    duration  = repeat_data.duration,
+    channel   = repeat_data.channel,
+    mode = 1
+  }
+  externals1.note_on(1,value_tab,1,1,"sequencer", "midi")
+  if repeat_data.repeats >= 1 then
+    repeat_data.repeats = repeat_data.repeats - 1
+    clock.run(dmp.repeat_note,repeat_data)
+  end
+
+end
+
 function dmp.play_note(mod)
   clock.sleep(0.0001)
+  if dmp["voice"..mod].repeats > 0 then
+    local repeat_freq = NOTE_REPEAT_FREQUENCIES[dmp["voice"..mod].repeat_freq]
+    repeat_freq = fn.fraction_to_decimal(repeat_freq)
+    local repeat_data = {
+      pitch     = fn.deep_copy(dmp["voice"..mod].pitch),
+      velocity  = fn.deep_copy(dmp["voice"..mod].velocity),
+      duration  = fn.deep_copy(tonumber(dmp["voice"..mod].duration)),
+      channel   = fn.deep_copy(dmp["voice"..mod].channel),
+      repeats   = fn.deep_copy(dmp["voice"..mod].repeats),
+      repeat_freq   = fn.deep_copy(tonumber(repeat_freq)),
+      mode = 1
+    }
+    clock.run(dmp.repeat_note,repeat_data)
+    
+  end
   local value_tab = {
     pitch     = dmp["voice"..mod].pitch,
     velocity  = dmp["voice"..mod].velocity,
@@ -99,8 +142,7 @@ end
 
 function dmp.end_note(value_tab)
   clock.sleep(0.001)
-  -- tab.print(value_tab)
-  print("end note")
+  -- print("end note")
   externals1.midi_note_off_beats(value_tab.duration,value_tab.pitch,value_tab.channel,1,value_tab.pitch)
 end
 

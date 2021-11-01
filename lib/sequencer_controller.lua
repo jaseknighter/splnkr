@@ -217,10 +217,9 @@ sc.outputs_map = {
 
 -- note: '(nil)' means the output mode takes just 1 param) 
 sc.output_mode_map = {
-  {nil,nil,nil,nil,nil,nil},                        -- softcut 
-  -- {nil,3,3,2},                  -- devices midi out (nil), crow(3), just_friends(3),w/(2)
-  {7,2,7,5},                  -- devices midi out (4), crow(2), just_friends(7),w/(5)
-  {nil,nil,4,3,3,7},  -- effects: amp(nil), drywet(nil), delay(4),bitcrush(3),enveloper(3),pitchshift(7)
+  {nil,nil,nil,nil,nil,nil},    -- softcut 
+  {7,2,7,5},                    -- devices midi out (7), crow(2), just_friends(7),w/(5)
+  {nil,nil,4,3,3,7},            -- effects: amp(nil), drywet(nil), delay(4),bitcrush(3),enveloper(3),pitchshift(7)
   {nil,nil},                        -- sequins:
                                 --  main sequins: every(1-9), times(1-9), count(1-9), all(), reset(), swap with (1-9), copy from (1-9), 
                                 --  sub-sequins: : every(1-9), times(1-9), count(1-9), all(), reset(), swap with (1-9), copy from (1-9), 
@@ -238,8 +237,7 @@ sc.output_params_map = {
     --    level: 0-1
     5,5,5,5,5,5
   }, 
-  -- {nil,{nil,nil,nil},{2,3,nil},{nil,nil}}, -- device (midi out (nil), crow(3), just_friends(3),w/(2))
-  {{4,4,4,3,3,3,nil},{nil,nil},{2,2,2,2,2,2,2},{9,9,9,4,9}}, -- device (midi out (4), crow(2), just_friends(2),w/(2))
+  {{6,6,6,3,3,3,nil},{nil,nil},{2,2,2,2,2,2,2},{9,9,9,4,9}}, -- device (midi out (4), crow(2), just_friends(2),w/(2))
   {nil,nil,{nil,nil,nil,nil},{nil,nil,nil},{nil,nil,nil},{nil,nil,nil,nil,nil,nil,nil}}, -- effect (amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (5)), phaser(nil), delay(nil), enveloper (3)
   {nil,nil,nil}, -- enveloper 
   {nil,nil}, -- pattern
@@ -285,12 +283,16 @@ function sc.refresh_output_control_specs_map()
       { -- midi note out 1-3 and stop/start
         { 
           {"note",min_note,max_note,nil,"pitch","pitch"},     -- note
-          {"number","0",127,80,"vel","vel"},                   -- velocity
+          {"number","0",16,0,"rp","repeats"},                   -- note_repeats
+          {"option",NOTE_REPEAT_FREQUENCIES,nil,nil,"rep_frq","repeat frequency"}, -- note repeat frequency
           {"option",MIDI_DURATIONS,3,nil,"dur","dur"},        -- midi stop/start
+          {"number","0",127,80,"vel","vel"},                   -- velocity
           {"number","1",16,1,"chan","chan"},                   -- channel
         }, 
-        {{"note",min_note,max_note,nil,"pitch","pitch"},{"number","0",127,80,"vel","vel"},{"option",{"1","1/2","1/4","1/8","1/16"},3,nil,"dur","dur"},{"number","1",16,1,"chan","chan"}}, 
-        {{"note",min_note,max_note,nil,"pitch","pitch"},{"number","0",127,80,"vel","vel"},{"option",{"1","1/2","1/4","1/8","1/16"},3,nil,"dur","dur"},{"number","1",16,1,"chan","chan"}}, 
+         
+          
+        {{"note",min_note,max_note,nil,"pitch","pitch"},{"number","0",16,0,"rp","repeats"},{"option",NOTE_REPEAT_FREQUENCIES,nil,nil,"rp_frq","repeat frequency"},{"option",{"1","1/2","1/4","1/8","1/16"},3,nil,"dur","dur"},{"number","0",127,80,"vel","vel"},{"number","1",16,1,"chan","chan"}}, 
+        {{"note",min_note,max_note,nil,"pitch","pitch"},{"number","0",16,0,"rp","repeats"},{"option",NOTE_REPEAT_FREQUENCIES,nil,nil,"rp_frq","repeat frequency"},{"option",{"1","1/2","1/4","1/8","1/16"},3,nil,"dur","dur"},{"number","0",127,80,"vel","vel"},{"number","1",16,1,"chan","chan"}}, 
         { 
           {"number","0",127,1,"cc","cc cc"},                   -- cc cc
           {"number","0",127,1,"val","cc val"},                   -- cc value
@@ -404,14 +406,13 @@ function sc.refresh_output_control_specs_map()
       },
     }, 
     {   -- sequins (TODO: replace with more flexible pattern division selector)
-      {"option",{1,1/2,1/4,1/8,1/16,1/3,2/3,1/4,3/4,1/8,1},nil,nil,"pattern_division","pattern division"},                   -- pattern division 1-18/1-18
+      {"option",{1,1/2,1/4,1/8,1/16,1/3,2/3,3/8,5/8},nil,nil,"pattern_division","pattern division"},                   -- pattern division 1-18/1-18
       {"option",{"stop","start","toggle"},nil,"stop_start_toggle","stop/start/toggle"} -- stop/start/toggle pattern 
       
     }, 
     {   -- pattern (TODO: replace with more flexible pattern division selector)
-      {"option",{1,1/2,1/4,1/8,1/16,1/3,2/3,1/4,3/4,1/8,1},nil,nil,"pattern_division","pattern division"},                   -- pattern division 1-18/1-18
+      {"option",{1,1/2,1/4,1/8,1/16,1/3,2/3,3/8,5/8},nil,nil,"pattern_division","pattern division"},                   -- pattern division 1-18/1-18
       {"option",{"stop","start","toggle"},nil,"stop_start_toggle","stop/start/toggle"} -- stop/start/toggle pattern 
-      
     }, 
     {   -- lattice 
       {                                 

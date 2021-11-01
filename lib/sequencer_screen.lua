@@ -125,18 +125,18 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
         -- end        
         control_bcrumbs =  control_bcrumbs .. "midi "
         if output_mode == nil and output_param == nil then
-          control_labels[1] = "vce1 vce2 vce3"
+          control_labels[1] = "v1 v2 v3"
           control_labels[2] = "cc1 cc2 cc3"
           control_labels[3] = "start/stop"
         elseif output_mode < 7 then
-          control_bcrumbs = output_mode < 4 and control_bcrumbs .. "vce" or  control_bcrumbs .. "cc"
+          control_bcrumbs = output_mode < 4 and control_bcrumbs .. "v" or  control_bcrumbs .. "cc"
           local output_num = output_mode < 4 and output_mode or output_mode - 3
           if output_param == nil then 
-            
             control_bcrumbs = control_bcrumbs .. output_num
             local label_pos = 1
             for i=1,#specs_map[output_type][output_index][output_mode],1 do
-              control_labels[label_pos] = control_labels[label_pos] .. specs_map[output_type][output_index][output_mode][i][5] .. " "
+              local val = specs_map[output_type][output_index][output_mode][i][5]
+              control_labels[label_pos] = control_labels[label_pos] .. val .. " "
               label_pos = i%3 == 0 and label_pos + 1 or label_pos
             end
           else
@@ -513,6 +513,7 @@ function sequencer_screen.update()
           if string.find(calculated_absolute_val,"%.0") then
             local empty_decimal = string.find(calculated_absolute_val,"%.0") - 1
             calculated_absolute_val = string.sub(calculated_absolute_val,1,empty_decimal)
+            calculated_absolute_val = fn.round_decimals(calculated_absolute_val, 2, "up")  
           end
           -- screen_text = val .."/".. calculated_absolute_val .. "  " 
           screen_text = calculated_absolute_val .. "  " 
@@ -553,7 +554,7 @@ function sequencer_screen.update()
       for i=1,5,1 do
         screen.move(lx,ly)
         local val = (sequin_values and #sequin_values > 0) and sequin_values[i] or val
-        val = (val ~= "" and val ~= "nil")and val or "-"
+        val = (val ~= "" and val ~= "nil") and val or "-"
         screen_text = screen_text .. val .. "  "
         local screen_level = selected_sequin_index == i and 15 or 5
         screen.level(screen_level)
@@ -580,7 +581,7 @@ function sequencer_screen.update()
         end   
         local lx,ly = 5,32
         for i=1,#control_labels do
-          screen.move(lx,ly)
+          screen.move(lx,ly)  
           screen.text(control_labels[i])
           ly = ly+7
         end

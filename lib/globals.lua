@@ -59,6 +59,15 @@ function fn.get_table_from_string(str,delimiter)
   return result;
 end
 
+function fn.fraction_to_decimal(fraction)
+  local fraction_tab = fn.get_table_from_string(fraction,"/")
+  if #fraction_tab == 2 then
+    return fraction_tab[1]/fraction_tab[2]
+  else
+    return fraction
+  end
+end
+
 
 
 -- scale/note functions
@@ -97,7 +106,6 @@ fn.get_num_notes_per_octave = function()
       return i-1
     end
   end
-
 end
 
 fn.round_decimals = function (value_to_round, num_decimals, rounding_direction)
@@ -150,7 +158,7 @@ midi_in_channel1_default = 1
 midi_in_command1 = 144
 midi_devices = nil
 MIDI_DURATIONS = {"1","1/2","1/4","1/8","1/16"}
-
+NOTE_REPEAT_FREQUENCIES = {'1','1/2','1/4','1/8','1/16','1/3','2/3','3/8','5/8'}
 -----------------------------------------
 -- ENVELOPES
 -- IMPORTANT NOTE: when changing AMPLITUDE_DEFAULT or ENV_LENGTH_DEFAULT

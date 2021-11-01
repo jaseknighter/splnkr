@@ -97,7 +97,7 @@ function sequin_processor.process_sub_sequins(sub_sequins)
 
       local number_end = string.find(next_output_value,"r") - 1
       local val = string.sub(next_output_value,1,number_end)
-      if calculated_absolute_value and val then
+      if tonumber(calculated_absolute_value) and tonumber(val) then
         calculated_absolute_value = tonumber(calculated_absolute_value) + tonumber(val)
       else 
         print("sequin_processor.lua 70: can't find calculated_absolute_value or val",calculated_absolute_value, val)

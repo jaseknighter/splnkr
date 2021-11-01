@@ -638,7 +638,7 @@ function parameters.init()
 
   params:add{
     type = "option", id = "detect_to_midi", name = "send to midi", 
-    options = {"off","on"}, default = 2, 
+    options = {"off","on"}, default = 1, 
   }
 
   params:add{
