@@ -12,11 +12,11 @@ function Sequencer:new(lattice,id)
   s.seq = Sequins{table.unpack(s.sequin_set)}
   s.sub_seq_leader = Sequins{table.unpack(DEFAULT_SUB_SEQUINS_TAB)}
 
-  s.division = 1
+  s.division = 1/2
   s.enabled = true
-  s.pattern = lattice:new_pattern{
+  s.pattern = s.lattice:new_pattern{
     action = function(t) 
-      if s.id == sequencer_controller.get_active_sequinset() then
+      if s.id == sequencer_controller.get_active_sequinset_id() then
         s:pattern_event(t)
       end
     end,
@@ -24,7 +24,7 @@ function Sequencer:new(lattice,id)
     enabled = s.enabled
   }
 
-  function s:pattern_event()
+  function s:pattern_event(t)
     local starting_sequin = params:get("starting_sequin")
     if s.seq.ix < starting_sequin then
       s.next_sequin = starting_sequin
@@ -51,7 +51,7 @@ function Sequencer:new(lattice,id)
     if sns == nil then 
       sns = s.next_sequin
     end
-    sequin_processor.process(s.next_sequin,s.sub_seq_leader_ix)
+    sequin_processor.process(s.next_sequin,s.sub_seq_leader_ix,s.id)
   end
   
   function s:start()

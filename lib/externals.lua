@@ -94,8 +94,10 @@ function externals:new(active_notes)
         local pitch = value.pitch
         local velocity = value.velocity
         local duration = value.duration 
+        duration = tonumber(duration) and duration or fn.fraction_to_decimal(duration)      
         midi_out_device:note_on(pitch, velocity, channel)
         table.insert(active_notes, pitch)
+        -- print("duration",duration)
         clock.run(ext.midi_note_off_beats, duration, pitch, channel, 1, #active_notes)
       elseif mode == 2 then -- stop/start
         if value.stop_start == 1 then -- stop

@@ -78,7 +78,9 @@ function sc.init()
   sc.sequencers[3] = Sequencer:new(sc.lattice,3)
   sc.sequencers[4] = Sequencer:new(sc.lattice,4)
   sc.sequencers[5] = Sequencer:new(sc.lattice,5)
-  sc.lattice:start()
+  sc.lattice:hard_restart()
+  -- sc.lattice:start()
+
 end
 
 function sc.copy_paste_sequinsets(target_sequinset,source_sequinset)
@@ -210,9 +212,8 @@ sc.outputs_map = {
   6, -- softcut voices NOTE: the sequencer will only allow 6 voices to play at once
   4, -- devices (midi, crow, just friends, w/)
   6, -- effects (amp, drywet, delay, bitcrush, enveloper, pitchshift
+  2, -- lattice and patterns
   2, -- sequins
-  2, -- pattern 
-  5, -- lattice
 }
 
 -- note: '(nil)' means the output mode takes just 1 param) 
@@ -220,11 +221,10 @@ sc.output_mode_map = {
   {nil,nil,nil,nil,nil,nil},    -- softcut 
   {7,2,7,5},                    -- devices midi out (7), crow(2), just_friends(7),w/(5)
   {nil,nil,4,3,3,7},            -- effects: amp(nil), drywet(nil), delay(4),bitcrush(3),enveloper(3),pitchshift(7)
-  {nil,nil},                        -- sequins:
+  {nil,nil},         -- lattice and patterns: set_meter (nil), auto_pulses (nil), ppqn (nil))
+  {nil,6},                        -- sequins:
                                 --  main sequins: every(1-9), times(1-9), count(1-9), all(), reset(), swap with (1-9), copy from (1-9), 
                                 --  sub-sequins: : every(1-9), times(1-9), count(1-9), all(), reset(), swap with (1-9), copy from (1-9), 
-  {nil,nil},                    -- pattern (division)
-  {nil,nil,nil,nil,nil}         -- lattice: set_meter (nil), auto_pulses (nil), ppqn (nil))
 }
 
 -- note: '(nil)' means just 1 output param' 
@@ -239,7 +239,7 @@ sc.output_params_map = {
   }, 
   {{6,6,6,3,3,3,nil},{nil,nil},{2,2,2,2,2,2,2},{9,9,9,4,9}}, -- device (midi out (4), crow(2), just_friends(2),w/(2))
   {nil,nil,{nil,nil,nil,nil},{nil,nil,nil},{nil,nil,nil},{nil,nil,nil,nil,nil,nil,nil}}, -- effect (amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (5)), phaser(nil), delay(nil), enveloper (3)
-  {nil,nil,nil}, -- enveloper 
+  {nil,{nil,nil,nil,nil,nil,nil}}, -- sequins 
   {nil,nil}, -- pattern
   {nil,nil,nil,nil,nil,nil},  -- lattice 
 }
@@ -405,25 +405,29 @@ function sc.refresh_output_control_specs_map()
         {"note",min_note,max_note,nil,"ps_5","ps note 5"},
       },
     }, 
-    {   -- sequins (TODO: replace with more flexible pattern division selector)
-      {"option",{1,1/2,1/4,1/8,1/16,1/3,2/3,3/8,5/8},nil,nil,"pattern_division","pattern division"},                   -- pattern division 1-18/1-18
-      {"option",{"stop","start","toggle"},nil,"stop_start_toggle","stop/start/toggle"} -- stop/start/toggle pattern 
-      
-    }, 
-    {   -- pattern (TODO: replace with more flexible pattern division selector)
-      {"option",{1,1/2,1/4,1/8,1/16,1/3,2/3,3/8,5/8},nil,nil,"pattern_division","pattern division"},                   -- pattern division 1-18/1-18
-      {"option",{"stop","start","toggle"},nil,"stop_start_toggle","stop/start/toggle"} -- stop/start/toggle pattern 
-    }, 
-    {   -- lattice 
-      {                                 
-        "option",{"stop","start","toggle",nil,nil,"stop_start_toggle","stop/start/toggle"}         -- stop/start/toggle pattern
+    {   -- lattice and patterns
+      {   -- lattice 
+        -- {"option",{"stp","strt","tgl",nil,nil,"stop_start_toggle","stop/start/toggle"}},         -- stop/start/toggle pattern
+        -- {"option",{"off","on"},nil,1,"auto_off_on","autopulse off/on"},        -- auto pulse(s) off/on
+        -- {"option",{"off","on"},nil,nil,"man_off_on","manual pulse off/on"},          -- manual pulse off/on (NOTE: setting is ignored if auto_pulse is enabled)
+        {"number",1,18,nil,"meter","meter"},                  -- meter: quarter notes per measure
+        {"option",{12,24,36,48,60,72,84,96,108},8,nil,"ppqn","ppqn"},          -- ppqn (default 96)
+        {"option",{"reset","hard reset"},nil,nil,"reset","reset"}                  
+        -- {"option",{"off","reset","hard reset"},nil,nil,"off/reset/hard reset","off/reset/hard reset"}                  
       },
-      {"number",1,18,nil,"meter","meter"},                  -- meter: quarter notes per measure
-      {"option",{"off","on"},nil,1,"autopulse_off_on","autopulse off/on"},        -- auto pulse(s) off/on
-      {"option",{"off","on"},nil,nil,"manual_pulse_off_on","manual pulse off/on"},          -- manual pulse off/on (NOTE: setting is ignored if auto_pulse is enabled)
-      {"option",{12,24,36,48,60,72,84,96,108},8,nil,"ppqn","ppqn"},          -- ppqn (default 96)
-      {"option",{"off","reset","hard reset"},nil,nil,"off/reset/hard reset","off/reset/hard reset"}                  
+      {   -- pattern (TODO: replace with more flexible pattern division selector)
+        {"option",{1,1/2,1/4,1/8,1/16,1/3,2/3,3/8,5/8},nil,nil,"pattern_division","pattern division"},                   -- pattern division 1-18/1-18
+        {"option",{"stop","start","toggle"},nil,"pat_state","pattern state"} -- stop/start/toggle pattern 
+      }, 
     },  
+    {   -- sequins: step, every, times, count, all, reset
+      {"number", "1", 9,1,"step","step"},
+      { -- sub sequins      
+        {{"number", "1", 5,1,"step","step"},{"number", "1", 5,1,"every","every"},{"number", "1", 20,1,"times","times"},{"number", "1", 20,1,"count","count"},{"number", "1", 20,1,"all","all"},{"number", "1", 20,1,"reset","reset"}},
+        {{"number", "1", 5,1,"step","step"},{"number", "1", 5,1,"every","every"},{"number", "1", 20,1,"times","times"},{"number", "1", 20,1,"count","count"},{"number", "1", 20,1,"all","all"},{"number", "1", 20,1,"reset","reset"}},
+        {{"number", "1", 5,1,"step","step"},{"number", "1", 5,1,"every","every"},{"number", "1", 20,1,"times","times"},{"number", "1", 20,1,"count","count"},{"number", "1", 20,1,"all","all"},{"number", "1", 20,1,"reset","reset"}},
+      },
+    },
   }
 end
 
@@ -482,7 +486,7 @@ end
 --
 
 -- UI functions
-function sc.get_active_sequinset()
+function sc.get_active_sequinset_id()
   return sc.selected_sequin_group
 end
 
@@ -1587,7 +1591,7 @@ function sc.refresh_selected_sequin_values(sgp,sqn,output_table,selected_sequin_
       local selected_sequin = v.value_heirarchy.sqn
       
       if selected_sequin == sequin_id then
-        -- local selected_sequin_output_group = sc.get_active_sequinset()
+        -- local selected_sequin_output_group = sc.get_active_sequinset_id()
         local sequin_group = v.value_heirarchy.sgp
         local sequin_output_type  = v.value_heirarchy.typ
         local sequin_output        = v.value_heirarchy.out

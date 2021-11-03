@@ -23,7 +23,8 @@ ideas:
   * replay according to the time of changes or by meter
   * delete individual events
 
-issues:
+issues/todos:
+* consolidate filter and sequencer lattices
 * sound cuts out if env length is too long when enveloper is activated
 * pan_type and pan_max params don't do anything (issue with the `Out` statement in sc I think)
 * sub-sequins are not kept in sync with each other (maybe a feature?)
@@ -109,60 +110,43 @@ function init()
     print("grid found with " .. grid_filter.last_known_width .. " columns")
     grid_filter_clock_id = clock.run(grid_filter.grid_redraw_clock)
     grid_sequencer_clock_id = clock.run(grid_sequencer.grid_redraw_clock)
+    
+    
+    --[[
+    audio.level_cut(1.0)
+    audio.level_adc_cut(1)
+    audio.level_eng_cut(1)
+    softcut.level(1,1.0)
+    softcut.level_slew_time(1,0.25)
+    softcut.level_input_cut(1, 1, 1.0)
+    softcut.level_input_cut(2, 1, 1.0)
+    softcut.pan(1, 0.0)
+    softcut.rate(1, 1)
+    softcut.rate_slew_time(1,1.0)
+    softcut.loop_start(1, 10)
+    softcut.loop_end(1, 12.5)
+    softcut.rec_offset (1, 1.2)
+    softcut.loop(1, 1)
+    softcut.fade_time(1, 0.1)
+    softcut.rec(1, 1)
+    softcut.rec_level(1, 0.25)
+    softcut.pre_level(1, 0.85) 
+    softcut.position(1, 0)
+    softcut.enable(1, 1)
+    softcut.filter_dry(1, 0);
+    softcut.filter_lp(1, 1.0);
+    softcut.filter_bp(1, 1.0);
+    softcut.filter_hp(1, 1.0);
+    softcut.filter_fc(1, 300);
+    softcut.filter_rq(1, 2.0);
+    ]]
+  
   else
     print("no grid found")
   end
   
 
-  
 
-  --[[
-  lattice_sequencer = Lattice:new{
-    auto = true,
-    meter = 4,
-    ppqn = 96
-  }
-
-  sequencers = {}
-  sequencers[1] = Sequencer:new()
-  
-  lattice_sample_sequencer = Lattice:new{
-    auto = true,
-    meter = 4,
-    ppqn = 96
-  }
-  
-  sample_pattern1 = lattice_sample_sequencer:new_pattern{
-    action = function(t) 
-      sample_pattern1_event()
-    end,
-    division = 1/4, --1/16,
-    enabled = true
-  }
-
-  seq1 = Sequins{ 1,  1, 1, 5, 5, 4,  5,  3, 1, -2, 4}
-
-    -- sample pattern params:
-      -- start: time
-      -- end: time, start + duration, note length
-      -- rate: -5,5
-
-  function sample_pattern1_event()
-
-    -- params:set("play_sequencer",2)
-    if params:get("play_sequencer") == 2 then 
-      -- softcut.loop (1, 0)
-      local seq_num = seq1()
-      -- local start = ((seq_num-1)*20)+(120 + math.random(2))
-      -- local start = ((seq_num-1)*5)+((ur_position*length))
-      local start = seq_num
-      sample_pattern1.division = 1/(seq_num*2)
-      softcut.loop_start(1,start)
-      softcut.loop_end(1,start + (0.3))
-      softcut.play(1, 1)
-    end
-  end
-  ]]
 
 
   active_notes = {}
@@ -283,7 +267,10 @@ end
 function finish_init()
   engine.splnk(0)
 
-  clock.sleep(0.2)
+  clock.sleep(0.5)
+  params:set("reverb",1)
+  params:set("root_note",12)
+
   amplitude_detect_poll:start()
   onset_amplitude_detect_poll:start()
   frequency_detect_poll:start()
@@ -321,7 +308,8 @@ function finish_init()
   -- sample_player.load_file("/home/we/dust/flora_wowless.wav")
   -- page_scroll(1)
   
-  
+  -- softcut.play(1, 1)
+
   
 end
 

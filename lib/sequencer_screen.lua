@@ -218,7 +218,7 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
         end
       end
     end
-  elseif output_type == 3 then
+  elseif output_type == 3 then -- effects
     control_bcrumbs =  control_bcrumbs .. "eff "
     if output_index then 
       if output_index == 1 then -- amp
@@ -245,6 +245,43 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
         end
       end
     end
+  elseif output_type == 4 then -- lattice and patterns  
+    local orig_bcrumbs = fn.deep_copy(control_bcrumbs)
+    control_bcrumbs =  control_bcrumbs .. "lat and pats"
+    if output_index == 1 then
+      control_bcrumbs = orig_bcrumbs .. " lat" 
+    elseif output_index == 2 then
+      control_bcrumbs = orig_bcrumbs .. " pats" 
+    end
+  elseif output_type == 5 then -- sequins
+    control_bcrumbs =  control_bcrumbs .. "sequins"
+    if output_index == 1 then
+      control_bcrumbs = control_bcrumbs .. " step" 
+    elseif output_index == 2 then
+      if output_mode == 1 then
+        control_bcrumbs = control_bcrumbs .. "every" 
+      elseif output_mode == 2 then
+        control_bcrumbs = control_bcrumbs .. "times" 
+      elseif output_mode == 3 then
+        control_bcrumbs = control_bcrumbs .. "count" 
+      elseif output_mode == 4 then
+        control_bcrumbs = control_bcrumbs .. "all" 
+      elseif output_mode == 5 then
+        control_bcrumbs = control_bcrumbs .. "reset" 
+      end
+      local label_pos = 1
+      control_labels[1] = ""
+      -- if output_mode then
+      -- for i=1,#specs_map[output_type][output_index][output_mode],1 do  
+      for i=1,#specs_map[output_type][output_index],1 do
+          -- print("i,label_pos",i,label_pos,specs_map[output_type][output_index][output_mode][i][5])
+          control_labels[label_pos] = control_labels[label_pos] .. specs_map[output_type][output_index][i][5] .. " "
+          label_pos = i%3 == 0 and label_pos + 1 or label_pos
+        -- end
+      -- elseif output_param and output_mode < 7 then
+      --   control_bcrumbs = control_bcrumbs .. " " .. specs_map[output_type][output_index][output_mode][output_param][5]
+      end        
+    end
   end
 
   -- set more control labels
@@ -268,21 +305,15 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
       control_labels[2] = "amp drywet delay"
       control_labels[3] = "bitcrshr env pshift"
       -- control_bcrumbs =  control_bcrumbs .. "eff"
-    elseif output_type == 4 then
-      control_labels[1] = "enveloper:"
-      control_labels[2] = "off/on trig_rate"
-      control_labels[3] = "overlap"
-      -- control_bcrumbs =  control_bcrumbs .. "env"
     elseif output_type == 5 then
-      control_labels[1] = "pattern:"
-      control_labels[2] = "division"
-      control_labels[3] = "stop/start/toggle"
-      -- control_bcrumbs =  control_bcrumbs .. "pat"
-    elseif output_type == 6 then
-      control_labels[1] = "lattice:"
-      control_labels[2] = "meter p_auto p_man"
-      control_labels[3] = "ppqn off/rst/h_reset"
-      -- control_bcrumbs =  control_bcrumbs .. "lat"
+      control_labels[1] = "sequins:"
+      control_labels[2] = "main sequins"
+      control_labels[3] = "sub-sequins"
+      -- control_bcrumbs =  control_bcrumbs .. "env"
+    elseif output_type == 4 then
+      control_labels[1] = "lattice and patterns:"
+      control_labels[2] = "meter ppqn reset"
+      control_labels[3] = "pat_div pat_state"
     end
   elseif active_ui_group_name == "sequin output modes" then
     if output_type == 2 then -- devices
