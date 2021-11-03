@@ -78,7 +78,7 @@ function sequin_processor.gather_outputs(ssid,output_table, sequin_id, sub_seq_l
               next_output_value = next_output_value,
               ssid=ssid
             } 
-            sequin_processor.process_sub_sequins(sub_sequin_data, ssid)
+            sequin_processor.process_sub_sequins(sub_sequin_data, ssid,sub_seq_leader_ix)
             --
             --------------------------------------
           end
@@ -94,7 +94,7 @@ function sequin_processor.gather_outputs(ssid,output_table, sequin_id, sub_seq_l
   return num_outputs
 end
 
-function sequin_processor.process_sub_sequins(sub_sequins, ssid)
+function sequin_processor.process_sub_sequins(sub_sequins, ssid, sub_seq_leader_ix)
   local output_table = sub_sequins.output_table
   local sequin_output_type_processor = sub_sequins.sequin_output_type_processor
   local next_output_value = sub_sequins.next_output_value
@@ -108,9 +108,8 @@ function sequin_processor.process_sub_sequins(sub_sequins, ssid)
       output_table.calculated_absolute_value = nil
       previous_absolute_value = next_output_value
       if output_table.value ~= "nil" then
-        -- print("sequin_output_type_processor.process",ssid)
         output_table.ssid = ssid
-        sequin_output_type_processor.process(output_table)
+        sequin_output_type_processor.process(output_table,sub_seq_leader_ix)
       end
       previous_relative_values = {}
     elseif process_mode == "relative" and (value_type == "number" or value_type == "notes") then
@@ -131,7 +130,7 @@ function sequin_processor.process_sub_sequins(sub_sequins, ssid)
       output_table.calculated_absolute_value = calculated_absolute_value
       if output_table.value ~= "nil" then
         output_table.ssid = ssid
-        sequin_output_type_processor.process(output_table)
+        sequin_output_type_processor.process(output_table,sub_seq_leader_ix)
       end
 
     end

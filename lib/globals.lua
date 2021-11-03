@@ -157,8 +157,9 @@ DEFAULT_SUB_SEQUINS_TAB = {"","","","",""}
 midi_in_channel1_default = 1
 midi_in_command1 = 144
 midi_devices = nil
-MIDI_DURATIONS = {"1","1/2","1/4","1/8","1/16"}
-NOTE_REPEAT_FREQUENCIES = {'1','1/2','1/4','1/8','1/16','1/3','2/3','3/8','5/8'}
+MIDI_DURATIONS = {"0","1","1/2","1/4","1/8","1/16"}
+-- NOTE_REPEAT_FREQUENCIES = {'1','1/2','1/4','1/8','1/16','1/3','2/3','3/8','5/8'}
+NOTE_REPEAT_FREQUENCIES = {'0','1','2','3','4','5','6','7','8'}
 -----------------------------------------
 -- ENVELOPES
 -- IMPORTANT NOTE: when changing AMPLITUDE_DEFAULT or ENV_LENGTH_DEFAULT

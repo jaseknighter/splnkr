@@ -45,6 +45,7 @@ function externals:new(active_notes)
   ext.note_on = function(voice_id, value, beat_frequency, envelope_time_remaining, note_source, note_target)
     -- local output_bandsaw = params:get("output_bandsaw")
     local note_offset = params:get("note_center_frequency") - root_note_default
+    local value = fn.deep_copy(value)
     if type(value) == "table" then
       value.pitch  = note_source == "engine" and value.pitch or notes[value.pitch+note_offset]
       -- print("note_on:",voice_id, value.pitch, beat_frequency, envelope_time_remaining, note_source, note_target)
