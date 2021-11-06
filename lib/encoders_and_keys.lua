@@ -193,13 +193,31 @@ local enc = function (n, d)
           
           for i=1,6,1 do sample_player.reset(i) end
         elseif sample_player.nav_active_control == 6 then -- set level
-          local new_level = util.clamp(sample_player.level+(d)/100,0,1)
-          new_level = fn.round_decimals (new_level, 3, "down")
-          sample_player.level = new_level
-          softcut.level(sample_player.selected_voice,sample_player.level)
+          if alt_key_active == true then -- update play mode for all voices
+          for i=1,6,1 do
+            local new_level = util.clamp(sample_player.levels[i]+(d)/100,0,1)
+            new_level = fn.round_decimals (new_level, 3, "down")
+            sample_player.levels[i] = new_level
+            softcut.level(i,sample_player.level)
+            
+            end
+          else
+            local new_level = util.clamp(sample_player.levels[sample_player.selected_voice]+(d)/100,0,1)
+            new_level = fn.round_decimals (new_level, 3, "down")
+            sample_player.levels[sample_player.selected_voice] = new_level
+          softcut.level(sample_player.selected_voice,sample_player.levels[sample_player.selected_voice])
+          end
         elseif sample_player.nav_active_control == 7 then -- autogenerate cutters
-          sample_player.num_cutters = util.clamp(sample_player.num_cutters+d,1,MAX_CUTTERS)
-          sample_player.autogenerate_cutters(sample_player.num_cutters)
+          if alt_key_active == true then
+            sample_player.num_cutters = util.clamp(sample_player.num_cutters+d,1,MAX_CUTTERS)
+            sample_player.autogenerate_cutters(sample_player.num_cutters)
+          else
+            local sorted_cut_indices = cut_detector.get_sorted_cut_indices()
+            local num_cutters = util.clamp(sample_player.num_cutters+d,1,MAX_CUTTERS)
+            num_cutters = num_cutters <= #sorted_cut_indices and num_cutters or #sorted_cut_indices
+            sample_player.num_cutters = num_cutters
+            sample_player.autogenerate_cutters(sample_player.num_cutters)
+          end
         end
       end
     end
@@ -288,14 +306,19 @@ local key = function (n,z)
         else
           if #cutters > 1 and sample_player.nav_active_control > 1 then
             sample_player.num_cutters = util.clamp(sample_player.num_cutters-1,1,MAX_CUTTERS)
-            sample_player.autogenerate_cutters(sample_player.num_cutters)          end
+            sample_player.autogenerate_cutters(sample_player.num_cutters)          
+          end
         end
       elseif n==3 and z==1 then
         if sample_player.nav_active_control == 1 then
           sample_player.playing = sample_player.playing == 1 and 0 or 1
           softcut.play(sample_player.selected_voice, sample_player.playing)
         elseif sample_player.nav_active_control > 1 and #cutters < MAX_CUTTERS then
-          sample_player.num_cutters = util.clamp(sample_player.num_cutters+1,1,MAX_CUTTERS)
+          local sorted_cut_indices = cut_detector.get_sorted_cut_indices()
+          local num_cutters = util.clamp(sample_player.num_cutters+1,1,MAX_CUTTERS)
+          num_cutters = num_cutters <= #sorted_cut_indices and num_cutters or #sorted_cut_indices
+
+          sample_player.num_cutters = num_cutters
           sample_player.autogenerate_cutters(sample_player.num_cutters)
         end
         -- for i=1,#cutters,1

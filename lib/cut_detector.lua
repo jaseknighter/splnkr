@@ -43,22 +43,46 @@ end
 
 function cut_detector.find_cuts()
   bright_diff_tab = {}
-  for i=2,#cut_detector.bright_tab,1
-  do
-    local b_diff = cut_detector.bright_tab[i] - cut_detector.bright_tab[i-1]
-    b_diff = b_diff < 0 and b_diff * -1 or b_diff
-    table.insert(bright_diff_tab,{i,b_diff})
-  end
+  -- print(#cut_detector.bright_tab)
 
-  bright_diff_sorted_tab = {}
-  for k, v in pairs(bright_diff_tab) do
-      table.insert(bright_diff_sorted_tab,{k,v})
-  end
-
-  table.sort(bright_diff_sorted_tab, function(a,b) 
-      return a[2][2] < b[2][2]
+  -- first try to find cuts where there are silent areas in the sample
+  for i=2,#cut_detector.bright_tab,1 do
+    local b_diff = math.abs(cut_detector.bright_tab[i] - cut_detector.bright_tab[i-1])
+    if (cut_detector.bright_tab[i] < 10 or  cut_detector.bright_tab[i-1] < 10) and b_diff > 100 then
+      -- b_diff = b_diff < 0 and b_diff * -1 or b_diff
+      -- print(i,b_diff,cut_detector.bright_tab[i],cut_detector.bright_tab[i-1])
+      table.insert(bright_diff_tab,{i,b_diff})
     end
-  )
-end
+  end
 
+  -- there aren't any silent areas in the sample just make cuts based on relative differences in volume
+  if #bright_diff_tab > 0 then 
+    bright_diff_sorted_tab = {}
+    for k, v in pairs(bright_diff_tab) do
+      table.insert(bright_diff_sorted_tab,{k,v})
+    end
+  else
+    for i=2,#cut_detector.bright_tab,1 do
+      local b_diff = math.abs(cut_detector.bright_tab[i] - cut_detector.bright_tab[i-1])
+      table.insert(bright_diff_tab,{i,b_diff})
+    end
+    bright_diff_sorted_tab = {}
+    for k, v in pairs(bright_diff_tab) do
+      table.insert(bright_diff_sorted_tab,{k,v})
+    end
+    table.sort(bright_diff_sorted_tab, function(a,b) 
+      return a[2][2] < b[2][2]
+    end)
+
+  end
+
+  
+--[[
+  -- tab.print(bright_diff_sorted_tab)
+  for i=1,#bright_diff_sorted_tab,1 do
+    -- tab.print(bright_diff_sorted_tab[i][2])
+  end
+  ]]
+  
+end
 return cut_detector

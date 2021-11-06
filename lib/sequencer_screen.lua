@@ -124,7 +124,7 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
         --   control_bcrumbs = control_bcrumbs .. specs_map[output_type][output_index][output_mode][5] .. " "
         -- end        
         control_bcrumbs =  control_bcrumbs .. "midi "
-        if output_mode == nil and output_param == nil then
+        if output_mode == nil then
           control_labels[1] = "v1 v2 v3"
           control_labels[2] = "cc1 cc2 cc3"
           control_labels[3] = "start/stop"

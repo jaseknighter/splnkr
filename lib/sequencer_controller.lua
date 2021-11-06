@@ -267,17 +267,17 @@ function sc.refresh_output_control_specs_map()
       --    rate_direction: -1, 1
       --    level: 0-1
       {
-        {"option",{"stp","la", "ac", "sc"},2,nil,"v_mode","v_mode"},      -- play mode
+        {"option",{"stp","la", "ac", "sc","rpt","1sh"},nil,nil,"v_mode","v_mode"},      -- play mode
         {"option",cutters,nil,"cutter","cutter"},  -- cutter
         {"number","0.00",20,1,"rate","rate"},    -- rate
         {"option",{-1,1},2,nil,"direction","direction"},      -- direction
         {"number",'0.00',10,0.20,"level","level"}         -- level (amp)
       },  
-      {{"option",{"stp","lp", "ac", "sc"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
-      {{"option",{"stp","lp", "ac", "sc"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
-      {{"option",{"stp","lp", "ac", "sc"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
-      {{"option",{"stp","lp", "ac", "sc"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
-      {{"option",{"stp","lp", "ac", "sc"},2,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
+      {{"option",{"stp","lp", "ac", "sc","rpt","1sh"},nil,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
+      {{"option",{"stp","lp", "ac", "sc","rpt","1sh"},nil,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
+      {{"option",{"stp","lp", "ac", "sc","rpt","1sh"},nil,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
+      {{"option",{"stp","lp", "ac", "sc","rpt","1sh"},nil,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
+      {{"option",{"stp","lp", "ac", "sc","rpt","1sh"},nil,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
     }, 
     { -- device (midi(4), crow(2), just_friends(3),w/(2))
       { -- midi note out 1-3 and stop/start
@@ -626,16 +626,16 @@ function sc.update_sequin_output_types(x, y, state)
     sc.sequin_outputs = grid_sequencer:register_ui_group("sequin_outputs",6,3,5+num_outputs,3,7,3)
   else
     sc:unregister_ui_group(6,3)
-    -- sc.selected_sequin_output = nil
-    -- sc.selected_sequin_output_mode = nil
-    -- sc.selected_sequin_output_param = nil
-    -- sc.value_place_integer = nil
-    -- sc.value_place_decimal = nil
-    -- sc.value_polarity = nil
-    -- sc.sequence_mode = nil
-    -- sc.value_number = nil
-    -- sc.value_option = nil
-    -- sc.active_output_value_text = nil
+    sc.selected_sequin_output = nil
+    sc.selected_sequin_output_mode = nil
+    sc.selected_sequin_output_param = nil
+    sc.value_place_integer = nil
+    sc.value_place_decimal = nil
+    sc.value_polarity = nil
+    sc.sequence_mode = nil
+    sc.value_number = nil
+    sc.value_option = nil
+    sc.active_output_value_text = nil
   end
 end
 
@@ -652,6 +652,18 @@ function sc.update_sequin_outputs(x, y, state)
   -- sc.selected_sequin_output_param = nil
   sc.active_value_heirarchy = nil
   if state == "on" then
+    sc.selected_sequin_output_mode = nil
+    sc.selected_sequin_output_param = nil
+    sc.value_place_integer = nil
+    sc.value_place_decimal = nil
+    sc.value_polarity = nil
+    sc.sequence_mode = nil
+    sc.value_number = nil
+    sc.value_option = nil
+    sc.value_note_num = nil
+    sc.value_octave = nil
+    sc.active_output_value_text = nil
+
     local output_type_selected = sc.selected_sequin_output_type
     local output_selected = x - sc.selectors_x_offset
     sc.selected_sequin_output = output_selected
@@ -1275,7 +1287,7 @@ function sc.update_sequin_output_value(x, y, state, press_type)
   if press_type == "long" then
     local value_selector_group_id = grid_sequencer:find_ui_group_num_by_xy(6,6)
     value_selector_default_value = grid_sequencer.ui_groups[value_selector_group_id].default_value
-    value_selector_default_value = value_selector_default_value and value_selector_default_value or 1
+    value_selector_default_value = value_selector_default_value and value_selector_default_value or nil
 
     -- if sc.active_value_selector_place then
     --   local reset_exception = sc.active_value_selector_place
@@ -1339,8 +1351,8 @@ function sc.update_sequin_output_value(x, y, state, press_type)
     sc.active_output_value_text = output_value
   elseif sc.active_sequin_value.value_type == "option" then
     if press_type == "long" then
-      print("reset to default value",press_type)
-      output_value = value_selector_default_value
+      output_value = value_selector_default_value and value_selector_default_value or "-"
+      sc.reset_place_values()
     else
       output_value = sc.active_sequin_value.option_value
     end
@@ -1397,12 +1409,14 @@ function sc.get_options_text(option_index)
 
   local map = sc.get_output_control_specs_map()
   local options_table
-  if map[typ][out][mod] and map[typ][out][mod][par] then
-    options_table = map[typ][out][mod][par][2]
-  elseif map[typ][out][mod] then
-    options_table = map[typ][out][mod][2]
-  elseif map[typ][out][par] then
-    options_table = map[typ][out][par][2]
+  if map[typ][out] then 
+    if map[typ][out][mod] and map[typ][out][mod][par] then
+      options_table = map[typ][out][mod][par][2]
+    elseif map[typ][out][mod] then
+      options_table = map[typ][out][mod][2]
+    elseif map[typ][out][par] then
+      options_table = map[typ][out][par][2]
+    end
   end
   -- tab.print(options_table)
   if option_index and type(options_table) == 'table' then
