@@ -111,36 +111,6 @@ function init()
     grid_filter_clock_id = clock.run(grid_filter.grid_redraw_clock)
     grid_sequencer_clock_id = clock.run(grid_sequencer.grid_redraw_clock)
     
-    
-    --[[
-    audio.level_cut(1.0)
-    audio.level_adc_cut(1)
-    audio.level_eng_cut(1)
-    softcut.level(1,1.0)
-    softcut.level_slew_time(1,0.25)
-    softcut.level_input_cut(1, 1, 1.0)
-    softcut.level_input_cut(2, 1, 1.0)
-    softcut.pan(1, 0.0)
-    softcut.rate(1, 1)
-    softcut.rate_slew_time(1,1.0)
-    softcut.loop_start(1, 10)
-    softcut.loop_end(1, 12.5)
-    softcut.rec_offset (1, 1.2)
-    softcut.loop(1, 1)
-    softcut.fade_time(1, 0.1)
-    softcut.rec(1, 1)
-    softcut.rec_level(1, 0.25)
-    softcut.pre_level(1, 0.85) 
-    softcut.position(1, 0)
-    softcut.enable(1, 1)
-    softcut.filter_dry(1, 0);
-    softcut.filter_lp(1, 1.0);
-    softcut.filter_bp(1, 1.0);
-    softcut.filter_hp(1, 1.0);
-    softcut.filter_fc(1, 300);
-    softcut.filter_rq(1, 2.0);
-    ]]
-  
   else
     print("no grid found")
   end
@@ -340,7 +310,7 @@ function set_redraw_timer()
   redrawtimer = metro.init(function() 
   
     menu_status = norns.menu.status()
-    if menu_status == false and initializing == false and selecting == false then
+    if menu_status == false and initializing == false and sample_player.selecting == false then
       -- sample_player.update()
   
       controller.update_pages()
