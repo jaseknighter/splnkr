@@ -267,17 +267,17 @@ function sc.refresh_output_control_specs_map()
       --    rate_direction: -1, 1
       --    level: 0-1
       {
-        {"option",{"stp","la", "ac", "sc","rpt","1sh"},nil,nil,"v_mode","v_mode"},      -- play mode
+        {"option",{"stp","la", "ac", "sc","1sh"},nil,nil,"v_mode","v_mode"},      -- play mode
         {"option",cutters,nil,"cutter","cutter"},  -- cutter
         {"number","0.00",20,1,"rate","rate"},    -- rate
         {"option",{-1,1},2,nil,"direction","direction"},      -- direction
         {"number",'0.00',10,0.20,"level","level"}         -- level (amp)
       },  
-      {{"option",{"stp","lp", "ac", "sc","rpt","1sh"},nil,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
-      {{"option",{"stp","lp", "ac", "sc","rpt","1sh"},nil,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
-      {{"option",{"stp","lp", "ac", "sc","rpt","1sh"},nil,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
-      {{"option",{"stp","lp", "ac", "sc","rpt","1sh"},nil,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
-      {{"option",{"stp","lp", "ac", "sc","rpt","1sh"},nil,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
+      {{"option",{"stp","lp", "ac", "sc","1sh"},nil,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
+      {{"option",{"stp","lp", "ac", "sc","1sh"},nil,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
+      {{"option",{"stp","lp", "ac", "sc","1sh"},nil,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
+      {{"option",{"stp","lp", "ac", "sc","1sh"},nil,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
+      {{"option",{"stp","lp", "ac", "sc","1sh"},nil,nil,"v_mode","v_mode"},{"option",cutters,nil,"cutter","cutter"},{"number","0.00",20.00,1,"rate","rate"},{"option",{-1,1},2,nil,"direction","direction"},{"number",'0.00',10,"level","level"}},  
     }, 
     { -- device (midi(4), crow(2), just_friends(3),w/(2))
       { -- midi note out 1-3 and stop/start

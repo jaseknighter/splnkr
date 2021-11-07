@@ -19,6 +19,8 @@ function devices_jf_processor.init()
   devices_jf_processor.play_voice_channel   = 1  
   devices_jf_processor.play_voice_pitch     = 1
   devices_jf_processor.play_voice_level     = 5
+  -- devices_jf_processor.repeats           = 5
+  -- devices_jf_processor.repeat_freq       = 5
   devices_jf_processor.portamento           = 1    
 end
 
@@ -44,8 +46,7 @@ function devices_jf_processor.process(output_table)
     devices_jf_processor.play_voice_channel = channel
     if param == 1 then 
       devices_jf_processor.play_voice_pitch = value
-    elseif param == 2 then -- update pitch
-    else -- update level
+    elseif param == 2 then -- update level
       devices_jf_processor.play_voice_level = value
     end
     devices_jf_processor.play_voice()

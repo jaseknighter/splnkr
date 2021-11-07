@@ -69,7 +69,6 @@ play_mode_text = {
   "loop all",
   "all cuts",
   "sel cut",
-  "repeat",
   "1-shot"
 }
 
@@ -96,6 +95,33 @@ function sample_player.init()
   softcut.event_phase(sample_player.playhead_position_update)
   softcut.poll_start_phase()
   softcut.event_render(sample_player.on_render)
+end
+
+function sample_player.play_live()
+
+  selecting = false
+  play_live = true 
+  
+  sample_player.num_cutters = 1
+  
+  sample_player_nav_labels[1] = "select/play/scrub voice: " .. 1
+
+  softcut.buffer_clear_region(1,-1)
+  
+  -- for i=1,6,1 do
+  --   sample_player.reset(i)
+  -- end
+  
+  waveform_loaded = true
+  -- clock.run(sample_player.init_cutters)
+  sample_player.autogenerate_cutters(sample_player.num_cutters)
+  
+  -- clock.run(cut_detector.set_bright_start)
+  
+  -- sample_player.set_play_mode(1,1)
+  softcut.play(1,1)
+
+
 end
 
 function sample_player.load_file(file)
@@ -295,6 +321,7 @@ function sample_player.cutters_start_finish_update()
 end
 
 function sample_player.playhead_position_update(voice,pos)
+  -- print(1,pos)
   sample_player.sample_positions[voice] = (pos - 1) / length
   -- if cutters[sample_player.cutter_assignments[voice]] then
   if waveform_loaded then
@@ -520,7 +547,7 @@ function sample_player.draw_top_nav (msg)
     screen.level(0)
     screen.move(4,7)
     screen.text(subnav_title)
-    if file_selected then
+    if file_selected == true or play_live == true then
       sample_player.draw_sub_nav()
     end
   else
