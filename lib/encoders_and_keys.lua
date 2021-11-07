@@ -31,7 +31,7 @@ local enc = function (n, d)
   end
 
   if pages.index == 1 then
-    if saving == false and show_instructions == false and file_selected == true then    
+    if saving == false and show_instructions == false and sample_player.file_selected == true then    
       if n==1 then
         d = util.clamp(d,-1,1) * 0.01
         if sample_player.nav_active_control == 3 then
@@ -333,7 +333,7 @@ local key = function (n,z)
     end
     if ((not waveform_loaded or sample_player.nav_active_control == 1) and alt_key_active == false) and n==2 and z==1 then
       screen.clear()
-      selecting = true
+      sample_player.selecting = true
       fileselect.enter(_path.dust,sample_player.load_file)
     end
 

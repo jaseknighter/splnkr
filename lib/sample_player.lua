@@ -13,6 +13,7 @@
 
 --------------------------
 sample_player = {}
+sample_player.waveform_samples = {}
 sample_player.selected_voice = 1
 sample_player.enabled_voices = {}
 sample_player.sample_positions = {}
@@ -29,8 +30,8 @@ sample_player.voices_start_finish[5] = {}
 sample_player.voices_start_finish[6] = {}
 -- local cutter_start_sec_x, cutter_finish_x_sec
 
-selecting = false
-file_selected = false
+sample_player.selecting = false
+sample_player.file_selected = false
 -- playing = 0
 cutters = {}
 sample_player.voice_rates = {1,1}
@@ -99,7 +100,7 @@ end
 
 function sample_player.play_live()
 
-  selecting = false
+  sample_player.selecting = false
   play_live = true 
   
   sample_player.num_cutters = 1
@@ -125,18 +126,18 @@ function sample_player.play_live()
 end
 
 function sample_player.load_file(file)
-  selecting = false
+  sample_player.selecting = false
   sample_player.num_cutters = 1
   if file ~= "cancel" then
-    file_selected = true
+    sample_player.file_selected = true
     sample_player_nav_labels[1] = "select/play/scrub voice: " .. 1
 
     softcut.buffer_clear_region(1,-1)
     local ch, samples = audio.file_info(file)
     length = samples/48000
-    -- softcut.buffer_read_mono(file,0,1,-1,1,1)
+    softcut.buffer_read_mono(file,0,1,-1,1,1)
     -- softcut.buffer_read_mono(file,0,1,-1,1,2)
-    softcut.buffer_read_stereo(file,0,0,-1)
+    -- softcut.buffer_read_stereo(file,0,0,-1)
     for i=1,6,1 do
       sample_player.reset(i)
     end
@@ -223,9 +224,10 @@ function sample_player.reset(voice, set_position_at_start)
       sample_player.voices_start_finish[voice][1] = util.linlin(10,120,0,length,cutters[sample_player.cutter_assignments[voice]]:get_start_x_updated())
       sample_player.voices_start_finish[voice][2] = util.linlin(10,120,0,length,cutters[sample_player.cutter_assignments[voice]]:get_finish_x_updated())      
     else 
-      sample_player.voices_start_finish[voice][1] = 1
-      sample_player.voices_start_finish[voice][2] = 1+length
+      sample_player.voices_start_finish[voice][1] = 0
+      sample_player.voices_start_finish[voice][2] = 0+length
     end 
+    print(sample_player.voices_start_finish[voice][1],sample_player.voices_start_finish[voice][2])
     softcut.loop_start(voice,sample_player.voices_start_finish[voice][1])
     softcut.loop_end(voice,sample_player.voices_start_finish[voice][2])
   else  -- not sure what this is for (it does get called at script init)
@@ -257,7 +259,7 @@ function sample_player.reset(voice, set_position_at_start)
   else
     softcut.play(voice,0)
   end
-  sample_player.update_content(1,1,length,128)
+  sample_player.update_content(1,0,length,128)
 end
 
 -- mode 0: stop
@@ -286,21 +288,9 @@ function sample_player.get_last_play_mode(voice)
   return sample_player.last_play_mode[voice] 
 end
 
--- function sample_player.copy_cut()
---   local rand_copy_end = math.random(1,util.round(length))
---   local rand_copy_start = math.random(1,util.round(rand_copy_end - (rand_copy_end/10)))
---   local rand_dest = math.random(1,util.round(length))
---   softcut.buffer_copy_mono(2,1,rand_copy_start,rand_dest,rand_copy_end-rand_copy_start,0.1,math.random(0,1))
---   sample_player.update_content(1,1,length,128)
--- end
-
 -- WAVEFORMS
-local interval = 0
-waveform_samples = {}
-
-
 function sample_player.on_render(ch, start, i, s)
-  waveform_samples = s
+  sample_player.waveform_samples = s
   interval = i
   -- sample_player.update()
 end
@@ -322,7 +312,7 @@ end
 
 function sample_player.playhead_position_update(voice,pos)
   -- print(1,pos)
-  sample_player.sample_positions[voice] = (pos - 1) / length
+  sample_player.sample_positions[voice] = (pos) / length
   -- if cutters[sample_player.cutter_assignments[voice]] then
   if waveform_loaded then
     local next_cutter_to_play = util.wrap(sample_player.cutter_assignments[voice]+1,1,#cutters)
@@ -362,7 +352,7 @@ function sample_player.playhead_position_update(voice,pos)
     else 
       sample_player.playhead_positions[voice] = util.linlin(0,1,10,120,sample_player.sample_positions[voice])
     end
-    if selecting == false and menu_status == false then 
+    if sample_player.selecting == false and menu_status == false then 
       sample_player.update() 
     end  
   end
@@ -547,7 +537,7 @@ function sample_player.draw_top_nav (msg)
     screen.level(0)
     screen.move(4,7)
     screen.text(subnav_title)
-    if file_selected == true or play_live == true then
+    if sample_player.file_selected == true or play_live == true then
       sample_player.draw_sub_nav()
     end
   else
@@ -568,8 +558,9 @@ end
 
 -- local c = 0
 local scale = 50
+local numit = 0
 function sample_player.update()
-  if pages.index == 1 and menu_status == false and selecting == false then
+  if pages.index == 1 and menu_status == false and sample_player.selecting == false then
     screen.clear()
     if show_instructions == true then 
       instructions.display() 
@@ -580,18 +571,28 @@ function sample_player.update()
         -- cut_detector.set_bright_completed()
       end
       
-      for i,s in ipairs(waveform_samples) do
-        local brightness = util.round(math.abs(s) * (scale*sample_player.levels[sample_player.selected_voice]))
-        brightness = util.round(util.linlin(0,30,0,15, brightness))
-        screen.level(brightness)
-        if cut_detector.bright_checked == false then
-          cut_detector.set_bright(math.abs(s) * 10000)
+      if (waveform_loaded == true) then
+        
+        for i,s in ipairs(sample_player.waveform_samples) do
+        
+          local brightness = util.round(math.abs(s) * (scale*sample_player.levels[sample_player.selected_voice]))
+          brightness = util.round(util.linlin(0,30,0,15, brightness))
+          screen.level(brightness)
+          if cut_detector.bright_checked == false then
+            cut_detector.set_bright(math.abs(s) * 10000)
+          end
+          local x = util.linlin(0,128,10,120,x_pos)
+          screen.move(math.floor(x), 25)
+          screen.line_rel(0, 20)
+          screen.stroke()
+          if numit == 0 and x_pos < 50 then
+            print("x_pos,x,brightness",x_pos,x,brightness)
+          end
+          x_pos = x_pos + 1
         end
-        screen.move(util.linlin(0,128,10,120,x_pos), 25)
-        screen.line_rel(0, 20)
-        screen.stroke()
-        x_pos = x_pos + 1
-      end
+        -- print("numit",numit)
+        numit = 1
+        end
       if cut_detector.bright_checked == false then
         cut_detector.set_bright_completed()
       end

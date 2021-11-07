@@ -72,48 +72,13 @@ local update_pages = function()
     if pages.index == 1 then
       sample_player.update()
     elseif pages.index == 2 then
-      -- update_content(1,1,length,128)
-      -- redraw_waveform()
-      -- screen.clear()
-      -- screen_dirty = true
       
       envelopes[1].redraw()
       draw_top_nav()
     elseif pages.index == 3 then
-      -- if screen_dirty == true then
         screen.clear()
         draw_top_nav()
         sequencer_screen.update()
-        -- screen_dirty = false
-      -- end
-      -- screen.move(10,20)
-      -- screen.level(p3_index == 1 and 15 or 5)
-      -- -- screen.text("vinyl: ")
-      -- screen.text("pitch shift: ")
-      -- screen.move(118,20)
-      -- screen.text_right(string.format("%.3f",pitchshift))
-      -- -- screen.text_right(string.format("%.3f",vinyl))
-      -- screen.move(10,30)
-      -- screen.level(p3_index == 2 and 15 or 5)
-      -- screen.text("phaser: ")
-      -- screen.move(118,30)
-      -- screen.text_right(string.format("%.3f",phaser))
-      -- screen.move(10,40)
-      -- screen.level(p3_index == 3 and 15 or 5)
-      -- screen.text("delay: ")
-      -- screen.move(118,40)
-      -- screen.text_right(string.format("%.3f",delay))
-      -- screen.move(10,50)
-      -- screen.level(p3_index == 4 and 15 or 5)
-      -- screen.text("strobe: ")
-      -- screen.move(118,50)
-      -- screen.text_right(string.format("%.3f",strobe))
-      -- screen.move(10,60)
-      -- screen.level(p3_index == 5 and 15 or 5)
-      -- screen.text("drywet: ")
-      -- screen.move(118,60)
-      -- screen.text_right(string.format("%.3f",drywet))
-
     elseif pages.index == 4 then
 
     elseif pages.index == 5 then
