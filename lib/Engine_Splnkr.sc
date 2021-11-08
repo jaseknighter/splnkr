@@ -125,7 +125,7 @@ Engine_Splnkr : CroneEngine {
       ampMinArray=Array.fill(4,{0.001});
       ampMaxArray=Array.fill(4,{0.999});
       freqMinArray=Array.fill(4,{40});
-      freqMaxArray=Array.fill(4,{1200});
+      freqMaxArray=Array.fill(4,{9600});
 
       wet = SoundIn.ar([0,1]);
       dry = SoundIn.ar([0,1]);

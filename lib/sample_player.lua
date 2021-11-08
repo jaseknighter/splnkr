@@ -135,7 +135,7 @@ function sample_player.load_file(file)
     softcut.buffer_clear_region(1,-1)
     local ch, samples = audio.file_info(file)
     length = samples/48000
-    softcut.buffer_read_mono(file,0,1,-1,1,1)
+    softcut.buffer_read_mono(file,0,0,-1,1,1)
     -- softcut.buffer_read_mono(file,0,1,-1,1,2)
     -- softcut.buffer_read_stereo(file,0,0,-1)
     for i=1,6,1 do
@@ -217,11 +217,7 @@ function sample_player.reset(voice, set_position_at_start)
   
   if cutters[1] then
     if sample_player.play_modes[voice] > 1 and sample_player.cutter_assignments[voice] > 0 then
-      
-      -- if sample_player.play_modes[voice] == 3 then 
-        -- sample_player.cutter_assignments[voice] = sample_player.selected_cutter_group 
-      -- end
-      sample_player.voices_start_finish[voice][1] = util.linlin(10,120,0,length,cutters[sample_player.cutter_assignments[voice]]:get_start_x_updated())
+       sample_player.voices_start_finish[voice][1] = util.linlin(10,120,0,length,cutters[sample_player.cutter_assignments[voice]]:get_start_x_updated())
       sample_player.voices_start_finish[voice][2] = util.linlin(10,120,0,length,cutters[sample_player.cutter_assignments[voice]]:get_finish_x_updated())      
     else 
       sample_player.voices_start_finish[voice][1] = 0
@@ -329,8 +325,8 @@ function sample_player.playhead_position_update(voice,pos)
           sample_player.sample_positions[voice] = sample_player.last_sample_positions[voice] + 1
         end
         sample_player.cutter_assignments[voice] = next_cutter_to_play
-        sample_player.voices_start_finish[voice][1] = util.linlin(10,120,1,length,cutters[sample_player.cutter_assignments[voice]]:get_start_x_updated())
-        sample_player.voices_start_finish[voice][2] = util.linlin(10,120,1,length,cutters[sample_player.cutter_assignments[voice]]:get_finish_x_updated()) 
+        sample_player.voices_start_finish[voice][1] = util.linlin(10,120,0,length,cutters[sample_player.cutter_assignments[voice]]:get_start_x_updated())
+        sample_player.voices_start_finish[voice][2] = util.linlin(10,120,0,length,cutters[sample_player.cutter_assignments[voice]]:get_finish_x_updated()) 
         sample_player.reset(voice)
       elseif sample_player.play_modes[voice] > 2 then -- selected cut/repeat/1shot
         if sample_player.play_modes[voice] < 5 then
@@ -582,7 +578,7 @@ function sample_player.update()
             cut_detector.set_bright(math.abs(s) * 10000)
           end
           local x = util.linlin(0,128,10,120,x_pos)
-          screen.move(math.floor(x), 25)
+          screen.move(x, 25)
           screen.line_rel(0, 20)
           screen.stroke()
           if numit == 0 and x_pos < 50 then

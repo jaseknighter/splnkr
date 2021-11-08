@@ -84,9 +84,7 @@ function Cutter:update()
     for i=1,2,1
     do
       local height = 5
-      -- local bottom = math.floor((25 - height) + (height * 4))
       local bottom = screen_size.y - 15
-      -- local bottom = 25
 
       --draw start lines
       if (self.active_edge == 1 and self.display_mode == 1) or self.display_mode == 2 then
@@ -98,8 +96,6 @@ function Cutter:update()
       if start_loc[1] >= 10 and start_loc[1] <= 128 then
         screen.move(start_loc[1],start_loc[2])
         screen.line(start_loc[1],bottom)
-        -- screen.line_rel(0, 4 * bottom - start_loc[2] - 2)
-        
         screen.stroke()
         screen.move(start_loc[1]-1,bottom)
         screen.line_rel(6, 0)

@@ -147,21 +147,18 @@ function parameters.init()
   -- filter level
   params:add_group("level",16)
   local filter_levelgrid_view = 1
-  cs_level = controlspec.AMP:copy()
-  cs_level.maxval = 1.6
+  -- cs_level = controlspec.AMP:copy()
+  -- cs_level.maxval = 5
   for i=1,16,1 do
     params:add_control("filter_level"..i,"filter level"..i,cs_level)
-    -- params:set("filter_level"..i,1.6, false)
-    -- local default_val = ((i-1)%5)+2
     local default_val = i%4==1 and 6 or 0
-    default_val = util.linlin(1,9,0,1.6,default_val)
+    default_val = util.linlin(1,9,0,cs_level.maxval,default_val)
     params:set("filter_level"..i,default_val, false)
     params:set_action("filter_level"..i,function(x) 
       -- update engine
         engine.set_filter_level(i-1,x)
+
       -- update grid
-      --print(grid_filter,grid_filter.last_known_height)
-      -- if grid_filter and grid_filter.last_known_height > 0 then
       if grid_filter and grid_filter.last_known_height then
         local j = i
         local l =math.floor(util.linlin(cs_level.minval,cs_level.maxval,8,1,x))
@@ -212,7 +209,7 @@ function parameters.init()
   params:add_group("center frequency",16)
   local filter_cfgrid_view = 3
   cs_cf = controlspec.MIDFREQ:copy()
-  cs_cf.maxval = 1200
+  cs_cf.maxval = 9600
   for i=1,16,1 do
     params:add_control("filter_center_frequency"..i,"center freq"..i,cs_cf)
     params:set_action("filter_center_frequency"..i,function(x) 
@@ -827,7 +824,7 @@ function parameters.init()
   params:add_group("just friends",2)
   params:add{type = "option", id = "output_jf", name = "just friends",
     options = {"off","engine", "midi", "engine + midi"},
-    default = 2,
+    default = 1,
     action = function(value)
       if value > 1 then 
         -- crow.output[2].action = "{to(5,0),to(0,0.25)}"

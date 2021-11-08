@@ -56,27 +56,9 @@ function softcut_processor.update_cutter_assignment(voice, cutter_assignment)
         sample_player.set_play_mode(voice, 3) -- TODO: move into a parameter
         sample_player.set_cutter_assignment(voice, cutter_assignment)
       end
-  
     end
-    -- cutter_assignment = cutter_assignment
-    
-
-    --print("call: set cut assignment", voice, cutter_assignment)
-    -- TODO: move into a global function shared with code in encoders_and keys
-    -- local d = 0 -- DIRECTION, DON'T NEED TO CHANGE HERE!!!!!
-    -- cutters[sample_player.selected_cutter_group]:set_start_x(util.clamp(cutters[sample_player.selected_cutter_group]:get_start_x()+(d*1),0,cutters[sample_player.selected_cutter_group]:get_finish_x()))
-    -- cutters[sample_player.selected_cutter_group]:set_finish_x(util.clamp(cutters[sample_player.selected_cutter_group]:get_finish_x()+(d*1),cutters[sample_player.selected_cutter_group]:get_start_x(), 128))
-    -- sample_player.cutters_start_finish_update()
-    -- sample_player.reset() 
-    -- if sample_player.play_modes[sample_player.selected_voice] > 1 then 
-    -- end 
-
-    -- softcut.play(voice, 1)
   else 
-    -- params:set("play_sequencer",1)
-    -- for i=1,6,1 do
     sample_player.set_play_mode(sample_player.selected_voice, 0) -- TODO: move into a parameter
-    -- end
   end
 
 end

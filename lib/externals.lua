@@ -74,18 +74,6 @@ function externals:new(active_notes)
     local envelope_length = envelopes[1].get_env_time()
 
     -- MIDI out
-    -- if (note_source == "engine" and output_bandsaw == 4) or output_midi > 1 then
-    -- if note_target == "midi" and (note_source == "engine" and (output_midi == 2 or output_midi == 4)) or
-    --   (note_source == "midi" and (output_midi == 3 or output_midi == 4))  then
-    --   local level = voice_id == 1 and params:get("envelope1_max_level") or params:get("envelope2_max_level")
-    --   level = math.floor(util.linlin(0,10,0,127,level))
-    --   midi_out_device:note_on(value, level, midi_out_channel)
-    --   table.insert(active_notes, value)
-    --   -- Note off timeout
-    --   -- local note_duration_param = voice_id == 1 and "voice_1_note_duration" or "voice_2_note_duration"
-    --   clock.run(ext.midi_note_off, envelope_length, value, midi_out_channel, voice_id, #active_notes)
-    -- end
-    
     -- midi out (sequencer)
     if (note_target == "midi") then
       -- if (output_jf ~= 2 and output_jf ~= 4) then params:set("output_jf",2) end
@@ -165,16 +153,16 @@ function externals:new(active_notes)
         (note_source == "midi" and (output_crow3 == 4 or output_crow3 == 5))
     ) then
       local volts
-      -- print("crow value", value)
-      if note_source == "engine" then
+      if note_source == "engine" and value then
         volts = (value-60)/12
-      else
-        -- volts = value/12
-        volts = (value-60)/12
+      elseif value then 
+        volts = value/12
+        -- volts = (value-60)/12
+      else 
+        print("NO CROW VOLTS VALUE VALUE: externals 162s")
       end
       
       crow.output[1].volts = volts
-
       local output_param = params:get("output_crow2")
       if output_param == 2 then -- envelope
         local asl_envelope = asl_generator(envelopes[1].get_env_time())
@@ -190,9 +178,13 @@ function externals:new(active_notes)
         -- local time = params:get("envelope1_max_time")
         local level = params:get("envelope1_max_level")
         local polarity = 1
-        crow.output[2].action = "pulse(" .. time ..",".. level .. "," .. polarity .. ")"
+        if (time and level and polarity) then 
+          crow.output[2].action = "pulse(" .. time ..",".. level .. "," .. polarity .. ")"
+        end
       end
       if output_param > 1 then crow.output[2]() end
+      crow.output[1].execute()
+
     end
 
 

@@ -170,20 +170,6 @@ function init()
     if detect_level > 0.03 and (last_onset_amplitude < detect_level or math.abs(last_onset_frequency - detect_freq) > 5)
     then 
       note_num = MusicUtil.freq_to_note_num (detect_freq) 
-      -- print(counter,"onsetAmplitudeDetect,detect_freq,note_num",tonumber(detect_level),last_onset_amplitude,detect_freq,note_num) 
-      
-      -- if params:get("detect_to_crow") > 1 then
-      -- if params:get("detect_to_crow") == 2 then
-      --   local value_tab = {
-      --     pitch     = note_num,
-      --     velocity  = util.linlin(0,0.05,1,127,detect_level),
-      --     duration  = 1/4,
-      --     channel   = params:get("detect_to_midi_out_channel"),
-      --     mode = 1
-      --   }      
-      --   clock.run(externals1.note_on,1, value_tab, 1, 1,"engine","crow")
-        -- clock.run(externals1.note_on,1, note_num, 1, 1,"engine","crow")
-      -- end
 
       if params:get("detect_to_midi") == 2 then
         local value_tab = {

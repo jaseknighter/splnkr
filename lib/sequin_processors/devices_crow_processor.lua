@@ -2,14 +2,14 @@ local devices_crow_processor = {}
 
 function devices_crow_processor.init()
   devices_crow_processor.controls = {
-    crow1_pitch = devices_crow_processor.play_note1,
-    crow3_pitch = devices_crow_processor.play_note3,
+    c1_pitch = devices_crow_processor.play_note1,
+    c3_pitch = devices_crow_processor.play_note3,
     drum =  devices_crow_processor.play_drum
   }
 end
 
 function devices_crow_processor.process(output_table)
-  --print("process crow control_id, control_name:",output_table.control_id,output_table.control_name)
+  -- print("process crow control_id, control_name:",output_table.control_id,output_table.control_name,output_table.calculated_absolute_value, output_table.value)
   -- tab.print(output_table)
   -- local voice = output_table.value_heirarchy
   -- tab.print(output_table.value_heirarchy)
@@ -21,6 +21,7 @@ function devices_crow_processor.process(output_table)
 
   -- sub sequin gets called here--
   local value = output_table.calculated_absolute_value and output_table.calculated_absolute_value or output_table.value
+  -- print(value, output_table.calculated_absolute_value, output_table.value,output_table.control_id)
   control_to_update(value) -- update control
 end
 

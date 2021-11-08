@@ -68,7 +68,7 @@ function grid_filter:short_press(x, y, from_view)
     end
     if from_view == 1 then -- set level
       if clear_col ~= true then
-        local level = util.linlin(2,8,0,1.6,params:get("num_sequin")-y)
+        local level = util.linlin(2,8,0,cs_level.maxval,params:get("num_sequin")-y)
         params:set("filter_level"..x,level)
       else 
         params:set("filter_level"..x,0)
