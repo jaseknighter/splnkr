@@ -63,7 +63,7 @@ function Envelope:new(id, num_envelopes, env_nodes)
   e.node_params = {"time", "level", "curve"}
   
   e.updating_graph = false
-  e.DEFAULT_GRAPH_NODES = id == 1 and DEFAULT_GRAPH_NODES_P1 or DEFAULT_GRAPH_NODES_P2
+  e.DEFAULT_GRAPH_NODES = fn.deep_copy(DEFAULT_GRAPH_NODES)
   e.graph_nodes = env_nodes and env_nodes or e.DEFAULT_GRAPH_NODES
   e.active_node = 0
   e.active_node_param = 1
@@ -128,62 +128,61 @@ function Envelope:new(id, num_envelopes, env_nodes)
     end
   end
   
-  -- e.modulate_env = function()
+  e.modulate_env = function()
+    ------------------------------------
+    -- envelope randomization
+    ------------------------------------
+    local time_probability = math.floor(params:get("time_probability"..e.id))
+    local time_modulation_amount = time_probability > math.random()*100 and params:get("time_modulation"..e.id) or 0
+    local level_probability = math.floor(params:get("level_probability"..e.id))
+    local level_modulation_amount = level_probability > math.random()*100 and params:get("level_modulation"..e.id) or 0
+    local curve_probability = math.floor(params:get("curve_probability"..e.id))
+    local curve_modulation_amount = curve_probability > math.random()*100 and params:get("curve_modulation"..e.id) or 0
+    local randomize_env_probability = params:get("randomize_env_probability"..e.id) 
+    local randomize_envelopes = math.random()*100<randomize_env_probability
+    if randomize_envelopes == true then
+      local env_nodes = envelopes[e.id].graph_nodes
+      for i=1,#env_nodes,1
+      do
+        local param_id_name, param_name, get_control_value_fn, min_val, max_val
   
-  --   ------------------------------------
-  --   -- envelope randomization
-  --   ------------------------------------
-  --   local time_probability = math.floor(params:get("time_probability"..e.id))
-  --   local time_modulation_amount = time_probability > math.random()*100 and params:get("time_modulation"..e.id) or 0
-  --   local level_probability = math.floor(params:get("level_probability"..e.id))
-  --   local level_modulation_amount = level_probability > math.random()*100 and params:get("level_modulation"..e.id) or 0
-  --   local curve_probability = math.floor(params:get("curve_probability"..e.id))
-  --   local curve_modulation_amount = curve_probability > math.random()*100 and params:get("curve_modulation"..e.id) or 0
-  --   local randomize_env_probability = params:get("randomize_env_probability"..e.id) 
-  --   local randomize_envelopes = math.random()*100<randomize_env_probability
-    
-  --   if randomize_envelopes == true then
-  --     local env_nodes = envelopes[e.id].graph_nodes
-  --     for i=1,#env_nodes,1
-  --     do
-  --       local param_id_name, param_name, get_control_value_fn, min_val, max_val
-  
-  --       -- update times
-  --       param_id_name = "envelope".. e.id.."_time" .. i
-  --       param_name = "envelope".. e.id.."-control" .. i .. "-time"
-        
-  --       local current_val = (env_nodes[1] and env_nodes[i].time) or 0
-  --       local prev_val = (env_nodes[i-1] and env_nodes[i-1].time) or 0
-  --       local next_val = env_nodes[i+1] and env_nodes[i+1].time or envelopes[e.id].env_time_max
-  --       local control_range = next_val - prev_val
-  --       local control_value = control_range*math.random(-1,1) * time_modulation_amount + current_val
-  --       control_value = util.clamp(control_value,prev_val, next_val)
-  --       local controlspec = cs.new(prev_val,next_val,'lin',0,control_value,'')
-  --       if env_nodes[i] then
-  --         local param = params:lookup_param(param_id_name)
-  --         param.controlspec = controlspec
-  --         params:set(param.id, control_value) 
-  --       end
-  
-  --       -- update levels
-  --       if i > 1 and i < #env_nodes then
-  --         local current_val = (env_nodes[1] and env_nodes[i].level) or 0
-  --         local new_value = current_val + (level_modulation_amount * math.random(-1,1))
-  --         new_value = util.clamp(new_value, 0, MAX_AMPLITUDE)
-  --         params:set("envelope".. e.id .. "_level"..i, new_value)
-  --       end        
-  
-  --       -- update curves
-  --       if i > 1 then
+        -- update times
+        param_id_name = "envelope".. e.id.."_time" .. i
+        param_name = "envelope".. e.id.."-control" .. i .. "-time"
+        local current_val = (env_nodes[1] and env_nodes[i].time) or 0
+        local prev_val = (env_nodes[i-1] and env_nodes[i-1].time) or 0
+        local next_val = env_nodes[i+1] and env_nodes[i+1].time or envelopes[e.id].env_time_max
+        local control_range = next_val - prev_val
+        local control_value = control_range*math.random(-1,1) * time_modulation_amount + current_val
+        control_value = util.clamp(control_value,prev_val, next_val)
+        local controlspec = cs.new(prev_val,next_val,'lin',0,control_value,'')
+        if env_nodes[i] then
           
-  --         local new_value = params:get("envelope".. e.id .. "_curve"..i) + (curve_modulation_amount* math.random()*math.random(-1,1)*10)
-  --         new_value = util.clamp(new_value, -10, 10)
-  --         params:set("envelope".. e.id .. "_curve"..i, new_value)
-  --         -- params:set("envelope".. e.id .. "_curve"..i, math.random()*math.random(-10,10))
-  --       end        
-  --     end
-  --   end
-  -- end
+          local param = params:lookup_param(param_id_name)
+          -- print("param.id, control_value",param.id, control_value)
+          param.controlspec = controlspec
+          params:set(param.id, control_value) 
+        end
+  
+        -- update levels
+        if i > 1 and i < #env_nodes then
+          local current_val = (env_nodes[1] and env_nodes[i].level) or 0
+          local new_value = current_val + (level_modulation_amount * math.random(-1,1))
+          new_value = util.clamp(new_value, 0, MAX_AMPLITUDE)
+          params:set("envelope".. e.id .. "_level"..i, new_value)
+        end        
+  
+        -- update curves
+        if i > 1 then
+          
+          local new_value = params:get("envelope".. e.id .. "_curve"..i) + (curve_modulation_amount* math.random()*math.random(-1,1)*10)
+          new_value = util.clamp(new_value, -10, 10)
+          params:set("envelope".. e.id .. "_curve"..i, new_value)
+          -- params:set("envelope".. e.id .. "_curve"..i, math.random()*math.random(-10,10))
+        end        
+      end
+    end
+  end
 
   --------------------------
   -- init
@@ -273,7 +272,6 @@ function Envelope:new(id, num_envelopes, env_nodes)
   end
   
   e.update_envelope = function()
-    --print("update_env")
     if initializing == false then
       engine.set_numSegs(#e.graph_nodes)
       local env_arrays = e.get_envelope_arrays()
@@ -300,7 +298,6 @@ function Envelope:new(id, num_envelopes, env_nodes)
       engine.set_env_curves(table.unpack(env_arrays.curves))
       engine.set_env_times(table.unpack(env_arrays.times))
       engine.splnk(0)
-      
       set_dirty = true
     end
 
@@ -473,10 +470,11 @@ function Envelope:new(id, num_envelopes, env_nodes)
     local graph_active_node = e.active_node
     if z== 1 and n == 2 and e.active_node > 1 then
       e.remove_node()
-    elseif n == 3 then
+    elseif n == 2 then
       --add a node to the graph
       if (alt_key_active) then
-        if show_env_mod_params == true then show_env_mod_params = false else show_env_mod_params = true end
+        if show_env_mod_params == true then params:set("show_env_mod_params", 1) else params:set("show_env_mod_params", 2) end
+        
       elseif (e.active_node >= 1 and e.active_node < #e.graph_nodes and #e.graph_nodes < MAX_ENVELOPE_NODES) then
         e.add_node()
       end      

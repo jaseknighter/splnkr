@@ -787,7 +787,7 @@ function parameters.init()
 
   params:add{type = "option", id = "output_crow2", name = "crow out2 mode",
     options = {"off","envelope","trigger","gate","clock"},
-    default = 3,
+    default = 2,
     action = function(value)
       if value == 3 then 
         crow.output[2].action = "{to(5,0),to(0,0.25)}"
@@ -810,7 +810,7 @@ function parameters.init()
 
   params:add{type = "option", id = "output_crow4", name = "crow out4 mode",
     options = {"off","envelope","trigger","gate", "clock"},
-    default = 2,
+    default = 3,
     action = function(value)
       if value == 3 then 
         crow.output[4].action = "{to(5,0),to(0,0.25)}"
@@ -1024,16 +1024,18 @@ function parameters.init()
     params:set(num_envelope_controls,num_env_nodes)
   end
 
-  local PLOW_LEVEL = cs.new(0.0,MAX_AMPLITUDE,'lin',0,AMPLITUDE_DEFAULT,'')
-  local PLOW_TIME = cs.new(0.0,MAX_ENV_LENGTH,'lin',0,ENV_TIME_MAX,'')
+  local ENV_LEVEL = cs.new(0.0,MAX_AMPLITUDE,'lin',0,AMPLITUDE_DEFAULT,'')
+  local ENV_TIME = cs.new(0.0,MAX_ENV_LENGTH,'lin',0,ENV_TIME_MAX,'')
 
   parameters.init_envelope_controls = function(envelope_id)
+    -- local env = envelopes[envelope_id].graph_nodes
     -- set the values of the individual envelope nodes 
-    local env = envelopes[1].graph_nodes
-    -- local env = envelope_id == 1 and envelopes[1].graph_nodes or envelopes[2].graph_nodes
-    local num_envelope1_controls =  envelopes[1].get_envelope_arrays().segments
+    -- local env = envelopes[1].graph_nodes
+    -- local env =  envelopes[1].get_envelope_arrays().segments
     -- local num_envelope2_controls = envelopes[2].get_envelope_arrays().segments
-    local num_envelope_controls = envelope_id == 1 and num_envelope1_controls or num_envelope2_controls
+    -- local num_envelope_controls = envelope_id == 1 and num_envelope1_controls or num_envelope2_controls
+    local num_envelope_controls = envelopes[envelope_id].get_envelope_arrays().segments 
+    print('envelope_id,num_envelope_controls',envelope_id,num_envelope_controls)
     local envelope_times = envelope_id == 1 and envelope1_times or envelope2_times
     local envelope_levels = envelope_id == 1 and envelope1_levels or envelope2_levels
     local envelope_curves = envelope_id == 1 and envelope1_curves or envelope2_curves
@@ -1044,7 +1046,7 @@ function parameters.init()
       type="control",
       id = envelope_id == 1 and "envelope1_max_level" or "envelope2_max_level",
       name = envelope_id == 1 and "envelope 1 max level" or "envelope 2 max level",
-      controlspec=PLOW_LEVEL,
+      controlspec=ENV_LEVEL,
       action=function(x) 
         if initializing == false then envelopes[envelope_id].set_env_level(x) end
         screen_dirty = true
@@ -1056,7 +1058,7 @@ function parameters.init()
       type="control",
       id = envelope_id == 1 and "envelope1_max_time" or "envelope2_max_time",
       name = envelope_id == 1 and "envelope 1 max time" or "envelope 2 max time",
-      controlspec=PLOW_TIME,
+      controlspec=ENV_TIME,
       action=function(x) 
         if initializing == false then envelopes[envelope_id].set_env_time(x) end
         screen_dirty = true
@@ -1143,49 +1145,52 @@ function parameters.init()
     params:hide(envelope_levels[1])
     params:hide(envelope_curves[1])
     params:hide(envelope_levels[num_envelope_controls])
+  
+  
+    params:add_separator("env mod params")
+    params:add{type = "option", id = "show_env_mod_params", name = "show env mod params",
+    options = {"off","on"}, default = 1,
+    action = function(x)
+      if x == 1 then show_env_mod_params = false else show_env_mod_params = true end
+    end}
+
+
+    if envelope_id == 1 then 
+      params:add_taper("randomize_env_probability1", "1: env mod probability", 0, 100, 100, 0, "%")
+      params:add_taper("time_probability1", "1: time mod probability", 0, 100, 0, 0, "%")
+      params:add_taper("level_probability1", "1: level mod probability", 0, 100, 0, 0, "%")
+      params:add_taper("curve_probability1", "1: curve mod probability", 0, 100, 0, 0, "%")
+      params:add_taper("time_modulation1", "1: time modulation", 0, params:get("envelope1_max_time"), 0, 0, "")
+      params:add_taper("level_modulation1", "1: level modulation", 0, params:get("envelope1_max_level"), 0, 0, "")
+      params:add_taper("curve_modulation1", "1: curve modulation", 0, 5, 0, 0, "")
+
+      params:add_number("env_nav_active_control1", "1: env mod nav", 1, #env_mod_param_labels)
+      params:set_action("env_nav_active_control1", function(x) 
+        if initializing == false then
+          envelopes[1].set_env_nav_active_control(x-envelopes[1].env_nav_active_control) 
+        end
+      end )
+    else
+      params:add_taper("randomize_env_probability2", "2: env probability", 0, 100, 100, 0, "%")
+      params:add_taper("time_probability2", "2: time probability", 0, 100, 0, 0, "%")
+      params:add_taper("level_probability2", "2: level probability", 0, 100, 0, 0, "%")
+      params:add_taper("curve_probability2", "2: curve probability", 0, 100, 0, 0, "%")
+      params:add_taper("time_modulation2", "2: time modulation", 0, params:get("envelope2_max_time") * 0.1, 0, 0, "")
+      params:add_taper("level_modulation2", "2: level modulation", 0, params:get("envelope2_max_level"), 0, 0, "")
+      params:add_taper("curve_modulation2", "2: curve modulation", 0, 5, 0, 0, "")
+      
+      params:add_number("env_nav_active_control2", "2: env mod nav", 1, #env_mod_param_labels)
+      params:set_action("env_nav_active_control2", function(x) 
+        if initializing == false then
+          envelopes[2].set_env_nav_active_control(x-envelopes[2].env_nav_active_control) 
+        end  
+      end )
+    end  
   end
 
-
-  -- params:add_separator("env mod params")
-  -- params:add{type = "option", id = "show_env_mod_params", name = "show env mod params",
-  -- options = {"off","on"}, default = 1,
-  -- action = function(x)
-  --   if x == 1 then show_env_mod_params = false else show_env_mod_params = true end
-  -- end}
-
-  -- params:add_taper("randomize_env_probability1", "1: env mod probability", 0, 100, 100, 0, "%")
-  -- params:add_taper("time_probability1", "1: time mod probability", 0, 100, 0, 0, "%")
-  -- params:add_taper("level_probability1", "1: level mod probability", 0, 100, 0, 0, "%")
-  -- params:add_taper("curve_probability1", "1: curve mod probability", 0, 100, 0, 0, "%")
-  -- params:add_taper("time_modulation1", "1: time modulation", 0, params:get("envelope1_max_time"), 0, 0, "")
-  -- params:add_taper("level_modulation1", "1: level modulation", 0, params:get("envelope1_max_level"), 0, 0, "")
-  -- params:add_taper("curve_modulation1", "1: curve modulation", 0, 5, 0, 0, "")
-
-  -- params:add_number("env_nav_active_control1", "1: env mod nav", 1, #env_mod_param_labels)
-  -- params:set_action("env_nav_active_control1", function(x) 
-  --   if initializing == false then
-  --     envelopes[1].set_env_nav_active_control(x-envelopes[1].env_nav_active_control) 
-  --   end
-  -- end )
-
-  -- params:add_taper("randomize_env_probability2", "2: env probability", 0, 100, 100, 0, "%")
-  -- params:add_taper("time_probability2", "2: time probability", 0, 100, 0, 0, "%")
-  -- params:add_taper("level_probability2", "2: level probability", 0, 100, 0, 0, "%")
-  -- params:add_taper("curve_probability2", "2: curve probability", 0, 100, 0, 0, "%")
-  -- params:add_taper("time_modulation2", "2: time modulation", 0, params:get("envelope1_max_time") * 0.1, 0, 0, "")
-  -- params:add_taper("level_modulation2", "2: level modulation", 0, params:get("envelope1_max_level"), 0, 0, "")
-  -- params:add_taper("curve_modulation2", "2: curve modulation", 0, 5, 0, 0, "")
-  
-  -- params:add_number("env_nav_active_control2", "2: env mod nav", 1, #env_mod_param_labels)
-  -- params:set_action("env_nav_active_control2", function(x) 
-  --   if initializing == false then
-  --     envelopes[2].set_env_nav_active_control(x-envelopes[2].env_nav_active_control) 
-  --   end  
-  -- end )
-  
-
-  params:add_separator("ENVELOPE CONTROLS")
+  -- params:add_separator("ENVELOPE CONTROLS")
   parameters.init_envelope_controls(1)
+  parameters.init_envelope_controls(2)
 
 end
 

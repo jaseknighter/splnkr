@@ -1,5 +1,5 @@
-dmp = {}
--- local devices_midi_processor = {}
+local devices_midi_processor = {}
+local dmp = devices_midi_processor
 -- local dmp = devices_midi_processor
 
 function dmp.init()

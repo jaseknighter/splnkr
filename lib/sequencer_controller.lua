@@ -219,7 +219,7 @@ sc.outputs_map = {
 -- note: '(nil)' means the output mode takes just 1 param) 
 sc.output_mode_map = {
   {nil,nil,nil,nil,nil,nil},    -- softcut 
-  {7,2,7,5},                    -- devices midi out (7), crow(2), just_friends(7),w/(5)
+  {7,6,7,5},                    -- devices midi out (7), crow(2), just_friends(7),w/(5)
   {nil,nil,4,3,3,7},            -- effects: amp(nil), drywet(nil), delay(4),bitcrush(3),enveloper(3),pitchshift(7)
   {nil,nil},         -- lattice and patterns: set_meter (nil), auto_pulses (nil), ppqn (nil))
   {nil,6},                        -- sequins:
@@ -237,7 +237,7 @@ sc.output_params_map = {
     --    level: 0-1
     5,5,5,5,5,5
   }, 
-  {{6,6,6,3,3,3,nil},{nil,nil},{2,2,2,2,2,2,2},{9,9,9,4,9}}, -- device (midi out (4), crow(2), just_friends(2),w/(2))
+  {{6,6,6,3,3,3,nil},{nil,nil,nil,nil,nil,nil},{2,2,2,2,2,2,2},{9,9,9,4,9}}, -- device (midi out (4), crow(6), just_friends(2),w/(2))
   {nil,nil,{nil,nil,nil,nil},{nil,nil,nil},{nil,nil,nil},{nil,nil,nil,nil,nil,nil,nil}}, -- effect (amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (5)), phaser(nil), delay(nil), enveloper (3)
   {nil,{nil,nil,nil,nil,nil,nil}}, -- sequins 
   {nil,nil}, -- pattern
@@ -304,8 +304,12 @@ function sc.refresh_output_control_specs_map()
       }, 
       { -- crow
         {"note",min_note,max_note,nil,"c1_pitch","c1 pitch"}, -- crow1 pitch
+        {"number","0",16,0,"c1_rp","c1_repeats"},                   -- note_repeats
+        {"option",NOTE_REPEAT_FREQUENCIES,nil,nil,"c1_rpfq","c1_repeat frequency"}, -- note repeat frequency
         {"note",min_note,max_note,nil,"c3_pitch","c3 pitch"}, -- crow3 pitch
-        -- {"note",min_note,max_note,nil,"drum","drum"} -- drums ??????????????
+        {"number","0",16,0,"c3_rp","c3_repeats"},                   -- note_repeats
+        {"option",NOTE_REPEAT_FREQUENCIES,nil,nil,"c3_rpfq","c3_repeat frequency"}, -- note repeat frequency
+          -- {"note",min_note,max_note,nil,"drum","drum"} -- drums ??????????????
       }, 
       { -- just friends
         {{"note",min_note,max_note,nil,"pitch","pitch"},{"number",'0.00',10,nil,"level","level"}}, -- play_note: pitch, level

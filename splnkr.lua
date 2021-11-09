@@ -128,7 +128,7 @@ function init()
     envelopes[i] = envelope:new(i, num_envelopes)
     envelopes[i].init(num_envelopes)
     local active = i == 1 and true or false
-    envelopes[i].set_active(active_envelope)
+    envelopes[i].set_active(active)
   end
   
   parameters.init()
@@ -258,8 +258,10 @@ function finish_init()
 
   -- engine.set_numSegs(4)
   envelopes[1].update_envelope()
+  envelopes[2].update_envelope()
   initializing = false
   params:set("envelope1_max_time",0.25)
+  params:set("envelope2_max_time",0.25)
   sequencer_screen.init(16,8)
   -- sample_player.load_file("/home/we/dust/flora_wowless.wav")
   -- page_scroll(1)
@@ -273,15 +275,18 @@ end
 -- encoders and keys
 --------------------------
 function enc(n, d)
-  encoders_and_keys.enc(n, d)
+  if initializing == false then
+    encoders_and_keys.enc(n, d)
   -- redraw()
 
+  end
 end
 
 function key(n,z)
-  encoders_and_keys.key(n, z)
-  
+  if initializing == false then
+    encoders_and_keys.key(n, z)
   -- redraw()
+  end
 
 end
 
@@ -294,13 +299,17 @@ end
 --------------------------
 function set_redraw_timer()
   redrawtimer = metro.init(function() 
-  
+    if initializing == false then
+      for i=1,num_envelopes,1 do
+        envelopes[i].modulate_env()
+      end
+    end
     menu_status = norns.menu.status()
     if menu_status == false and initializing == false and sample_player.selecting == false then
       -- sample_player.update()
   
-      controller.update_pages()
       --print("update")
+      controller.update_pages()
       screen_dirty = false
       clear_subnav = true
       

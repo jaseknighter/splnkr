@@ -148,11 +148,12 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
       elseif output_index == 2 then -- crow
         control_bcrumbs = "dev crow "
         local label_pos = 1
-        for i=1,#specs_map[2][2],1 do
-          control_labels[label_pos] = control_labels[label_pos] .. specs_map[output_type][output_index][i][5] .. " "
-          label_pos = i%3 == 0 and label_pos + 1 or label_pos
-        end
-        if output_mode then
+        if output_mode == nil and output_param == nil then
+          for i=1,#specs_map[2][2],1 do
+            control_labels[label_pos] = control_labels[label_pos] .. specs_map[output_type][output_index][i][5] .. " "
+            label_pos = i%3 == 0 and label_pos + 1 or label_pos
+          end
+        elseif output_mode then
           control_bcrumbs = control_bcrumbs .. specs_map[output_type][output_index][output_mode][5] .. " "
         end
       elseif output_index == 3 then -- just friends

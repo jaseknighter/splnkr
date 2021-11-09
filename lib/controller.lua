@@ -49,7 +49,10 @@ local draw_top_nav = function()
     elseif show_env_mod_params then
       env_nav_text = envelopes[active_envelope].get_control_label()
     end
-    screen.text("plow " .. env_nav_text)
+    screen.text("env " .. env_nav_text)
+    -- if show_env_mod_params == true then
+      envelopes[active_envelope].update_envelope()
+    -- end
   elseif pages.index == 3 then
     local bcrumbs = sequencer_screen.get_control_bcrumbs() 
     local sequencer_screen_label = "sqncr "
@@ -72,9 +75,12 @@ local update_pages = function()
     if pages.index == 1 then
       sample_player.update()
     elseif pages.index == 2 then
-      
-      envelopes[1].redraw()
-      draw_top_nav()
+      if screen_dirty == true then
+        screen.clear()
+        draw_top_nav()
+        envelopes[1].redraw()
+        envelopes[2].redraw()
+      end
     elseif pages.index == 3 then
         screen.clear()
         draw_top_nav()

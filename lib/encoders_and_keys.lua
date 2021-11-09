@@ -28,6 +28,13 @@ local enc = function (n, d)
     if (next_page <= NUM_PAGES and next_page > 0) then
       page_scroll(page_increment)
     end
+  elseif n == 1 then
+    if pages.index == 2 then
+      active_envelope = active_envelope == 1 and 2 or 1
+      inactive_envelope = active_envelope == 1 and 2 or 1
+      envelopes[active_envelope].set_active(true)
+      envelopes[inactive_envelope].set_active(false)
+    end
   end
 
   if pages.index == 1 then

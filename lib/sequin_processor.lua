@@ -19,7 +19,6 @@ end
 function sequin_processor.process(sequin_to_process,sub_seq_leader_ix, ssid)
   -- print("#sequin_to_process.active_outputs",#sequin_to_process,#sequin_to_process.active_outputs)
   if(#sequin_to_process.active_outputs)>0 then
-    local param = output_table.value_heirarchy.par
     sequin_processor.gather_outputs(ssid,sequin_to_process.active_outputs, sequin_to_process.id, sub_seq_leader_ix)
   end
 end

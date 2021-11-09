@@ -10,7 +10,6 @@ Lattice = require "lattice"
 Sequins = require "sequins"
 -- Sequins = include "splnkr/lib/Sequins"
 
-vector = include "splnkr/lib/vector"
 globals = include "splnkr/lib/globals"
 grid_filter = include "lib/grid_filter"
 grid_sequencer = include "lib/grid_sequencer"

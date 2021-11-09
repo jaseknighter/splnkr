@@ -1,43 +1,103 @@
 local devices_crow_processor = {}
-
-function devices_crow_processor.init()
-  devices_crow_processor.controls = {
-    c1_pitch = devices_crow_processor.play_note1,
-    c3_pitch = devices_crow_processor.play_note3,
-    drum =  devices_crow_processor.play_drum
+local dcp = devices_crow_processor
+function dcp.init()
+  dcp.voice_default = {
+    pitch    = 1,
+    repeats  = 0,
+    repeat_freq = 1
   }
+
+  for i=1,2,1 do
+    dcp["voice"..i] = {}
+    dcp["voice"..i].pitch = {}
+    dcp["voice"..i].repeats = {}
+    dcp["voice"..i].repeat_freq = {}
+    for j=1,5,1 do
+      dcp["voice"..i].pitch[j] = dcp.voice_default.pitch
+      dcp["voice"..i].repeats[j] = dcp.voice_default.repeats
+      dcp["voice"..i].repeat_freq[j] = dcp.voice_default.repeat_freq
+    end
+  end
 end
 
-function devices_crow_processor.process(output_table)
-  -- print("process crow control_id, control_name:",output_table.control_id,output_table.control_name,output_table.calculated_absolute_value, output_table.value)
-  -- tab.print(output_table)
-  -- local voice = output_table.value_heirarchy
-  -- tab.print(output_table.value_heirarchy)
-  -- local voice = output_table.value_heirarchy.out
-  --print("control_to_update, voice",control_to_update, voice)
-  
-  
-  local control_to_update = devices_crow_processor.controls[output_table.control_id]
-
-  -- sub sequin gets called here--
+function dcp.process(output_table, subsequin_ix)
+  local ssid = output_table.ssid
   local value = output_table.calculated_absolute_value and output_table.calculated_absolute_value or output_table.value
-  -- print(value, output_table.calculated_absolute_value, output_table.value,output_table.control_id)
-  control_to_update(value) -- update control
+  local mod = output_table.value_heirarchy.mod
+
+  if mod == 1 then -- update pitch
+    dcp["voice1"].pitch[subsequin_ix] = value 
+    clock.run(dcp.play_note,1, 1, ssid, subsequin_ix)
+  elseif mod == 2 then -- update note repeats
+    dcp["voice1"].repeats[subsequin_ix] = value       
+  elseif mod == 3 then -- update note repeat frequency      
+    value = NOTE_REPEAT_FREQUENCIES[value]
+    local frac = string.find(value,"/")
+    dcp["voice1"].repeat_freq[subsequin_ix] = frac and fn.fraction_to_decimal(value) or value
+  elseif mod == 4 then -- update pitch
+    dcp["voice2"].pitch[subsequin_ix] = value 
+    clock.run(dcp.play_note,2, 2, ssid, subsequin_ix)
+  elseif mod == 5 then -- update note repeats
+    dcp["voice2"].repeats[subsequin_ix] = value       
+  else -- update note repeat frequency      
+    value = NOTE_REPEAT_FREQUENCIES[value]
+    local frac = string.find(value,"/")
+    dcp["voice2"].repeat_freq[subsequin_ix] = frac and fn.fraction_to_decimal(value) or value
+
+  end
+  
+  -- sub sequin gets called here--
+  -- local value = output_table.calculated_absolute_value and output_table.calculated_absolute_value or output_table.value
+  -- control_to_update(value) -- update control
 end
 
-function devices_crow_processor.play_note1(value)
-  externals1.note_on(1,value,1,1,"sequencer", "crow")
-  -- externals1.note_on(1,value,1,1,1,"sequencer", "crow")
+dcp.ratchet_pats = {}
+function dcp.init_ratchet(ssid, ratchet_data)
+  local active_ssid = sequencer_controller.get_active_sequinset_id()
+  if active_ssid == ssid then 
+    local lattice = sequencer_controller.lattice
+    local next_pat_ix = #dcp.ratchet_pats+1
+    dcp.ratchet_pats[next_pat_ix] = {}
+    -- local ratchet_data = value_tab
+    -- print("ratchet", ratchet_data.pitch, ratchet_data.repeats)
+    dcp.ratchet_pats[next_pat_ix] = lattice:new_pattern({
+      action = function()
+        local pat = dcp.ratchet_pats[next_pat_ix]
+        if active_ssid == ssid then
+          pat.num_times_repeated = pat.num_times_repeated and pat.num_times_repeated + 1 or 0
+          -- print(pat.ix,ratchet_data.repeats,pat.num_times_repeated)
+          if ratchet_data.repeats - pat.num_times_repeated == 0 then
+            pat:destroy()
+          elseif ratchet_data.repeats > 1 then
+            externals1.note_on(1,ratchet_data,1,1,"sequencer", "crow")
+          end
+        end
+      end,
+      division = ratchet_data.repeat_freq,
+      enabled = true
+    })
+    dcp.ratchet_pats[next_pat_ix].ix = next_pat_ix
+    -- dcp.ratchet_pats[next_pat_ix].ratchet_data = fn.deep_copy(ratchet_data)
+  end
+
 end
 
-function devices_crow_processor.play_note3(value)
-  externals1.note_on(3,value,1,1,"sequencer", "crow")
-  -- externals1.note_on(3,value,1,1,1,"sequencer", "crow")
+function dcp.play_note(output, voice_id, ssid,subsequin_ix)
+  clock.sleep(0.0001)
+  local value_tab = {
+    pitch       = dcp["voice"..output].pitch[subsequin_ix],
+    repeats     = dcp["voice"..output].repeats[subsequin_ix],
+    repeat_freq = dcp["voice"..output].repeat_freq[subsequin_ix],
+    mode = 1
+  } 
+  -- tab.print(value_tab)
+  value_tab.repeats = type(value_tab.repeats) == 'number' and value_tab.repeats or 0
+
+  if dcp["voice"..output].repeats[subsequin_ix] > 0 then
+    dcp.init_ratchet(ssid, value_tab)  
+  end
+  externals1.note_on(voice_id,value_tab,1,1,"sequencer", "crow")
 end
 
-function devices_crow_processor.play_drum(value)
-  externals1.note_on(1,value,1,1,"sequencer", "crow_drum")
-  -- externals1.note_on(1,value,1,1,1,"sequencer", "crow_drum")
-end
 
-return devices_crow_processor
+return dcp
