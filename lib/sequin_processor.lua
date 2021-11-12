@@ -38,9 +38,8 @@ end
 
 function sequin_processor.gather_outputs(ssid,output_table, sequin_id, sub_seq_leader_ix, num_outputs)
   local num_outputs = num_outputs or nil
-  
-
   sub_seq_leader_ix = sub_seq_leader_ix > 1 and sub_seq_leader_ix or 1
+  
   for k, v in pairs(output_table) do 
     if k == "num_outputs" then
       num_outputs = v
@@ -79,6 +78,19 @@ function sequin_processor.gather_outputs(ssid,output_table, sequin_id, sub_seq_l
               --------------------------------------
             -- THIS IS WHERE THE SUB SEQUINS GET INCREMENTED 
             v.seq:select(sub_seq_leader_ix)
+            -- v.ix_repeats = v.ix_repeats == nil and 0
+            if v.last_ix and v.last_ix == sub_seq_leader_ix then
+              v.ix_repeats = v.ix_repeats + 1
+              if v.ix_repeats > max_sub_seq_repeats then
+                params:set("sequin_step",params:get("sequin_step")-1)
+                params:set("sub_sequin_step",params:get("sequin_step")-1)
+                params:set("num_sequin",params:get("num_sequin")+1)
+                params:set("num_sub_sequin",params:get("num_sub_sequin")+1)
+              end
+            else
+              v.ix_repeats = 0
+            end
+            v.last_ix = sub_seq_leader_ix
             local next_output_value = v.seq() 
             local sub_sequin_data = {
               output_table=v,
@@ -86,6 +98,7 @@ function sequin_processor.gather_outputs(ssid,output_table, sequin_id, sub_seq_l
               next_output_value = next_output_value,
               ssid=ssid
             } 
+
             sequin_processor.process_sub_sequins(sub_sequin_data, ssid,sub_seq_leader_ix)
             --
             --------------------------------------

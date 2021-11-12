@@ -251,13 +251,27 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
       end
       local label_pos = 1
       if output_type and output_index then
+        -- print("output_param",output_param)
         for i=1,#specs_map[output_type][output_index],1 do
-          control_labels[label_pos] = control_labels[label_pos] .. specs_map[output_type][output_index][i][5] .. " "
-          label_pos = i%3 == 0 and label_pos + 1 or label_pos
+          if specs_map[output_type][output_index][i][5] and output_mode ~= 2 then
+            control_labels[label_pos] = control_labels[label_pos] .. specs_map[output_type][output_index][i][5] .. " "
+            label_pos = i%3 == 0 and label_pos + 1 or label_pos
+          elseif output_mode == nil then
+            control_labels[label_pos] = control_labels[label_pos] .. "c_morph " 
+            label_pos = i%3 == 0 and label_pos + 1 or label_pos
+          elseif output_mode == 2 and output_param == nil then
+            control_labels[1] = "tempo dur"
+            control_labels[2] = "steps shape"
+            control_labels[3] = ""
+          end
         end
       
         if output_mode then
-          control_bcrumbs = control_bcrumbs .. specs_map[output_type][output_index][output_mode][5] .. " "
+          if specs_map[output_type][output_index][output_mode][5] then
+            control_bcrumbs = control_bcrumbs .. specs_map[output_type][output_index][output_mode][5] .. " "
+          elseif output_mode == 2 and output_param ~= nil then
+            control_bcrumbs = control_bcrumbs .. specs_map[output_type][output_index][output_mode][output_param][5] .. " "
+          end
         end
       end
     end

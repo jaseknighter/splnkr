@@ -467,7 +467,6 @@ function grid_sequencer:unregister_ui_group(x1,y1)
       local group_name = grid_sequencer.ui_groups[i].group_name
       table.insert(groups_unregistered,{group_num,group_name})
       table.remove(grid_sequencer.ui_groups,i)
-      print("removed",#grid_sequencer.ui_groups)
     end
   end
   return groups_unregistered
@@ -477,7 +476,6 @@ end
 function grid_sequencer:register_ui_group(group_name,x1,y1,x2, y2, off_level, selection_mode, control_spec, default_value)
   local ui_group_exists = false
   local ui_group_num
-  print(x1,x2,y1)
   for i=x1,x2,1 do
     if grid_sequencer:find_ui_group_num_by_xy(i,y1) then
       if ui_group_num == nil then
@@ -528,7 +526,6 @@ function grid_sequencer:register_ui_group(group_name,x1,y1,x2, y2, off_level, se
     grid_sequencer.ui_groups[grid_sequencer.get_num_ui_groups()+1] = {}
     group_num = grid_sequencer.get_num_ui_groups()
   end 
-  print("ui_group_exists,group_num",ui_group_exists,group_num)
   grid_sequencer.ui_groups[group_num].grid_data = grid_data
   grid_sequencer.ui_groups[group_num].group_name = group_name
   grid_sequencer.ui_groups[group_num].selection_mode = selection_mode

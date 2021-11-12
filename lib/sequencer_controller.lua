@@ -220,7 +220,7 @@ sc.output_mode_map = {
   {nil,nil,nil,nil,nil,nil},    -- softcut 
   {7,6,7,5},                    -- devices midi out (7), crow(2), just_friends(7),w/(5)
   {nil,nil,4,3,3,7},            -- effects: amp(nil), drywet(nil), delay(4),bitcrush(3),enveloper(3),pitchshift(7)
-  {3,3,3},                      -- sequins: step, num sequin, starting sequin
+  {3,3,4},                      -- sequins: step, num sequin, starting sequin
                                 -- subsequins: step, num sub sequin, starting sub sequin
                                 -- clock/lattice/pattern: tempo, meter, pattern division
 }
@@ -237,7 +237,7 @@ sc.output_params_map = {
   }, 
   {{6,6,6,3,3,3,nil},{nil,nil,nil,nil,nil,nil},{2,2,2,2,2,2,2},{9,9,9,4,9}}, -- device (midi out (4), crow(6), just_friends(2),w/(2))
   {nil,nil,{nil,nil,nil,nil},{nil,nil,nil},{nil,nil,nil},{nil,nil,nil,nil,nil,nil,nil}}, -- effect (amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (5)), phaser(nil), delay(nil), enveloper (3)
-  {{nil,nil,nil},{nil,nil,nil},{nil,nil,nil},}, -- sequins: step, num sequin, starting sequin
+  {{nil,nil,nil},{nil,nil,nil},{nil,4,nil,nil},}, -- sequins: step, num sequin, starting sequin
                                                     -- subsequins: step, num sub sequin, starting sub sequin
                                                     -- clock/lattice/pattern: tempo, meter, pattern division
 }
@@ -258,8 +258,7 @@ function sc.refresh_output_control_specs_map()
   local max_note = scale_length - min_note
   for i=1,num_cutters,1 do table.insert(cutters,i) end
   sc.output_control_specs_map = {
-    {
-      -- 4 softcut output params: 
+    { -- 4 softcut output params: 
       --    sample_cut_num: 1-10 ????
       --    rate: -20 - 20 ??????
       --    rate_direction: -1, 1
@@ -422,6 +421,12 @@ function sc.refresh_output_control_specs_map()
       },
       { -- clock/lattice/pattern
         {"number", "33", 300,params:get("clock_tempo"),"clock","clock"},
+        {
+          {"number", "33", 300,params:get("clock_tempo"),"clock","clock"},
+          {"option", MORPH_DURATIONS, 4,nil,"c_mdur","clock morph duration"},
+          {"number", "2", 20,10,"c_msteps","clock morph steps"},
+          {"option", MORPH_SHAPES, 1,nil,"c_mshepe","clock morph shape"}
+        },
         {"option", {"1/8","1/4","1/3","1/2","3/4","1","4/3","3/2","2"}, 4,nil,"meter","meter"},
         {"option", {"1/8","1/4","1/3","1/2","3/4","1","4/3","3/2","2"}, 6,nil,"pat_div","pattern division"},
         -- {"number", "62", 2000,250,"meter","meter"},

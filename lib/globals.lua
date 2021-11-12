@@ -52,11 +52,16 @@ end
 
 
 function fn.get_table_from_string(str,delimiter)
-  local result = {};
-  for match in (str..delimiter):gmatch("(.-)"..delimiter) do
-      table.insert(result, match);
+  local result = {}
+  if delimiter then
+    for match in (str..delimiter):gmatch("(.-)"..delimiter) do
+        table.insert(result, match)
+    end
+    return result
+  else
+    print("no delimiter")
+    return 1
   end
-  return result;
 end
 
 function fn.fraction_to_decimal(fraction)
@@ -168,6 +173,8 @@ MAX_CUTTERS = 12
 OUTPUT_TYPES = {"softcut","devices","effects","time"}
 PPQN_OPTIONS = {12,24,36,48,60,72,84,96,108}
 TIME_OPTIONS = {"1/8","1/4","1/3","1/2","3/4","1","4/3","3/2","2"}
+MORPH_DURATIONS = {"1/4","1/3","1/2","1","3/2","2","3","4","5"}
+MORPH_SHAPES = {"lin","exp","log"}
 
 g = grid.connect()
 grid_mode = "filter"
@@ -198,6 +205,8 @@ sequencer_playing = false
 DEFAULT_SUB_SEQUINS_TAB = {"","","","",""}
 num_sub_sequin = #DEFAULT_SUB_SEQUINS_TAB
 starting_sub_sequin = 1
+
+max_sub_seq_repeats = 3
 
 midi_in_channel1_default = 1
 midi_in_command1 = 144
