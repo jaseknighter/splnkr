@@ -1,19 +1,17 @@
 local sequin_processor = {}
 
 
-
+-- sc.sequencers[5].seq:step(2)
 sequin_processor.processors = {
   softcut_processor,
   devices_processor, 
   effects_processor,
-  enveloper_processor,
-  pattern_processor,
-  lattice_processor
+  time_processor,
 }
-
 function sequin_processor.init()
   softcut_processor.init()
   devices_midi_processor.init()
+  sequin_processor.active_sub_sequins = {}
 end
 
 function sequin_processor.process(sequin_to_process,sub_seq_leader_ix, ssid)
@@ -40,7 +38,7 @@ end
 
 function sequin_processor.gather_outputs(ssid,output_table, sequin_id, sub_seq_leader_ix, num_outputs)
   local num_outputs = num_outputs or nil
-  sequin_processor.active_sub_sequins = {}
+  
 
   sub_seq_leader_ix = sub_seq_leader_ix > 1 and sub_seq_leader_ix or 1
   for k, v in pairs(output_table) do 
@@ -63,15 +61,25 @@ function sequin_processor.gather_outputs(ssid,output_table, sequin_id, sub_seq_l
               v.seq = Sequins{table.unpack(v.seq.data)}
             end
             local type = v.value_heirarchy.typ
-            if sequin_processor.active_sub_sequins[type] == nil then
-              sequin_processor.active_sub_sequins[type] = {}
+            if sequin_processor.active_sub_sequins[OUTPUT_TYPES[type]] == nil then
+              sequin_processor.active_sub_sequins[OUTPUT_TYPES[type]] = {}
             end
-            table.insert(sequin_processor.active_sub_sequins[type],v)
-            --------------------------------------
+
+            local control_name = v.control_name
+            local control_name_found = false
+            local outputs = sequin_processor.active_sub_sequins[OUTPUT_TYPES[type]]
+            for i=1,#outputs,1 do
+              if outputs[i].control_name == control_name then
+                control_name_found = true
+              end
+            end
+            if control_name_found == false then
+              table.insert(sequin_processor.active_sub_sequins[OUTPUT_TYPES[type]],v)
+            end
+              --------------------------------------
             -- THIS IS WHERE THE SUB SEQUINS GET INCREMENTED 
             v.seq:select(sub_seq_leader_ix)
             local next_output_value = v.seq() 
-
             local sub_sequin_data = {
               output_table=v,
               sequin_output_type_processor=sequin_output_type_processor,
@@ -91,6 +99,7 @@ function sequin_processor.gather_outputs(ssid,output_table, sequin_id, sub_seq_l
       sequin_processor.gather_outputs(ssid, v, sequin_id, sub_seq_leader_ix, num_outputs)
     end
   end  
+  
   return num_outputs
 end
 

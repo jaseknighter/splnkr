@@ -229,9 +229,6 @@ Engine_Splnkr : CroneEngine {
       // other effects
       //////////////////////////////////////////
 
-      // delay
-      combBuf1 = Buffer.alloc(context.server,48000,2);
-      wet = (wet*(1-effect_delay))+(effect_delay*BufCombC.ar(combBuf1,wet,effect_delaytime,effect_delaydecaytime,effect_delaymul));
 
       // flutter + wow
       signed_wobble = wobble_amp*(SinOsc.kr(wobble_rpm/60)**wobble_exp);
@@ -278,12 +275,15 @@ Engine_Splnkr : CroneEngine {
       // wet =(effect_vinyl<1*wet)+(effect_vinyl>0* DelayC.ar(wet,0.01,VarLag.kr(LFNoise0.kr(1),1,warp:\sine).range(0,0.01)));
 
 
+      wet = (Pan2.ar(wet * sweptEnv * amp, pan) * EnvGate.new * enveloper) + (wet*((enveloper+1)%2));
+
+      // delay
+      combBuf1 = Buffer.alloc(context.server,48000,2);
+      wet = (wet*(1-effect_delay))+(effect_delay*BufCombC.ar(combBuf1,wet,effect_delaytime,effect_delaydecaytime,effect_delaymul));
 
       //////////////////////////////////////////
       // apply drywet, lag, remove DC bias, and send the signal out
       //////////////////////////////////////////
-
-      wet = (Pan2.ar(wet * sweptEnv * amp, pan) * EnvGate.new * enveloper) + (wet*((enveloper+1)%2));
 
       wet = wet*Lag.kr(amp*drywet,1);
       wet = LeakDC.ar(wet, 0.995);
@@ -299,7 +299,7 @@ Engine_Splnkr : CroneEngine {
 
       out = Mix.new([wet,dry*(2-drywet)]);
       
-      Out.ar(0,(crossfade*out*0.5))
+      Out.ar(0,(crossfade*out*0.05))
 
       // Out.ar(0,out);      
       // Out.ar(0,Balance2.ar(wet, dry, 0));

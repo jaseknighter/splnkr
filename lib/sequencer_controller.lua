@@ -63,7 +63,7 @@ function sc.init()
 
   sc.lattice = Lattice:new{
     auto = true,
-    meter = 1/4,
+    meter = 1/2,
     ppqn = 96
   }
 
@@ -73,6 +73,7 @@ function sc.init()
 
   sc.refresh_output_control_specs_map()
   sc.sequencers = {}
+  sc.sequencers.seq_chainer = Sequencer:new(sc.lattice,0)
   sc.sequencers[1] = Sequencer:new(sc.lattice,1)
   sc.sequencers[2] = Sequencer:new(sc.lattice,2)
   sc.sequencers[3] = Sequencer:new(sc.lattice,3)
@@ -94,8 +95,7 @@ end
 
 function sc.activate_sequinset(target_sequinset)
   -- clock.run(grid_sequencer.activate_grid_key_at,target_sequinset,1,0.01)
-  clock.sleep(0.1)
-  print("act",target_sequinset)
+  clock.sleep(0.001)
   sc.reset_sequinset_value_heirarcy(target_sequinset)
 end
 
@@ -148,7 +148,7 @@ function sc.copy_paste_sequence_data(source_id, target_id, data_path, end_node)
 end
 
 function sc.activate_target(target_id)
-  clock.sleep(0.1)
+  clock.sleep(0.001)
   sc.update_sequin(target_id)
   clock.run(grid_sequencer.activate_grid_key_at,target_id+5,1,0.1)
 end
@@ -212,8 +212,7 @@ sc.outputs_map = {
   6, -- softcut voices NOTE: the sequencer will only allow 6 voices to play at once
   4, -- devices (midi, crow, just friends, w/)
   6, -- effects (amp, drywet, delay, bitcrush, enveloper, pitchshift
-  2, -- lattice and patterns
-  2, -- sequins
+  3, -- sequins, subsequins, clock/lattice/pattern
 }
 
 -- note: '(nil)' means the output mode takes just 1 param) 
@@ -221,10 +220,9 @@ sc.output_mode_map = {
   {nil,nil,nil,nil,nil,nil},    -- softcut 
   {7,6,7,5},                    -- devices midi out (7), crow(2), just_friends(7),w/(5)
   {nil,nil,4,3,3,7},            -- effects: amp(nil), drywet(nil), delay(4),bitcrush(3),enveloper(3),pitchshift(7)
-  {nil,nil},         -- lattice and patterns: set_meter (nil), auto_pulses (nil), ppqn (nil))
-  {nil,6},                        -- sequins:
-                                --  main sequins: every(1-9), times(1-9), count(1-9), all(), reset(), swap with (1-9), copy from (1-9), 
-                                --  sub-sequins: : every(1-9), times(1-9), count(1-9), all(), reset(), swap with (1-9), copy from (1-9), 
+  {3,3,3},                      -- sequins: step, num sequin, starting sequin
+                                -- subsequins: step, num sub sequin, starting sub sequin
+                                -- clock/lattice/pattern: tempo, meter, pattern division
 }
 
 -- note: '(nil)' means just 1 output param' 
@@ -239,9 +237,9 @@ sc.output_params_map = {
   }, 
   {{6,6,6,3,3,3,nil},{nil,nil,nil,nil,nil,nil},{2,2,2,2,2,2,2},{9,9,9,4,9}}, -- device (midi out (4), crow(6), just_friends(2),w/(2))
   {nil,nil,{nil,nil,nil,nil},{nil,nil,nil},{nil,nil,nil},{nil,nil,nil,nil,nil,nil,nil}}, -- effect (amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (5)), phaser(nil), delay(nil), enveloper (3)
-  {nil,{nil,nil,nil,nil,nil,nil}}, -- sequins 
-  {nil,nil}, -- pattern
-  {nil,nil,nil,nil,nil,nil},  -- lattice 
+  {{nil,nil,nil},{nil,nil,nil},{nil,nil,nil},}, -- sequins: step, num sequin, starting sequin
+                                                    -- subsequins: step, num sub sequin, starting sub sequin
+                                                    -- clock/lattice/pattern: tempo, meter, pattern division
 }
 
 function sc.get_num_cutters()
@@ -409,29 +407,42 @@ function sc.refresh_output_control_specs_map()
         {"note",min_note,max_note,nil,"ps_5","ps note 5"},
       },
     }, 
-    {   -- lattice and patterns
-      {   -- lattice 
+    {   -- sequins: step, num sequin, starting sequin
+        -- subsequins: step, num sub sequin, starting sub sequin
+        -- clock/lattice/pattern: tempo, meter, pattern division
+      { -- sequins      
+        {"number", "1", 8,1,"step","step"},
+        {"number", "1", 9,9,"#seq","num sequin"},
+        {"number", "1", 9,1,"stseq","starting seq"},
+      },
+      { -- sub sequins      
+        {"number", "1", 4,1,"step","sub step"},
+        {"number", "1", 5,5,"#seq","num sub sequin"},
+        {"number", "1", 5,1,"stseq","starting sub seq"},
+      },
+      { -- clock/lattice/pattern
+        {"number", "33", 300,params:get("clock_tempo"),"clock","clock"},
+        {"option", {"1/8","1/4","1/3","1/2","3/4","1","4/3","3/2","2"}, 4,nil,"meter","meter"},
+        {"option", {"1/8","1/4","1/3","1/2","3/4","1","4/3","3/2","2"}, 6,nil,"pat_div","pattern division"},
+        -- {"number", "62", 2000,250,"meter","meter"},
+        -- {"number", "62", 2000,250,"pat_div","pattern division"},
+      },
+    },
+    -- {   -- lattice and patterns
+      -- {   -- lattice 
         -- {"option",{"stp","strt","tgl",nil,nil,"stop_start_toggle","stop/start/toggle"}},         -- stop/start/toggle pattern
         -- {"option",{"off","on"},nil,1,"auto_off_on","autopulse off/on"},        -- auto pulse(s) off/on
         -- {"option",{"off","on"},nil,nil,"man_off_on","manual pulse off/on"},          -- manual pulse off/on (NOTE: setting is ignored if auto_pulse is enabled)
-        {"number",1,18,nil,"meter","meter"},                  -- meter: quarter notes per measure
-        {"option",{12,24,36,48,60,72,84,96,108},8,nil,"ppqn","ppqn"},          -- ppqn (default 96)
-        {"option",{"reset","hard reset"},nil,nil,"reset","reset"}                  
+        -- {"number",1,18,nil,"meter","meter"},                  -- meter: quarter notes per measure
+        -- {"option",{12,24,36,48,60,72,84,96,108},8,nil,"ppqn","ppqn"},          -- ppqn (default 96)
+        -- {"option",{"reset","hard reset"},nil,nil,"reset","reset"}                  
         -- {"option",{"off","reset","hard reset"},nil,nil,"off/reset/hard reset","off/reset/hard reset"}                  
-      },
-      {   -- pattern (TODO: replace with more flexible pattern division selector)
-        {"option",{1,1/2,1/4,1/8,1/16,1/3,2/3,3/8,5/8},nil,nil,"pattern_division","pattern division"},                   -- pattern division 1-18/1-18
-        {"option",{"stop","start","toggle"},nil,"pat_state","pattern state"} -- stop/start/toggle pattern 
-      }, 
-    },  
-    {   -- sequins: step, every, times, count, all, reset
-      {"number", "1", 9,1,"step","step"},
-      { -- sub sequins      
-        {{"number", "1", 5,1,"step","step"},{"number", "1", 5,1,"every","every"},{"number", "1", 20,1,"times","times"},{"number", "1", 20,1,"count","count"},{"number", "1", 20,1,"all","all"},{"number", "1", 20,1,"reset","reset"}},
-        {{"number", "1", 5,1,"step","step"},{"number", "1", 5,1,"every","every"},{"number", "1", 20,1,"times","times"},{"number", "1", 20,1,"count","count"},{"number", "1", 20,1,"all","all"},{"number", "1", 20,1,"reset","reset"}},
-        {{"number", "1", 5,1,"step","step"},{"number", "1", 5,1,"every","every"},{"number", "1", 20,1,"times","times"},{"number", "1", 20,1,"count","count"},{"number", "1", 20,1,"all","all"},{"number", "1", 20,1,"reset","reset"}},
-      },
-    },
+      -- },
+      -- {   -- pattern (TODO: replace with more flexible pattern division selector)
+        -- {"option",{1,1/2,1/4,1/8,1/16,1/3,2/3,3/8,5/8},nil,nil,"pattern_division","pattern division"},                   -- pattern division 1-18/1-18
+        -- {"option",{"stop","start","toggle"},nil,"pat_state","pattern state"} -- stop/start/toggle pattern 
+      -- }, 
+    -- },  
   }
 end
 
@@ -494,9 +505,13 @@ function sc.get_active_sequinset_id()
   return sc.selected_sequin_group
 end
 
-function sc.update_selected_sequin_group(index,state, seq_ix)
+function sc.update_selected_sequin_group(index,state)
   sc.active_value_heirarchy = nil
   if state == "on" then
+    local seq_ix = fn.deep_copy(sc.sequencers[sc.selected_sequin_group].seq.ix)
+    local subseq_ix = selected_sub_sequin_ix and fn.deep_copy(selected_sub_sequin_ix) or nil
+    
+
     for i=1,5,1 do
       for j=1,1,1 do
         if i ~= index then
@@ -504,14 +519,20 @@ function sc.update_selected_sequin_group(index,state, seq_ix)
         end
       end
     end
+
+      
     sc.selected_sequin_group = index or nil
     sc.selected_sequin_subgroup = 1
     sc.set_ui_sequin_selector()
     if seq_ix then
       local seq = sc.sequencers[sc.selected_sequin_group].seq
-      -- local next_seq_ix = seq.ix < #seq.data and seq.ix+1 or 1
-      -- seq:select(next_seq_ix)
+      -- print("before subseq_ix",subseq_ix)
       seq:select(seq_ix)
+      seq()
+      if subseq_ix then
+        sc.sequencers[sc.selected_sequin_group].sub_seq_leader:select(subseq_ix)
+        sc.sequencers[sc.selected_sequin_group].sub_seq_leader()
+      end
     end
     if sc.lattice.enabled == false then 
       sc.lattice:start()
@@ -975,7 +996,7 @@ function sc.set_output_values(control_spec)
 end
 
 function sc.activate_grid_key_at(x,y)
-  clock.sleep(0.1)
+  clock.sleep(0.001)
   grid_sequencer.activate_grid_key_at(x,y)    
   grid_sequencer.activate_grid_key_at(x,y)
 end
@@ -1731,14 +1752,7 @@ function sc:update_group(group_name,x, y, state, press_type)
   if string.sub(group_name,1,13) == "sequin_groups" then 
     -- sync the sequin index 
     sc.selected_sequin_group = x
-    local seq_ix = sc.sequencers[sc.selected_sequin_group].seq.ix
-
-    -- local seq_ix
-    -- if sc.selected_sequin_group then
-      -- seq_ix = sc.sequencers[sc.selected_sequin_group].seq.ix
-    -- end
-    -- print("sc.selected_sequin_group,seq_ix",sc.selected_sequin_group,seq_ix)
-    self.update_selected_sequin_group(x,state,seq_ix)
+    self.update_selected_sequin_group(x,state)
   elseif group_name == "sequin_selector" then
     self.update_sequin_selector(x, y, state)
   elseif group_name == "sequin_output_types" then

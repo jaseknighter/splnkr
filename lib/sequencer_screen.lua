@@ -178,13 +178,6 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
             control_bcrumbs = control_bcrumbs .. " " .. specs_map[output_type][output_index][output_mode][output_param][5]
           end
         end
-        -- if output_mode and output_param == nil then
-            --print(specs_map[output_type][output_index][output_mode][output_param][5])
-          -- control_bcrumbs = control_bcrumbs .. specs_map[output_type][output_index][output_mode][output_param][5] .. " "
-        -- end
-        -- if output_mode and output_mode < 3 and output_param then
-        --   control_bcrumbs = control_bcrumbs .. specs_map[output_type][output_index][output_mode][output_param][5] .. " "
-        -- end
 
       elseif output_index == 4 then -- w/
         local control_bcrumbs_base = control_bcrumbs
@@ -204,7 +197,6 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
           control_labels[1] = ""
           if output_param == nil and output_mode < 6 then
             for i=1,#specs_map[output_type][output_index][output_mode],1 do
-              -- print("i,label_pos",i,label_pos,specs_map[output_type][output_index][output_mode][i][5])
               control_labels[label_pos] = control_labels[label_pos] .. specs_map[output_type][output_index][output_mode][i][5] .. " "
               label_pos = i%3 == 0 and label_pos + 1 or label_pos
             end
@@ -248,51 +240,39 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
     end
   elseif output_type == 4 then -- lattice and patterns  
     local orig_bcrumbs = fn.deep_copy(control_bcrumbs)
-    control_bcrumbs =  control_bcrumbs .. "lat and pats"
-    if output_index == 1 then
-      control_bcrumbs = orig_bcrumbs .. " lat" 
-    elseif output_index == 2 then
-      control_bcrumbs = orig_bcrumbs .. " pats" 
-    end
-  elseif output_type == 5 then -- sequins
-    control_bcrumbs =  control_bcrumbs .. "sequins"
-    if output_index == 1 then
-      control_bcrumbs = control_bcrumbs .. " step" 
-    elseif output_index == 2 then
-      if output_mode == 1 then
-        control_bcrumbs = control_bcrumbs .. "every" 
-      elseif output_mode == 2 then
-        control_bcrumbs = control_bcrumbs .. "times" 
-      elseif output_mode == 3 then
-        control_bcrumbs = control_bcrumbs .. "count" 
-      elseif output_mode == 4 then
-        control_bcrumbs = control_bcrumbs .. "all" 
-      elseif output_mode == 5 then
-        control_bcrumbs = control_bcrumbs .. "reset" 
+    -- control_bcrumbs =  control_bcrumbs .. "lat and pats"
+    if output_index then
+      if output_index == 1 then
+        control_bcrumbs = orig_bcrumbs .. " seq " 
+      elseif output_index == 2 then
+        control_bcrumbs = orig_bcrumbs .. " subseq " 
+      elseif output_index == 3 then
+        control_bcrumbs = orig_bcrumbs .. " clp " 
       end
       local label_pos = 1
-      control_labels[1] = ""
-      -- if output_mode then
-      -- for i=1,#specs_map[output_type][output_index][output_mode],1 do  
-      for i=1,#specs_map[output_type][output_index],1 do
-          -- print("i,label_pos",i,label_pos,specs_map[output_type][output_index][output_mode][i][5])
+      if output_type and output_index then
+        for i=1,#specs_map[output_type][output_index],1 do
           control_labels[label_pos] = control_labels[label_pos] .. specs_map[output_type][output_index][i][5] .. " "
           label_pos = i%3 == 0 and label_pos + 1 or label_pos
-        -- end
-      -- elseif output_param and output_mode < 7 then
-      --   control_bcrumbs = control_bcrumbs .. " " .. specs_map[output_type][output_index][output_mode][output_param][5]
-      end        
+        end
+      
+        if output_mode then
+          control_bcrumbs = control_bcrumbs .. specs_map[output_type][output_index][output_mode][5] .. " "
+        end
+      end
     end
   end
 
   -- set more control labels
-  if active_ui_group_name == "sequin groups" then
-    control_labels = {"group 1-5"}
-  elseif active_ui_group_name == "sequin selector" then
-    control_labels = {"sequin 1-" .. params:get("num_sequin")}
-  elseif active_ui_group_name == "sequin output types" then
-    control_labels = {"sc dev eff", "env pat", "lat"}
-  elseif active_ui_group_name == "sequin outputs" then
+  -- if active_ui_group_name == "sequin groups" then
+  --   control_labels = {"group 1-5"}
+  -- elseif active_ui_group_name == "sequin selector" then
+  --   control_labels = {"sequin 1-" .. params:get("num_sequin")}
+  -- elseif active_ui_group_name == "sequin output types" then
+  --   control_labels = {"seq", "subseq", "lat/pat"}
+  -- elseif active_ui_group_name == "sequin outputs" then
+  -- print("active_ui_group_name",active_ui_group_name)
+  if active_ui_group_name == "sequin outputs" then
     if output_type == 1 then
       -- control_bcrumbs =  control_bcrumbs .. "softcut"
       control_labels[1] = "softcut:"
@@ -306,15 +286,10 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
       control_labels[2] = "amp drywet delay"
       control_labels[3] = "bitcrshr env pshift"
       -- control_bcrumbs =  control_bcrumbs .. "eff"
-    elseif output_type == 5 then
-      control_labels[1] = "sequins:"
-      control_labels[2] = "main sequins"
-      control_labels[3] = "sub-sequins"
-      -- control_bcrumbs =  control_bcrumbs .. "env"
     elseif output_type == 4 then
-      control_labels[1] = "lattice and patterns:"
-      control_labels[2] = "meter ppqn reset"
-      control_labels[3] = "pat_div pat_state"
+      control_labels[1] = "time:"
+      control_labels[2] = "sequins sub-sequins"
+      control_labels[3] = "clock/lat/pat (clp)"
     end
   elseif active_ui_group_name == "sequin output modes" then
     if output_type == 2 then -- devices
@@ -357,7 +332,6 @@ function sequencer_screen.get_selected_sequin_values()
   if sequencer_controller.selected_sequin_group and sequencer_controller.selected_sequin then
     sequencer_controller.refresh_selected_sequin_values(sequencer_controller.selected_sequin_group,sequencer_controller.selected_sequin)
     vals = sequencer_controller.selected_sequin_values
-    -- tab.print(vals)
   end
   return vals
 end
@@ -529,7 +503,6 @@ function sequencer_screen.update()
       -- local output_labels = {"(1/3) ","(4/6) ","(7/9) "}
       -- local line_num = 1
       for i=1,#sequence_values do
-        -- tab.print(sequence_values[i])
         screen.move(lx,ly)
         local val = sequence_values[i][1]
         if string.find(val,"%.0") then
@@ -538,7 +511,6 @@ function sequencer_screen.update()
           val = string.sub(val,1,empty_decimal)
           val = r and val .. "r" or val
         end
-        -- if i == 1 then tab.print(sequence_values[i]) end
         local calculated_absolute_val = sequence_values[i][2]
         if calculated_absolute_val ~= "nil" then 
           -- screen_text = screen_text .. val.."/".. calculated_absolute_val .. "  " 
@@ -591,6 +563,7 @@ function sequencer_screen.update()
         local screen_level = selected_sequin_index == i and 15 or 5
         screen.level(screen_level)
         screen.text(screen_text)
+        -- print("screen_text",screen_text)
         screen.level(screen_level)
         lx = lx + screen.text_extents(screen_text) + 5
         screen_text = ""

@@ -153,7 +153,7 @@ based on tyler etter's code: https://gist.github.com/tyleretters/a62a27e22dc7021
             -- soft reset: enable with 12
             -- hard reset (remove modifiers): enable with 12 long press
         13: spacer
-        14-16: mode switcher (14: filter, 15: sample sequencer, 16: params/effect sequencer)
+        15-16: mode switcher (15: filter, 16: sequencer)
           
 ]]
 local grid_sequencer = {}
@@ -402,7 +402,7 @@ function grid_sequencer:set_current_level_at(x, y, view, level)
       solid.current_level = solid.on_level
     end
   else
-    print("ERROR grid_sequencer:set_current_level_at: can't find solid at", x,y)
+    -- print("ERROR grid_sequencer:set_current_level_at: can't find solid at", x,y)
   end
 end
 
@@ -450,7 +450,6 @@ function grid_sequencer:find_ui_group_num_by_name(name)
   end
 end
 
--- function grid_sequencer:unregister_ui_group(group_name,x1,y1)
 function grid_sequencer:unregister_ui_group(x1,y1)
   local ui_group = grid_sequencer:find_ui_group_num_by_xy(x1,y1)
   groups_unregistered = {}
@@ -468,6 +467,7 @@ function grid_sequencer:unregister_ui_group(x1,y1)
       local group_name = grid_sequencer.ui_groups[i].group_name
       table.insert(groups_unregistered,{group_num,group_name})
       table.remove(grid_sequencer.ui_groups,i)
+      print("removed",#grid_sequencer.ui_groups)
     end
   end
   return groups_unregistered
@@ -475,6 +475,24 @@ end
 
 -- function grid_sequencer:register_ui_group(group_name,x1,y1,x2, y2, off_level, off_level_bottom)
 function grid_sequencer:register_ui_group(group_name,x1,y1,x2, y2, off_level, selection_mode, control_spec, default_value)
+  local ui_group_exists = false
+  local ui_group_num
+  print(x1,x2,y1)
+  for i=x1,x2,1 do
+    if grid_sequencer:find_ui_group_num_by_xy(i,y1) then
+      if ui_group_num == nil then
+        ui_group_exists = true
+        ui_group_num = grid_sequencer:find_ui_group_num_by_xy(i,y1)
+      end
+      local old_x1 = grid_sequencer.ui_groups[ui_group_num].grid_data.x1
+      local old_x2 = grid_sequencer.ui_groups[ui_group_num].grid_data.x2
+      for j=old_x1,old_x2,y1 do
+        grid_sequencer:unregister_solid_at(j,y1, 1)
+        grid_sequencer:solid_off(j,y1, 1)
+      end
+    end
+  end
+
   local grid_data = {}
   grid_data.x1=x1 
   grid_data.y1=y1 
@@ -503,15 +521,22 @@ function grid_sequencer:register_ui_group(group_name,x1,y1,x2, y2, off_level, se
       
   end
   -- table.insert(grid_sequencer.ui_groups,grid_data)
-  grid_sequencer.ui_groups[grid_sequencer.get_num_ui_groups()+1] = {}
-  grid_sequencer.ui_groups[grid_sequencer.get_num_ui_groups()].grid_data = grid_data
-  grid_sequencer.ui_groups[grid_sequencer.get_num_ui_groups()].group_name = group_name
-  grid_sequencer.ui_groups[grid_sequencer.get_num_ui_groups()].selection_mode = selection_mode
-  grid_sequencer.ui_groups[grid_sequencer.get_num_ui_groups()].control_spec = control_spec
-  grid_sequencer.ui_groups[grid_sequencer.get_num_ui_groups()].default_value = default_value
-  grid_sequencer.flickers[grid_sequencer.get_num_ui_groups()] = {}
+  local group_num
+  if ui_group_exists == true then
+    group_num = ui_group_num
+  else 
+    grid_sequencer.ui_groups[grid_sequencer.get_num_ui_groups()+1] = {}
+    group_num = grid_sequencer.get_num_ui_groups()
+  end 
+  print("ui_group_exists,group_num",ui_group_exists,group_num)
+  grid_sequencer.ui_groups[group_num].grid_data = grid_data
+  grid_sequencer.ui_groups[group_num].group_name = group_name
+  grid_sequencer.ui_groups[group_num].selection_mode = selection_mode
+  grid_sequencer.ui_groups[group_num].control_spec = control_spec
+  grid_sequencer.ui_groups[group_num].default_value = default_value
+  grid_sequencer.flickers[group_num] = {}
 
-  return grid_sequencer.ui_groups[grid_sequencer.get_num_ui_groups()]
+  return grid_sequencer.ui_groups[group_num]
 end
 
 function grid_sequencer:draw_led_solids()
@@ -534,8 +559,8 @@ end
 function grid_sequencer:find_flickering_at(x,y)
   local found_x, found_y
   local ui_group_num = grid_sequencer:find_ui_group_num_by_xy(x, y)
-  if ui_group_num == nil or x == nil or y == nil then print("no ui_group at ",x,y) return end
-  if #self.flickers[ui_group_num]>0 then
+  -- if ui_group_num == nil or x == nil or y == nil then print("no ui_group at ",x,y) return end
+  if self.flickers[ui_group_num] and #self.flickers[ui_group_num]>0 then
     for i=1,#self.flickers[ui_group_num],1 do
       for k, v in pairs(self.flickers[ui_group_num][i]) do
         if k=="y" and v==y then found_y = 1 end
@@ -553,7 +578,7 @@ end
 
 function grid_sequencer:unregister_flicker_at(x, y)
   local flickering = grid_sequencer:find_flickering_at(x,y) 
-  if flickering then 
+  if flickering and self.flicker_counter then 
     clock.cancel(self.flicker_counter)
     table.remove(self.flickers[flickering[1]],flickering[2])
   end
@@ -561,8 +586,8 @@ end
 
 function grid_sequencer.set_momentary_flicker(x, y, view, flicker_time)
   clock.sleep(flicker_time)
+
   grid_sequencer:unregister_flicker_at(x, y)
-  -- grid_sequencer:set_current_level_at(x, y, from_view, "off")  
 end
 
 function grid_sequencer:register_flicker_at(x, y, flicker_time)
@@ -576,7 +601,8 @@ function grid_sequencer:register_flicker_at(x, y, flicker_time)
 
   local ui_group_num = grid_sequencer:find_ui_group_num_by_xy(x, y)
   
-  if ui_group_num == nil or x == nil or y == nil then print("no ui_group at ",x,y) return end
+  if ui_group_num == nil or x == nil or y == nil then return end
+  -- if ui_group_num == nil or x == nil or y == nil then print("no ui_group at ",x,y) return end
   
   table.insert(self.flickers[ui_group_num], flicker)
 
@@ -634,14 +660,15 @@ end
 function grid_sequencer:draw_spacers()
   g:led(4, 8, 2)
   g:led(5, 8, 2)
-  g:led(11, 8, 2)
-  g:led(12, 8, 2)
+  -- g:led(11, 8, 2)
+  -- g:led(12, 8, 2)
   -- g:led(8, 8, 2)
   -- g:led(9, 8, 2)
   -- g:led(10, 8, 2)
-  -- g:led(11, 8, 2)
-  -- g:led(12, 8, 2)
-  g:led(13, 8, 2)
+  g:led(11, 8, 0)
+  g:led(12, 8, 0)
+  g:led(13, 8, 0)
+  g:led(14, 8, 3)
 end
 
 --[[
@@ -675,7 +702,6 @@ function grid_sequencer:grid_redraw()
     -- self:draw_playing_samples()
     -- self:draw_animation_indicators()
     -- self:draw_filter_param_overlay()
-    self:draw_spacers()  
     self:draw_led_solids()
     self:draw_led_flickers()
     self.flicker_counter = clock.run(grid_sequencer.schedule_led_flickers)
@@ -683,9 +709,10 @@ function grid_sequencer:grid_redraw()
     -- draw active_view
     -- set leds to show active view and  (if selected) animation mode
     self:draw_active_view()
-
+    
     --set mode indicator
-    g:led(15, 8, 7)
+    g:led(16, 8, 7)
+    self:draw_spacers()  
     g:refresh()
   end
 end
@@ -722,7 +749,7 @@ function grid_sequencer:process_long_press(first_press,second_press)
   elseif (first_press[1] < 6 and second_press[1] < 6 ) and (first_press[2] == 1 and second_press[2] == 1 ) then
     -- copy/paste sequinsets to first pressed set from second pressed set
     sequencer_controller.copy_paste_sequinsets(first_press[1], second_press[1])
-  elseif (first_press[1] < 15 and second_press[1] < 15 ) and (first_press[2] == 1 and second_press[2] == 1 ) then
+  elseif second_press and (first_press[1] < 15 and second_press[1] < 15 ) and (first_press[2] == 1 and second_press[2] == 1 ) then
     -- copy/paste indivdual sequins to first pressed sequin from second pressed sequin
     local sgp = sequencer_controller.selected_sequin_group
     local ssg = 1  

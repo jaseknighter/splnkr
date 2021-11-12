@@ -124,7 +124,7 @@ selecting the third screen (*sqncr*) using norns encoder *e1* brings up the sequ
 
 the grid ui is organized into multiple ui groups:
 
-* (1) *sequencer mode* selector: selecting grid key 15,8 brings up the grid controls for the sequencer. selecting the key to the right (key 14,8) returns the the bandpass filter controls
+* (1) *sequencer mode* selector: selecting grid key 16,8 brings up the grid controls for the sequencer. selecting the key to the left right (key 15,8) returns the the bandpass filter controls
 * (A) *sequinsets*: there are 5 sets of sequins. each set defines a unique sequence
 * (B) *sequin(s)*: each sequinset contains up to 9 sequence steps defined with the Sequins port referenced above. At each sequence step, multiple types of outputs may be sequenced
   * the number of active steps may be controlled with from the params menu by updating the *num sequin* parameter

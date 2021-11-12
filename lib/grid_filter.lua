@@ -274,9 +274,9 @@ function grid_filter:draw_spacers()
   g:led(7, 8, 2)
   g:led(9, 8, 2)
   g:led(10, 8, 2)
-  g:led(11, 8, 2)
-  g:led(12, 8, 2)
-  g:led(13, 8, 2)
+  -- g:led(11, 8, 2)
+  -- g:led(12, 8, 2)
+  -- g:led(13, 8, 2)
   g:led(14, 8, 2)
 end
 
@@ -315,7 +315,7 @@ function grid_filter:redraw()
     self:draw_active_view()
     
     --set mode indicator
-    g:led(14, 8, 7)
+    g:led(15, 8, 7)
     g:refresh()
   end
 end

@@ -68,6 +68,47 @@ function fn.fraction_to_decimal(fraction)
   end
 end
 
+-- morphing function
+-- note: the last two parameters are "private" to the function and don't need to included in the inital call to the function
+-- example: `morph(my_callback_function,1,10,2,10,"log")`
+function fn.morph(callback,s_val,f_val,duration,steps,shape, steps_remaining, next_val)
+  local start_val = s_val < f_val and s_val or f_val
+  local finish_val = s_val < f_val and f_val or s_val
+  local increment = (finish_val-start_val)/steps
+  if next_val and steps_remaining < steps then
+    local delay = duration/steps
+    clock.sleep(delay)
+    local return_val = next_val
+    if s_val ~= f_val then
+      callback(return_val)
+    else
+      callback(s_val)
+    end
+  end
+  local steps_remaining = steps_remaining and steps_remaining - 1 or steps 
+  
+  if steps_remaining >= 0 then
+    local value_to_convert
+    if next_val == nil then
+      value_to_convert = start_val
+    elseif s_val < f_val then
+      -- value_to_convert = next_val and s_val + ((steps-steps_remaining) * increment) 
+      value_to_convert = next_val and start_val + ((steps-steps_remaining) * increment) 
+    else
+      value_to_convert = next_val and finish_val - ((steps-steps_remaining) * increment) 
+    end 
+
+    if shape == "exp" then
+      next_val = util.linexp(start_val,finish_val,start_val,finish_val, value_to_convert)
+    elseif shape == "log" then
+      next_val = util.explin(start_val,finish_val,start_val,finish_val, value_to_convert)
+    else
+      next_val = util.linlin(start_val,finish_val,start_val,finish_val, value_to_convert)
+    end
+    clock.run(fn.morph,callback,s_val,f_val,duration,steps,shape, steps_remaining,next_val)
+  end
+end
+
 
 
 -- scale/note functions
@@ -124,6 +165,9 @@ end
 -------------------------------------------
 
 MAX_CUTTERS = 12
+OUTPUT_TYPES = {"softcut","devices","effects","time"}
+PPQN_OPTIONS = {12,24,36,48,60,72,84,96,108}
+TIME_OPTIONS = {"1/8","1/4","1/3","1/2","3/4","1","4/3","3/2","2"}
 
 g = grid.connect()
 grid_mode = "filter"
@@ -132,7 +176,7 @@ NUM_PAGES = 3
 show_instructions = false
 updating_controls = false
 OUTPUT_DEFAULT = 4
-SCREEN_FRAMERATE = 1/10
+SCREEN_FRAMERATE = 1/30
 menu_status = false
 pages = 0
 
@@ -152,6 +196,8 @@ pre_save_play_mode = false
 
 sequencer_playing = false
 DEFAULT_SUB_SEQUINS_TAB = {"","","","",""}
+num_sub_sequin = #DEFAULT_SUB_SEQUINS_TAB
+starting_sub_sequin = 1
 
 midi_in_channel1_default = 1
 midi_in_command1 = 144
@@ -201,7 +247,7 @@ DEFAULT_GRAPH_NODES[1].time = 0.00
 DEFAULT_GRAPH_NODES[1].level = 0.00
 DEFAULT_GRAPH_NODES[1].curve = 0.00
 DEFAULT_GRAPH_NODES[2] = {}
-DEFAULT_GRAPH_NODES[2].time = 0.1
+DEFAULT_GRAPH_NODES[2].time = 0.01
 DEFAULT_GRAPH_NODES[2].level = 5
 DEFAULT_GRAPH_NODES[2].curve = -10
 DEFAULT_GRAPH_NODES[3] = {}

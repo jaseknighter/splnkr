@@ -2,9 +2,9 @@
 
 local function grid_key(x, y, z)
   if z == 0 then
-    if x == 14 and y==8 then
+    if x == 15 and y==8 then
       grid_mode = "filter"
-    elseif x == 15 and y==8 then
+    elseif x == 16 and y==8 then
       grid_mode = "sequencer"
     end
   end

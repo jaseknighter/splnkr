@@ -35,6 +35,7 @@ devices_crow_processor = include "splnkr/lib/sequin_processors/devices_crow_proc
 devices_jf_processor = include "splnkr/lib/sequin_processors/devices_jf_processor"
 devices_w_processor = include "splnkr/lib/sequin_processors/devices_w_processor"
 effects_processor = include "splnkr/lib/sequin_processors/effects_processor"
+time_processor = include "splnkr/lib/sequin_processors/time_processor"
 
 sequin_processor = include "splnkr/lib/sequin_processor"
 

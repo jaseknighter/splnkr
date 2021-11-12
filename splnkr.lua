@@ -167,7 +167,7 @@ function init()
 
   onset_amplitude_detect_poll = poll.set("onsetAmplitudeDetect", function(value)
     detect_level = fn.round_decimals(value,5,"up")
-    if detect_level > 0.03 and (last_onset_amplitude < detect_level or math.abs(last_onset_frequency - detect_freq) > 5)
+    if (detect_level and last_onset_amplitude) and detect_level > 0.03 and (last_onset_amplitude < detect_level or math.abs(last_onset_frequency - detect_freq) > 5)
     then 
       note_num = MusicUtil.freq_to_note_num (detect_freq) 
 

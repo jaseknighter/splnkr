@@ -43,8 +43,12 @@ function save_load.load_sequence(path)
     for i=1,5,1 do
       sc.sequins_outputs_table[i] = {}
       if sequence_data[i] then
-        sc.sequins_outputs_table[i] = fn.deep_copy(sequence_data[i])
+        if grid_mode ~= "sequencer" then 
+          grid_mode="sequencer" 
+        end
         grid_sequencer.activate_grid_key_at(i,1)
+        grid_sequencer.activate_grid_key_at(6,1)
+        sc.sequins_outputs_table[i] = fn.deep_copy(sequence_data[i])
         sc.reset_sequinset_value_heirarcy(i)
       end
     end
@@ -98,18 +102,27 @@ end
 -- end
 
 function save_load.init()
-  params:add_separator()
-  params:add_separator("SAVE SEQUENCE DATA")
+  local grid_found = false
+  for i=1,#grid.vports,1 do
+    if grid.vports[i].cols >= 16 then
+      grid_found = true
+    end
+  end
+  
+  if grid_found == true then
+    params:add_separator()
+    params:add_separator("SAVE SEQUENCE DATA")
 
-  params:add_trigger("save_sequence", "> SAVE SEQUENCE")
-  params:set_action("save_sequence", function(x) textentry.enter(save_load.save_sequence_data) end)
+    params:add_trigger("save_sequence", "> SAVE SEQUENCE")
+    params:set_action("save_sequence", function(x) textentry.enter(save_load.save_sequence_data) end)
 
-  params:add_trigger("remove_sequence", "< REMOVE SAVED SEQUENCE")
-  params:set_action("remove_sequence", function(x) fileselect.enter(save_path, save_load.remove_sequence) end)
+    params:add_trigger("remove_sequence", "< REMOVE SAVED SEQUENCE")
+    params:set_action("remove_sequence", function(x) fileselect.enter(save_path, save_load.remove_sequence) end)
 
-  params:add_trigger("load_sequence", "> LOAD SEQUENCE" )
-  params:set_action("load_sequence", function(x) fileselect.enter(save_path, save_load.load_sequence) end)
+    params:add_trigger("load_sequence", "> LOAD SEQUENCE" )
+    params:set_action("load_sequence", function(x) fileselect.enter(save_path, save_load.load_sequence) end)
 
+  end
   -- params:add_trigger("remove_plant_from_garden", "< REMOVE PLANT FROM GARDEN" )
 
   -- params:set_action("remove_plant_from_garden", function(x) 

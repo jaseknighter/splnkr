@@ -12,7 +12,7 @@ function Sequencer:new(lattice,id)
   s.seq = Sequins{table.unpack(s.sequin_set)}
   s.sub_seq_leader = Sequins{table.unpack(DEFAULT_SUB_SEQUINS_TAB)}
 
-  s.division = 1/2
+  s.division = 1
   s.enabled = true
   s.pattern = s.lattice:new_pattern{
     action = function(t) 
@@ -34,6 +34,7 @@ function Sequencer:new(lattice,id)
     end
 
     local last_sequin = params:get("num_sequin") + params:get("starting_sequin") - 1
+    
     if s.seq.ix < last_sequin  then
       s.next_sequin = s.seq()
     else
@@ -41,7 +42,15 @@ function Sequencer:new(lattice,id)
       s.next_sequin = s.seq()
       s.sub_seq_leader()
     end
+    if (s.sub_seq_leader.ix > params:get("num_sub_sequin") + params:get("starting_sub_sequin") - 1) or
+        (s.sub_seq_leader.ix < params:get("starting_sub_sequin")) then
+      s.sub_seq_leader:select(params:get("starting_sub_sequin"))
+      s.sub_seq_leader()
+    end
+    selected_sub_sequin_ix = s.sub_seq_leader.ix
     s.sub_seq_leader_ix = fn.deep_copy(s.sub_seq_leader.ix)
+    local flicker_time = 1/16 
+    grid_sequencer:register_flicker_at(5+s.sub_seq_leader.ix, 8, flicker_time)
     -- print("s.sub_seq_leader_ix",s.sub_seq_leader_ix)
     
     -- if sequencer_controller.sequencers and sequencer_controller.sequencers[1] and sequencer_controller.sequencers[1].next_sequin then

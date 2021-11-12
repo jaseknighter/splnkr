@@ -88,28 +88,47 @@ function parameters.init()
 
   
   params:add{
-    type = "number", id = "num_sequin", name = "num sequin", min=1, max=9, default=9,
+    type = "number", id = "sequin_step", name = "sequin step", min=1, max=8, default=1,
     action=function(x)
-      if initializing == false then
-        local selected_sequin = sequencer_controller.selected_sequin and sequencer_controller.selected_sequin or 1
-        for i=x,9,1 do
-          sequencer_controller.update_sequin_selector(5+selected_sequin,1,"off")
-          grid_sequencer:solid_off(5+i,1, 1)
-          grid_sequencer:unregister_solid_at(5+i,1, 1)
-        end
-        local starting_sequin = 5+params:get("starting_sequin")
-        local last_sequin = starting_sequin+x-1
-        last_sequin = last_sequin <= 14 and last_sequin or 14
-        sequencer_controller.sequin_selector = grid_sequencer:register_ui_group("sequin_selector",starting_sequin,1,last_sequin,1,2,3)
+      if initializing == false and sequencer_controller.selected_sequin_group then
+        local seq = sequencer_controller.sequencers[sequencer_controller.selected_sequin_group].seq
+        seq:step(x)
       end
     end
   }
 
   params:add{
+    type = "number", id = "num_sequin", name = "num sequin", min=1, max=9, default=9,
+    action=function(x)
+      if initializing == false then
+        -- local selected_sequin = sequencer_controller.selected_sequin and sequencer_controller.selected_sequin or 1
+        -- for i=1,9,1 do
+        --   -- sequencer_controller.update_sequin_selector(5+selected_sequin,1,"off")
+        --   sequencer_controller.update_sequin_selector(5+i,1,"off")
+        --   grid_sequencer:unregister_solid_at(5+i,1, 1)
+        --   grid_sequencer:solid_off(5+i,1, 1)
+        -- end
+        local starting_sequin = 5+params:get("starting_sequin")
+        local last_sequin = starting_sequin+x-1
+        last_sequin = last_sequin <= 14 and last_sequin or 14
+
+        
+        -- for i=6,14,1 do
+        --   if grid_sequencer:find_ui_group_num_by_xy(i,1) then
+        --     print("unreg",i)
+        --     sc:unregister_ui_group(i,1)
+        --   end
+        -- end
+        sequencer_controller.sequin_selector = grid_sequencer:register_ui_group("sequin_selector",starting_sequin,1,last_sequin,1,2,3)
+      end
+    end
+  }
+  
+  params:add{
     type = "number", id = "starting_sequin", name = "starting sequin", min=1, max=9, default=1,
     action=function(x)
       if initializing == false then
-        for i=1,x-1,1 do
+        for i=1,9,1 do
           sequencer_controller.update_sequin_selector(5+i,1,"off")
           grid_sequencer:solid_off(5+i,1, 1)
           grid_sequencer:unregister_solid_at(5+i,1, 1)
@@ -117,27 +136,133 @@ function parameters.init()
         local starting_sequin = 5+x
         local last_sequin = 5+x+params:get("num_sequin")
         last_sequin = last_sequin <= 14 and last_sequin or 14
+        -- for i=6,14,1 do
+        --   if grid_sequencer:find_ui_group_num_by_xy(i,1) then
+        --     sc:unregister_ui_group(i,1)
+        --   end
+        -- end
         sequencer_controller.sequin_selector = grid_sequencer:register_ui_group("sequin_selector",starting_sequin,1,last_sequin,1,2,3)
+        
+        local num_sequin = params:get("num_sequin")
+        -- num_sequin = util.clamp(1,9-x+1,num_sequin)
+        params:set("num_sequin",num_sequin+1)
+        params:set("num_sequin",num_sequin)
       end
     end
   }
 
+  params:add{
+    type = "number", id = "sub_sequin_step", name = "sub sequin step", min=1, max=4, default=1,
+    action=function(x)
+      if initializing == false and sequencer_controller.selected_sequin_group then
+        local seq = sequencer_controller.sequencers[sequencer_controller.selected_sequin_group].sub_seq_leader
+        seq:step(x)
+      end
+    end
+  }
 
+  params:add{
+    type = "number", id = "num_sub_sequin", name = "num sub sequin", min=1, max=5, default=5,
+    action=function(x)
+      if initializing == false and sequencer_controller.sequin_output_values then
+        -- local selected_sequin = selected_sub_sequin_ix and selected_sub_sequin_ix or 1
+        for i=x,5,1 do
+          -- sequencer_controller.update_sequin_selector(5+selected_sequin,8,"off")
+          sequencer_controller.update_sequin_output_value(5+i,8,"off")
+          grid_sequencer:unregister_solid_at(5+i,8, 1)
+          grid_sequencer:solid_off(5+i,8, 1)
+        end
+        local starting_sequin = 5+params:get("starting_sub_sequin")
+        local last_sequin = starting_sequin+x-1
+        -- last_sequin = last_sequin <= 10 and last_sequin or 10
+        -- for i=6,10,1 do
+        --   if grid_sequencer:find_ui_group_num_by_xy(i,8) then
+        --     sc:unregister_ui_group(i,8)
+        --   end
+        -- end
+        
+        -- sequencer_controller.sequin_selector = grid_sequencer:register_ui_group("sequin_selector",starting_sequin,1,last_sequin,1,2,3)
+        sequencer_controller.sequin_output_values = grid_sequencer:register_ui_group("sequin_output_values",starting_sequin,8,last_sequin,8,5,3)
+        -- num_sub_sequin = last_sequin - starting_sequin + 1
+      end
+    end
+  }
+
+  params:add{
+    type = "number", id = "starting_sub_sequin", name = "starting sub sequin", min=1, max=5, default=1,
+    action=function(x)
+      if initializing == false then
+        for i=1,5,1 do
+          sequencer_controller.update_sequin_output_value(5+i,8,"off")
+          grid_sequencer:solid_off(5+i,8, 1)
+          grid_sequencer:unregister_solid_at(5+i,8, 1)
+        end
+        local starting_sequin = 5+x
+        local last_sequin = 5+x+params:get("num_sub_sequin")
+        -- last_sequin = last_sequin <= 10 and last_sequin or 10
+        -- for i=6,10,1 do
+        --   if grid_sequencer:find_ui_group_num_by_xy(i,8) then
+        --     sc:unregister_ui_group(i,8)
+        --   end
+        -- end
+        
+        sequencer_controller.sequin_output_values = grid_sequencer:register_ui_group("sequin_output_values",starting_sequin,8,last_sequin,8,5,3)
+        
+        local num_sub_sequin = params:get("num_sub_sequin")
+        -- num_sub_sequin = util.clamp(1,5-x+1,num_sub_sequin)
+        params:set("num_sub_sequin",num_sub_sequin+1)
+        params:set("num_sub_sequin",num_sub_sequin)
+      end
+    end
+  }
+
+  -- latice meter
+  params:add{
+    type = "option", id = "meter", name = "meter", default=4,
+    options=TIME_OPTIONS,
+    action=function(x)
+      if initializing == false and sequencer_controller.selected_sequin_group then
+        print("set meter",x)
+        sequencer_controller.lattice:set_meter(fn.fraction_to_decimal(TIME_OPTIONS[x]))
+      end
+    end
+  }
+
+    -- pattern division
+    params:add{
+      type = "option", id = "division", name = "divisions", default=6,
+      options=TIME_OPTIONS,
+      action=function(x)
+        if initializing == false and sequencer_controller.selected_sequin_group then
+          local pattern = sequencer_controller.sequencers[sequencer_controller.selected_sequin_group].pattern
+          pattern:set_division(fn.fraction_to_decimal(TIME_OPTIONS[x]))
+        end
+      end
+    }
+  
+  -- -- latice meter
   -- params:add{
-  --   type = "option", id = "play_sequencer", name = "play sequencer", 
-  --   options = {"off", "on"},
-  --   default = 1,
-  --   action = function(value) 
-  --     if value == 1 then
-  --       sequencer_playing = false 
-  --       -- sample_player.set_play_mode(sample_player.selected_voice,5)
-  --     else
-  --       sequencer_playing= true
-  --       -- sample_player.set_play_mode(3)
+  --   type = "number", id = "meter", name = "meter", min=62, max=2000, default=250,
+  --   action=function(x)
+  --     print("meter",x)
+  --     if x >= 62 and initializing == false and sequencer_controller.selected_sequin_group then
+  --       sequencer_controller.lattice:set_meter(x/1000)
   --     end
-  --     ur_position = sample_player.sample_positions[sample_player.selected_voice]
   --   end
   -- }
+
+  --   -- pattern division
+  --   params:add{
+  --     type = "number", id = "division", name = "divisions", min=62, max=2000, default=1000,
+  --     action=function(x)
+  --       if x >= 62 and initializing == false and sequencer_controller.selected_sequin_group then
+  --         local pattern = sequencer_controller.sequencers[sequencer_controller.selected_sequin_group].pattern
+  --         pattern:set_division(x/1000)
+  --       end
+  --     end
+  --   }
+  
+
   ------------------------------
   -- filter params
   ------------------------------
@@ -245,6 +370,17 @@ function parameters.init()
   -- effect params
   ------------------------------
 
+  AMP_SPEC = controlspec.def{
+    min=0.0,
+    max=10.0,
+    warp='linear',
+    step=0.1,
+    default=1,
+    quantum=0.01,
+    wrap=false,
+    -- units='khz'
+  }
+
   DELAY_SPEC = controlspec.def{
     min=0.0,
     max=5.0,
@@ -273,7 +409,7 @@ function parameters.init()
     warp='linear',
     step=0.01,
     default=5,
-    quantum=0.001,
+    quantum=0.0001,
     wrap=false,
     -- units='khz'
   }
@@ -282,8 +418,8 @@ function parameters.init()
     -- {vinyl,vinyl,0,10,0,engine.vinyl}
     -- effect_name,effect_id,effect_min,effect_max,effect_default, effect_fn, effect_type
 
-    {"amp","amp",0,1,1,engine.amp,"control",},
     {"drywet","drywet",0,1,1,engine.drywet,"control",},
+    {"effects amp","amp",0,10,1,engine.amp,"control",},
     -- {"phaser","phaser",0,1,0,engine.phaser,"control",},
     {"delay","delay",0,1,0,engine.delay,"control",},
     {"  delay time","delay_time",0,5,0.25,engine.delaytime,"control",},
@@ -311,7 +447,12 @@ function parameters.init()
   }
 
   function parameters.add_effect_param(effect_name,effect_id,effect_min,effect_max,effect_default, effect_fn, effect_type, effect_options)
-    if effect_id == "bitcrush" then
+    if effect_id == "amp" then
+      params:add_control(effect_id,effect_name,AMP_SPEC)
+      params:set_action(effect_id,function(x) 
+        effect_fn(x)
+      end)
+    elseif effect_id == "bitcrush" then
       params:add{
         type = effect_type, id = effect_id, name = effect_name, default = effect_default,
         min=effect_min,max=effect_max, options=effect_options,

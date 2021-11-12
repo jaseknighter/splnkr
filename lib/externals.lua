@@ -47,7 +47,10 @@ function externals:new(active_notes)
     local note_offset = params:get("note_center_frequency") - root_note_default
     local value = fn.deep_copy(value)
     if type(value) == "table" then
-      value.pitch  = note_source == "engine" and value.pitch or notes[value.pitch+note_offset]
+      -- hack!!! figure out when notes[value.pitch+note_offset] would be nil
+      if note_source ~= "engine" and notes[value.pitch+note_offset] then
+        value.pitch = notes[value.pitch+note_offset]
+      end
       -- print("note_on:",voice_id, value.pitch, beat_frequency, envelope_time_remaining, note_source, note_target)
     else
       -- print("eng",value,note_offset)
