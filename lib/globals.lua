@@ -202,6 +202,7 @@ saving_elipses = ""
 pre_save_play_mode = false
 
 sequencer_playing = false
+SEQUIN_GROUP_OFF_LEVEL = 3
 DEFAULT_SUB_SEQUINS_TAB = {"","","","",""}
 num_sub_sequin = #DEFAULT_SUB_SEQUINS_TAB
 starting_sub_sequin = 1

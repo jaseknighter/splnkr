@@ -100,11 +100,11 @@ function init()
     grid_sequencer.init()
   
     -- -- NOTE: fn parameters: group_name,x1,y1,x2, y2, off_level, selection_mode
-    grid_sequencer:register_ui_group("sequin_groups1",1,1,1,1,7,3)
-    grid_sequencer:register_ui_group("sequin_groups2",2,1,2,1,7,3)
-    grid_sequencer:register_ui_group("sequin_groups3",3,1,3,1,7,3)
-    grid_sequencer:register_ui_group("sequin_groups4",4,1,4,1,7,3)
-    grid_sequencer:register_ui_group("sequin_groups5",5,1,5,1,7,3)
+    grid_sequencer:register_ui_group("sequin_groups1",1,1,1,1,7,SEQUIN_GROUP_OFF_LEVEL)
+    grid_sequencer:register_ui_group("sequin_groups2",2,1,2,1,7,SEQUIN_GROUP_OFF_LEVEL)
+    grid_sequencer:register_ui_group("sequin_groups3",3,1,3,1,7,SEQUIN_GROUP_OFF_LEVEL)
+    grid_sequencer:register_ui_group("sequin_groups4",4,1,4,1,7,SEQUIN_GROUP_OFF_LEVEL)
+    grid_sequencer:register_ui_group("sequin_groups5",5,1,5,1,7,SEQUIN_GROUP_OFF_LEVEL)
     
     
     print("grid found with " .. grid_filter.last_known_width .. " columns")

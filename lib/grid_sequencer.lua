@@ -234,7 +234,7 @@ function grid_sequencer:solid_on(x,y, from_view, flicker_mode)
   grid_sequencer:register_flicker_at(x, y)
 end
 
-function grid_sequencer:key_press(x, y, from_view, press_type)
+function grid_sequencer:key_press(x, y, from_view, press_type, from_norns)
   
   from_view = from_view and from_view or self.active_view
   local ui_group_num = grid_sequencer:find_ui_group_num_by_xy(x, y)
@@ -254,7 +254,7 @@ function grid_sequencer:key_press(x, y, from_view, press_type)
       local grid_data = group.grid_data
       if ui_group_num > 0 then
         local group_name = group.group_name
-        if current_level == "off" then
+        if current_level ~= "on" then
           -- if ui_group_num <= 5 then 
           if group.selection_mode == 1 or group.selection_mode == 3 or group.selection_mode == 6 then -- single selection
             for i=grid_data.x1,grid_data.x2,1 do
@@ -384,8 +384,10 @@ function grid_sequencer:get_current_level_at(x, y, view)
     local off_level = grid_sequencer.solids[1][x][y].solid.off_level
     if current_level == off_level then
       return "off"
-    else
+    elseif current_level == on_level then
       return "on"
+    else
+      return "other"
     end
   else 
     return nil
@@ -407,11 +409,15 @@ function grid_sequencer:set_current_level_at(x, y, view, level)
 end
 
 function grid_sequencer:is_registered_solid_at(x, y, view)
-  return #self.solids[view][x][y] > 0
+  return #self.solids[view][x][y].solid > 0
 end
 
 function grid_sequencer:unregister_solid_at(x, y, view)
   self.solids[view][x][y] = {}
+end
+
+function grid_sequencer:set_off_level_at(x, y, view, solid_level, off_level)
+
 end
 
 function grid_sequencer:register_solid_at(x, y, view, solid_level, off_level)
@@ -499,7 +505,7 @@ function grid_sequencer:register_ui_group(group_name,x1,y1,x2, y2, off_level, se
   grid_data.active_item = nil
   grid_data.default_value = default_value
   grid_data.group_name = group_name
-  --print(group_name,x1,y1,x2, y2, off_level, selection_mode, control_spec, default_value)
+  
   local ol = off_level
   local increment = 0
   local has_default_value = false
@@ -527,6 +533,7 @@ function grid_sequencer:register_ui_group(group_name,x1,y1,x2, y2, off_level, se
     group_num = grid_sequencer.get_num_ui_groups()
   end 
   grid_sequencer.ui_groups[group_num].grid_data = grid_data
+  grid_sequencer.ui_groups[group_num].ix = group_num
   grid_sequencer.ui_groups[group_num].group_name = group_name
   grid_sequencer.ui_groups[group_num].selection_mode = selection_mode
   grid_sequencer.ui_groups[group_num].control_spec = control_spec

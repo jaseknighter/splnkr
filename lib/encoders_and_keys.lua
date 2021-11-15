@@ -1,4 +1,5 @@
 -- encoders and keys
+-- todo: split out grid controls (and variables) into a separate lua file
 
 local function grid_key(x, y, z)
   if z == 0 then
@@ -27,6 +28,9 @@ local enc = function (n, d)
     local next_page = pages.index + page_increment
     if (next_page <= NUM_PAGES and next_page > 0) then
       page_scroll(page_increment)
+      if pages.index == 3 then
+        g.key(16,8,0)
+      end
     end
   elseif n == 1 then
     if pages.index == 2 then
@@ -245,33 +249,42 @@ local enc = function (n, d)
       envelopes[active_envelope].enc(n, d)     
     end
   elseif pages.index == 3 then
+    local startup = sc.selected_sequin_group == nil and true or false
+
     if n==1 then
     elseif n==2 then
-      -- do something
+      local ssg = sc.selected_sequin_group and sc.selected_sequin_group or d<0 and 6 or 0
+      encoders_and_keys.next_sequins_group = encoders_and_keys.next_sequins_group and encoders_and_keys.next_sequins_group or ssg
+      encoders_and_keys.next_sequins_group = util.wrap(encoders_and_keys.next_sequins_group + d,1,5)
+      for i=1,5,1 do
+        grid_sequencer.solids[1][i][1].solid.current_level = 7
+      end
+      grid_sequencer.solids[1][encoders_and_keys.next_sequins_group][1].solid.current_level = 14
     elseif n==3 then
-      -- check if number values are being selected
-      local sc = sequencer_controller
-      if sc.active_sequin_value.value_type == 'number' then
-        local selecting_number = false
-        local number_selected = 0
-        local last_selection
-        for i=6,14,1 do
-          if grid_sequencer:find_ui_group_num_by_xy(i,6) then
-            selecting_number = true
-            if grid_sequencer:find_flickering_at(i,6) then
-              number_selected = i-5
-            end
-            last_selection = i-5
-          end
+      if encoders_and_keys.active_ui_group and encoders_and_keys.active_ui_group.ix < 6 then
+        grid_sequencer.activate_grid_key_at(6, 1)
+        local next_y = sc:get_active_ui_group().grid_data.y1
+        if next_y<=5 then
+          encoders_and_keys.active_ui_group = sc:get_active_ui_group()
         end
-        if selecting_number then
-          local next_num = util.clamp(number_selected+d,0,last_selection)
-          if number_selected == 1 and d < 1 then 
-            grid_sequencer.activate_grid_key_at(6,6)
-          elseif((number_selected == 0 and d > 0) or (number_selected+d <= last_selection)) then
-            grid_sequencer.activate_grid_key_at(5+next_num,6)
-          end
+      elseif sc:get_active_ui_group().ix > 5 then
+        local next_y = sc:get_active_ui_group().grid_data.y1
+        if next_y<=5 then
+          encoders_and_keys.active_ui_group = sc:get_active_ui_group()
         end
+        local x_min = encoders_and_keys.active_ui_group.grid_data.x1
+        local x_max = encoders_and_keys.active_ui_group.grid_data.x2
+        y = encoders_and_keys.active_ui_group.grid_data.y1
+        encoders_and_keys.x_selected = encoders_and_keys.x_selected and encoders_and_keys.x_selected or encoders_and_keys.active_ui_group.grid_data.x1
+        local x = util.wrap(encoders_and_keys.x_selected+d,x_min,x_max)
+        -- if y < 8 and encoders_and_keys.x_selected ~= x then
+        
+        encoders_and_keys.x_selected = x
+        local off_level = encoders_and_keys.active_ui_group.grid_data.off_level
+        for i=x_min,x_max,1 do
+          grid_sequencer.solids[1][i][y].solid.current_level = off_level
+        end
+        grid_sequencer.solids[1][encoders_and_keys.x_selected][y].solid.current_level = 14
       end
     end
   elseif pages.index == 4 then
@@ -359,7 +372,76 @@ local key = function (n,z)
     -- end
   elseif pages.index == 3 then
     screen_dirty = true
+    local startup = encoders_and_keys.active_ui_group == nil and true or false
       
+    if (n==2 or n==3) and z==1 and 
+      (encoders_and_keys.next_sequins_group or startup or encoders_and_keys.active_ui_group.ix < 6) then 
+
+      local x
+      
+      if encoders_and_keys.next_sequins_group then
+        x = encoders_and_keys.next_sequins_group 
+        grid_sequencer.activate_grid_key_at(x, 1)
+        -- if encoders_and_keys.active_ui_group and encoders_and_keys.active_ui_group.ix ~= x then
+        --   print("redo")
+        -- end
+      elseif startup == true then
+        x = 1
+        grid_sequencer.activate_grid_key_at(x, 1)
+      else
+        if n==2 then
+          x = encoders_and_keys.active_ui_group.grid_data.x1 - 1
+        elseif n==3 then
+          x = encoders_and_keys.active_ui_group.grid_data.x1 + 1
+        end
+        print(x,n,encoders_and_keys.active_ui_group.grid_data.x1)
+        x = util.wrap(x,1,5)
+        grid_sequencer.activate_grid_key_at(x, 1)
+      end
+      encoders_and_keys.next_sequins_group = nil
+      local next_y = sc:get_active_ui_group().grid_data.y1
+      if next_y<=5 then
+        encoders_and_keys.active_ui_group = sc:get_active_ui_group()
+      end
+    
+    elseif n==2 and z==1 then
+      local active_group_index = encoders_and_keys.active_ui_group.ix
+      local prev_active_group = grid_sequencer.ui_groups[active_group_index-1]
+      -- print("prev_active_group.ix",prev_active_group.ix)
+      if prev_active_group.ix >= 6 then
+        local prev_x_selected 
+        local prev_x1 = prev_active_group.grid_data.x1
+        local prev_x2 = prev_active_group.grid_data.x2
+        local prev_y = prev_active_group.grid_data.y1
+        for i=prev_x1,prev_x2,1 do
+          local current_level = grid_sequencer.solids[1][i][prev_y].solid.current_level
+          local on_level = grid_sequencer.solids[1][i][prev_y].solid.on_level
+          if current_level == on_level then
+            prev_x_selected = i
+            break
+          end
+        end
+        -- print("prev_x_selected",prev_x_selected)
+        if prev_x_selected then
+          encoders_and_keys.x_selected = prev_x_selected
+          grid_sequencer.activate_grid_key_at(encoders_and_keys.x_selected, prev_y)
+          grid_sequencer:register_flicker_at(encoders_and_keys.x_selected, prev_y)
+          encoders_and_keys.active_ui_group = sc:get_active_ui_group()
+        else
+          local current_y = grid_sequencer.ui_groups[active_group_index].y1
+          grid_sequencer.activate_grid_key_at(encoders_and_keys.x_selected, current_y)
+        end
+      end      
+    elseif n==3 and z==1 then
+      if startup == true or encoders_and_keys.x_selected < 6 then
+        elseif encoders_and_keys.active_ui_group and encoders_and_keys.x_selected then
+        local y = encoders_and_keys.active_ui_group.grid_data.y1    
+        -- local current_level = grid_sequencer.solids[1][encoders_and_keys.x_selected][y].solid.current_level
+        -- local off_level = grid_sequencer.solids[1][encoders_and_keys.x_selected][y].solid.off_level
+        -- grid_sequencer.activate_grid_key_at(encoders_and_keys.x_selected, y)
+        grid_sequencer:key_press(encoders_and_keys.x_selected, y,1,"short",1)
+      end
+    end  
   end
 end
 

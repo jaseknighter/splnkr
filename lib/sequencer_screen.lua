@@ -1,76 +1,17 @@
 
 sequencer_screen = {}
-sequencer_screen.active_ui_group = "sequins group selector (1-5)"
-sequencer_screen.active_ui_group_instructions1 = ""
-sequencer_screen.active_ui_group_instructions2 = " "
-sequencer_screen.active_ui_group_instructions3 = ""
-    
 
+sequencer_screen.active_control = ""
 
-Square = {}
+function sequencer_screen.init()
 
--- sequencer_controller.get_active_output_table_slot().output_value
-
-function Square:new(col, row)
-  local square = {}
-  setmetatable(square, Square)
-  square.row = row
-  square.col = col
-  square.fill = false
-
-  function square:draw()
-    -- code to draw squares
-    local x_loc = 5 + (self.col-1)*3
-    local y_loc = 15 + (self.row-1)* 3
-    screen.move(x_loc,y_loc)
-    screen.rect(x_loc,y_loc,3,3)
-    if (self.fill == true) then 
-      -- screen.level(6)
-      screen.level(15)
-      screen.stroke()
-      screen.fill() 
-    else
-      screen.level(3)
-      screen.fill() 
-    end
-    screen.update()
-  end
-
-  return square
 end
 
-
-sequencer_screen.squares = {}
-
-function sequencer_screen.init(num_cols, num_rows)
-  active_control = ""
-  --[[
-  for i=1,num_cols,1 do
-    for j=1,num_rows,1 do
-      local sq = Square:new(i,j)
-      if i==13 then sq.fill = true end
-      table.insert(sequencer_screen.squares, sq)
-    end
-  end
-  ]]
-end
-
---[[
-  local indices = {
-  selected_sequin_group        = sequencer_controller.selected_sequin_group,         -- selected_sequin_group:  value table level 1
-  selected_sequin_subgroups     = sequencer_controller.selected_sequin_subgroups,      -- selected_sequin_group:  value table level 2
-  selected_sequin               = sequencer_controller.selected_sequin,          -- selected_sequin:  value table level 3
-  selected_sequin_output_type   = sequencer_controller.selected_sequin_output_type,    -- output_type_selected:  value table level 4
-  selected_sequin_output        = sequencer_controller.selected_sequin_output,         -- output_selected:  value table level 5
-  selected_sequin_output_mode   = sequencer_controller.selected_sequin_output_mode,    -- output_mode_selected:  value table level 6
-  selected_sequin_output_param  = sequencer_controller.selected_sequin_output_param,   -- output_param_selected:  value table level 7
-}
-]]
 function sequencer_screen.update_screen_instructions(selected_control_indices)
-  local active_ui_group_name = sequencer_controller:get_active_ui_group()
+  local active_ui_group_name = sequencer_controller:get_active_ui_group_name()
   active_ui_group_name = (string.sub(active_ui_group_name,1,13) == "sequin groups") and "sequin groups" or active_ui_group_name
   specs_map = sequencer_controller.get_output_control_specs_map()
-
+  local selected_sequin = selected_control_indices.selected_sequin
   local output_type = selected_control_indices.selected_sequin_output_type
   local output_index = selected_control_indices.selected_sequin_output
   local output_mode = selected_control_indices.selected_sequin_output_mode
@@ -88,7 +29,10 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
   if sequencer_controller.selected_sequin then
     control_bcrumbs = control_bcrumbs .. "-" .. sequencer_controller.selected_sequin .. " "
   end
-  if output_type == 1 then -- softcut titles and labels
+  if selected_sequin and output_type == nil then
+    control_labels[1] = "softcut devices effects"
+    control_labels[2] = "time"
+  elseif output_type == 1 then -- softcut titles and labels
     control_bcrumbs =  control_bcrumbs .. "sc voice "
     if output_index then
       control_bcrumbs = control_bcrumbs .. output_index .. " "
@@ -97,8 +41,8 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
         control_labels[label_pos] = control_labels[label_pos] .. specs_map[1][1][i][5] .. " "
         label_pos = i%3 == 0 and label_pos + 1 or label_pos
       end  
-      if output_param then
-        control_bcrumbs = control_bcrumbs .. specs_map[output_type][output_index][output_param][5]
+      if output_mode then
+        control_bcrumbs = control_bcrumbs .. specs_map[output_type][output_index][output_mode][5]
         -- if specs_map[output_type][output_index][output_param][1] == "option" then
         --   local label_pos = 1
         --   control_labels = {"","",""}
@@ -239,15 +183,17 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
       end
     end
   elseif output_type == 4 then -- lattice and patterns  
-    local orig_bcrumbs = fn.deep_copy(control_bcrumbs)
+    local orig_bcrumbs = fn.deep_copy(control_bcrumbs) .. "time "
+    control_bcrumbs =  orig_bcrumbs
+
     -- control_bcrumbs =  control_bcrumbs .. "lat and pats"
     if output_index then
       if output_index == 1 then
-        control_bcrumbs = orig_bcrumbs .. " seq " 
+        control_bcrumbs = orig_bcrumbs .. "seq " 
       elseif output_index == 2 then
-        control_bcrumbs = orig_bcrumbs .. " subseq " 
+        control_bcrumbs = orig_bcrumbs .. "subseq " 
       elseif output_index == 3 then
-        control_bcrumbs = orig_bcrumbs .. " clp " 
+        control_bcrumbs = orig_bcrumbs .. "clp " 
       end
       local label_pos = 1
       if output_type and output_index then
@@ -349,131 +295,6 @@ function sequencer_screen.get_selected_sequin_values()
   end
   return vals
 end
--- local ui_group_acnyms =   { "sgp","sqn","typ","out","mod",
---                             "par","opt","sqm","pol",
---                             "int","dec","num",
---                             -- "num","opt","val"
---                           }
-
-function sequencer_screen.check_for_active_chicklet(acronym)
-  local active_ui_group_name = sequencer_controller:get_active_ui_group()
-  active_ui_group_name = ((string.sub(active_ui_group_name,1,13) == "sequin groups") and "sequin groups" or active_ui_group_name)
-
-  local active_chicklet = false
-  if active_ui_group_name == "sequin groups" and acronym == "sgp" then
-    active_chicklet = true
-  elseif active_ui_group_name == "sequin selector" and acronym == "sqn" then
-    active_chicklet = true
-  elseif active_ui_group_name == "sequin output types" and acronym == "typ" then
-    active_chicklet = true
-  elseif active_ui_group_name == "sequin outputs" and acronym == "out" then
-    active_chicklet = true
-  elseif active_ui_group_name == "sequin output modes" and acronym == "mod" then
-    active_chicklet = true
-  elseif active_ui_group_name == "sequin output params" and acronym == "par" then
-    active_chicklet = true
-  elseif active_ui_group_name == "value place integers" and acronym == "int" then
-    active_chicklet = true
-  elseif active_ui_group_name == "value place decimals" and acronym == "dec" then
-    active_chicklet = true
-  elseif active_ui_group_name == "sequence_mode" and acronym == "sqm" then
-    active_chicklet = true
-  elseif active_ui_group_name == "value selector polarity" and acronym == "pol" then
-    active_chicklet = true
-  elseif active_ui_group_name == "value selector nums" and acronym == "num" then
-    active_chicklet = true
-  elseif active_ui_group_name == "value selector options" and acronym == "opt" then
-    active_chicklet = true
-  -- elseif active_ui_group_name == "sequin output values" and acronym == "val" then
-  --   active_chicklet = true
-  end
-  return active_chicklet 
-end
-
-
-
-function sequencer_screen.draw_chicklets(selected_control_indices, output_value)
-  local selected_value_type = sequencer_controller.get_active_sequin_value_type()
-  -- local ui_group_acnyms
-  if selected_value_type == "number" then
-    ui_group_acnyms =   { "sgp","sqn","typ","out","mod",
-                          "par","sqm","pol",
-                          "int","dec","num",
-    }
-  elseif selected_value_type == "notes" then
-    ui_group_acnyms =   { "sgp","sqn","typ","out","mod",
-                          "par","sqm",
-                          "oct","ntn",
-    }
-  elseif selected_value_type == "option" then
-    ui_group_acnyms =   { "sgp","sqn","typ","out","mod",
-                          "par","sqm","opt",
-    }
-  else 
-    ui_group_acnyms =   { "sgp","sqn","typ","out","mod",
-                          "par","sqm",
-    }  
-  end 
-    
-  local chicklet_direction = "lr"
-  local c_loc = {5,15}
-  local chicklet_dim = {20,10}
-  acnym_map = sequencer_controller.get_acnym_map()
-  for i=2,#ui_group_acnyms+1,1 do
-    -- if chicklet_direction == "lr" then
-    -- chicklet_dim[1] = screen.text_extents(ui_group_acnyms[i])
-    local screen_level = chicklet_direction == "lr" and 5 or 3
-    local active_chicklet = sequencer_screen.check_for_active_chicklet(ui_group_acnyms[i])
-    screen_level = active_chicklet == true and 15 or screen_level
-    screen.level(screen_level)
-    if i <= #ui_group_acnyms then
-      screen.move(c_loc[1],c_loc[2])
-      screen.rect(c_loc[1],c_loc[2]+3,chicklet_dim[1]+3,chicklet_dim[2]-3)
-      screen.fill()
-      screen.stroke()
-      screen.level(0)
-      screen.move(c_loc[1],c_loc[2]+8)
-      screen.text(ui_group_acnyms[i])
-    elseif c_loc[2]>40 then
-      screen_level = 12
-      screen.move(c_loc[1]-chicklet_dim[1]-5,c_loc[2])
-      
-      screen.rect(c_loc[1]-chicklet_dim[1]-5,c_loc[2]+3,(chicklet_dim[1]*2)+8,chicklet_dim[2]-3)
-      screen.fill()
-      screen.stroke()
-      screen.level(15)
-      screen.move(c_loc[1]-chicklet_dim[1]-5,c_loc[2]+8)
-      if type(output_value) ~= "table" then
-        screen.text(output_value and output_value  or "")
-      end
-    end
-    screen.move(c_loc[1]+22,c_loc[2]+8)
-    local selected_index = acnym_map[ui_group_acnyms[i]]
-    selected_index = selected_index and selected_index or ""
-    if ui_group_acnyms[i] ~= "mod" or (ui_group_acnyms[i] == "mod" and sequencer_controller.sequin_output_modes) then
-      screen.text_right(selected_index)
-    end
-    screen.move(c_loc[1],c_loc[2])
-    local chick_space = 5
-    if chicklet_direction == "lr" and ui_group_acnyms[i+1] then
-      if c_loc[1] < 100 then
-        c_loc[1] = c_loc[1]+chicklet_dim[1]+chick_space
-      else
-        c_loc[2] = c_loc[2] + 11
-        chicklet_direction = "td"
-      end
-    elseif chicklet_direction == "td" then
-      if c_loc[2] < 45 then
-        c_loc[2] = c_loc[2] + 11
-      else
-        c_loc[1] = c_loc[1]-chicklet_dim[1]-chick_space
-        chicklet_direction = "rl"
-      end
-    elseif chicklet_direction == "rl" then
-      c_loc[1] = c_loc[1]-chicklet_dim[1]-chick_space
-    end
-  end
-end
 
 function sequencer_screen.get_control_bcrumbs()
   return sequencer_screen.control_bcrumbs  
@@ -485,34 +306,39 @@ end
 
 function sequencer_screen.update()
   if grid_mode == "sequencer" then
-    local active_control = sequencer_controller:get_active_ui_group()
-    active_control = ((string.sub(active_control,1,13) == "sequin groups") and "sequin groups" or active_control)
+    sequencer_screen.active_control = sequencer_controller:get_active_ui_group_name()
+    sequencer_screen.active_control = ((string.sub(sequencer_screen.active_control,1,13) == "sequin groups") and "sequin groups" or sequencer_screen.active_control)
 
 
     selected_control_indices = sequencer_controller.get_selected_indices()
     control_labels, control_bcrumbs, sequence_values, sequin_values, output_value = sequencer_screen.update_screen_instructions(selected_control_indices)
 
-
-    sequencer_screen.draw_chicklets(selected_control_indices,output_value)
-    screen.level(10)
-    screen.move(22-17,27)
-    screen.line_rel(86+12,0)
-    screen.line_rel(0,21)
-    screen.line_rel(-86-12,0)
+    screen.level(8)
+    screen.move(5,18)
+    screen.line_rel(122,0)
+    screen.line_rel(0,32)
+    screen.move_rel(-1,-32)
+    screen.line_rel(0,32)
+    screen.line_rel(-121,0)
+    screen.stroke()
+    screen.move(5,42)
+    screen.rect(5,42,122,8)
+    screen.fill()
     screen.stroke()
 
     sequencer_screen.set_control_bcrumbs(control_bcrumbs)
-    local show_sequence_values =  active_control ==   "sequin output values"  or 
-                                  active_control ==   "value selector nums"   or
-                                  active_control ==   "value place integers"  or
-                                  active_control ==   "value place digits"
+    local show_sequence_values =  sequencer_screen.active_control ==   "sequin output values"  or 
+                                  sequencer_screen.active_control ==   "value selector nums"   or
+                                  sequencer_screen.active_control ==   "value place integers"  or
+                                  sequencer_screen.active_control ==   "value place digits"
     if show_sequence_values and sequence_values then
       -------------------------
       --  active sequence values for all sequin(s)
       -------------------------
-      -- screen.move(5,32)
+      -- screen.move(5,26)
       -- screen.text(sequence_values)
-      local lx,ly = 5,32
+
+      local lx,ly = 5,26
       local screen_text = ""
       -- local output_labels = {"(1/3) ","(4/6) ","(7/9) "}
       -- local line_num = 1
@@ -549,6 +375,7 @@ function sequencer_screen.update()
           end
         end
         local screen_level = i == sequencer_controller.selected_sequin and 15 or 5
+        screen.level(10)
         screen.level(screen_level)
         screen.text(screen_text)
         screen.level(10)
@@ -564,7 +391,7 @@ function sequencer_screen.update()
       -------------------------
       --  all sequence values for the selected sequin
       -------------------------
-      local lx,ly = 50,32
+      local lx,ly = 70,26
       local screen_text = ""
       local selected_sequin_index = sequencer_controller.selected_sequin_ix
       -- local output_labels = {"(1/3) ","(4/6) ","(7/9) "}
@@ -583,12 +410,18 @@ function sequencer_screen.update()
         screen_text = ""
         -- screen.text(val)
         if i%2 == 0 then
-          lx = 50
+          lx = 70
           ly = ly+7
         end
       end
-    elseif active_control == "value selector options" then
-    -- elseif active_control == "value selector options" then
+      screen.level(2)
+      screen.move(5,48)
+      screen.text("sequins")
+      screen.move(70,48)
+      screen.text("sub-sequins")
+
+    elseif sequencer_screen.active_control == "value selector options" then
+    -- elseif sequencer_screen.active_control == "value selector options" then
       control_labels = {}
       local options = sequencer_controller.get_options_text()
       if options then
@@ -598,58 +431,63 @@ function sequencer_screen.update()
           control_labels[label_pos] = control_labels[label_pos] .. options[i] .. "  "
           label_pos = i%3 == 0 and label_pos + 1 or label_pos
         end   
-        local lx,ly = 5,32
+        local lx,ly = 5,26
         for i=1,#control_labels do
           screen.move(lx,ly)  
           screen.text(control_labels[i])
           ly = ly+7
         end
       end  
-    elseif active_control == "value place integers" or active_control == "value place decimals" then
-       screen.move(5,32)
-       screen.text(active_control)
-    elseif active_control == "value selector nums" then
-      local active_place = sequencer_controller.active_value_selector_place
-      screen.move(5,47)
-      screen.text("set value at: " .. active_place)
     else
-      local lx,ly = 5,32
+      local lx,ly = 5,26
       for i=1,#control_labels do
         screen.move(lx,ly)
         screen.text(control_labels[i])
         ly = ly+7
       end
     end
+
     screen.move(5,10)
     screen.level(3)
-    screen.rect(5,10,127,7)
+    screen.rect(5,10,122,7)
     screen.fill()
     screen.stroke()
     
     screen.level(8)
     screen.move(5,15)
-    screen.text(active_control)
 
+    local select_num =  sequencer_screen.active_control ==   "value selector nums"   or
+                        sequencer_screen.active_control ==   "value place integers"  or
+                        sequencer_screen.active_control ==   "value place digits"
 
-      --[[
-    screen.level(15)
-    screen.move(1,25)
-    screen.text(sequencer_screen.active_ui_group)
-    screen.move(1,35)
-    screen.text(sequencer_screen.active_ui_group_instructions1)
-    screen.move(1,45)
-    screen.text(sequencer_screen.active_ui_group_instructions2)
-    screen.move(1,55)
-    screen.text(sequencer_screen.active_ui_group_instructions3)
-    ]]
+    local text = select_num == true and "select number" or sequencer_screen.active_control 
+    screen.text(text)
+    
+    
+    local output_value_label = "selected value "
+    local output_value_label_width = screen.text_extents(output_value_label)
+    screen.level(5)
+    -- screen.rect(5,53,output_value_label_width,16)
+    screen.rect(5,53,122,16)
+    screen.fill()
+    screen.stroke()
+    screen.level(8)
+    -- screen.rect(5+output_value_label_width,53,4,8)
+    -- screen.fill()
+    -- screen.stroke()
 
-    --[[
-    if #sequencer_screen.squares>0 then
-      for i=1,#sequencer_screen.squares,1 do
-        sequencer_screen.squares[i]:draw()
-      end
+    screen.level(12)
+    screen.rect(9+output_value_label_width,53,126-10-output_value_label_width,8)
+    screen.fill()
+    screen.stroke()
+    if sequencer_screen.active_control == "sequin output values" and output_value then
+      -- print(control_labels, control_bcrumbs, sequence_values, sequin_values, output_value)
+      screen.level(0)
+      screen.move(5,60)
+      screen.text(output_value_label ..output_value)
     end
-    ]]
+
+
   end
 end
 

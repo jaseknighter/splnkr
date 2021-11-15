@@ -217,7 +217,7 @@ sc.outputs_map = {
 
 -- note: '(nil)' means the output mode takes just 1 param) 
 sc.output_mode_map = {
-  {nil,nil,nil,nil,nil,nil},    -- softcut 
+  {5,5,5,5,5,5},    -- softcut 
   {7,6,7,5},                    -- devices midi out (7), crow(2), just_friends(7),w/(5)
   {nil,nil,4,3,3,7},            -- effects: amp(nil), drywet(nil), delay(4),bitcrush(3),enveloper(3),pitchshift(7)
   {3,3,4},                      -- sequins: step, num sequin, starting sequin
@@ -227,14 +227,7 @@ sc.output_mode_map = {
 
 -- note: '(nil)' means just 1 output param' 
 sc.output_params_map = {
-  {
-    -- 4 softcut output params: 
-    --    sample_cut_num: 1-10 ????
-    --    rate: -20 - 20 ??????
-    --    rate_direction: -1, 1
-    --    level: 0-1
-    5,5,5,5,5,5
-  }, 
+  {{nil,nil,nil,nil,nil,nil}}, -- 4 softcut output params: sample_cut_num, rate, rade_direction, level
   {{6,6,6,3,3,3,nil},{nil,nil,nil,nil,nil,nil},{2,2,2,2,2,2,2},{9,9,9,4,9}}, -- device (midi out (4), crow(6), just_friends(2),w/(2))
   {nil,nil,{nil,nil,nil,nil},{nil,nil,nil},{nil,nil,nil},{nil,nil,nil,nil,nil,nil,nil}}, -- effect (amp(nil), drywet(nil), pitchshift(nil), pitchshift offset(nil), pitchshift array (5)), phaser(nil), delay(nil), enveloper (3)
   {{nil,nil,nil},{nil,nil,nil},{nil,4,nil,nil},}, -- sequins: step, num sequin, starting sequin
@@ -258,12 +251,8 @@ function sc.refresh_output_control_specs_map()
   local max_note = scale_length - min_note
   for i=1,num_cutters,1 do table.insert(cutters,i) end
   sc.output_control_specs_map = {
-    { -- 4 softcut output params: 
-      --    sample_cut_num: 1-10 ????
-      --    rate: -20 - 20 ??????
-      --    rate_direction: -1, 1
-      --    level: 0-1
-      {
+    { -- softcut: voices: 1-6
+      { 
         {"option",{"stp","la", "ac", "sc","1sh"},nil,nil,"v_mode","v_mode"},      -- play mode
         {"option",cutters,nil,"cutter","cutter"},  -- cutter
         {"number","0.00",20,1,"rate","rate"},    -- rate
@@ -603,8 +592,10 @@ function sc.update_sequin_selector(x, y, state)
     -- sc.sequins_mods = grid_sequencer:register_ui_group("sequins_mods",15,2,15,7,7,3)
     sc.set_selected_sequin(x - sc.selectors_x_offset)
   else
+    -- sc:unregister_ui_group(6,3)
+
     -- sc.active_value_heirarchy = nil
-    -- sc:unregister_ui_group(6,2)
+    sc:unregister_ui_group(6,2)
     -- sc.selected_sequin = nil
     -- sc.selected_sequin_output_type = nil
     -- sc.selected_sequin_output = nil
@@ -656,6 +647,7 @@ function sc.update_sequin_output_types(x, y, state)
     sc.sequin_outputs = grid_sequencer:register_ui_group("sequin_outputs",6,3,5+num_outputs,3,7,3)
   else
     sc:unregister_ui_group(6,3)
+    sc.selected_sequin_output_type = nil
     sc.selected_sequin_output = nil
     sc.selected_sequin_output_mode = nil
     sc.selected_sequin_output_param = nil
@@ -725,7 +717,6 @@ function sc.update_sequin_outputs(x, y, state)
       sc.set_sequin_output_value_controls()
     end
   else
-
     if sc.sequin_output_modes then 
       sc:unregister_ui_group(6,4)
     elseif sc.sequin_output_params then
@@ -771,7 +762,7 @@ function sc.update_sequin_output_modes(x, y, state)
     sc.selected_sequin_output_mode = output_mode_selected
     local output_type_selected = sc.selected_sequin_output_type
     local output_selected = sc.selected_sequin_output
-    local num_output_mode_params = sc.output_params_map[output_type_selected][output_selected][output_mode_selected]
+    local num_output_mode_params = sc.output_params_map[output_type_selected] and sc.output_params_map[output_type_selected][output_selected] and sc.output_params_map[output_type_selected][output_selected][output_mode_selected]
     if sc.sequin_output_params or sc.value_option then
       sc:unregister_ui_group(6,6)
       sc:unregister_ui_group(6,5)
@@ -1410,8 +1401,10 @@ function sc.update_sequin()
   local sgp = selected_indices.selected_sequin_group
   local sqn = selected_indices.selected_sequin
   -- print("update_sequin",sgp, sqn, sc.sequencers[sgp], sc.sequencers)
-  local sequin_to_update = sc.sequencers[sgp].sequin_set[sqn]
-  sequin_to_update.set_output_table(sc.sequins_outputs_table)
+  if sc.sequencers[sgp] and sc.sequencers[sgp].sequin_set[sqn] then 
+    local sequin_to_update = sc.sequencers[sgp].sequin_set[sqn]
+    sequin_to_update.set_output_table(sc.sequins_outputs_table)
+  end 
 end
 
 function sc.get_selected_indices()
@@ -1439,7 +1432,7 @@ function sc.get_options_text(option_index)
 
   local map = sc.get_output_control_specs_map()
   local options_table
-  if map[typ][out] then 
+  if map[typ] and map[typ][out] then 
     if map[typ][out][mod] and map[typ][out][mod][par] then
       options_table = map[typ][out][mod][par][2]
     elseif map[typ][out][mod] then
@@ -1662,7 +1655,7 @@ function sc.refresh_selected_sequin_values(sgp,sqn,output_table,selected_sequin_
           sc.selected_sequin_ix = v.seq.ix
 
           -- if the selected control is an option, convert the values 
-          if sc.output_control_specs_selected[1]=="option" then
+          if sc.output_control_specs_selected and sc.output_control_specs_selected[1]=="option" then
             for i=1,#selected_sequin_values,1 do
               local idx = selected_sequin_values[i]
               selected_sequin_values[i]=sc.output_control_specs_selected[2][idx]
@@ -1727,7 +1720,18 @@ end
 ----------------------------------
 -- 
 ----------------------------------
-function sc:get_active_ui_group()
+function sc:get_active_ui_group(group_num)
+  if group_num then
+    local active_ui_group = grid_sequencer.ui_groups[group_num]
+    return active_ui_group    
+  else
+    local num_ui_groups = grid_sequencer.get_num_ui_groups()
+    local active_ui_group = grid_sequencer.ui_groups[num_ui_groups]
+    return active_ui_group
+  end
+end
+
+function sc:get_active_ui_group_name()
   local num_ui_groups = grid_sequencer.get_num_ui_groups()
   local group_name = grid_sequencer.ui_groups[num_ui_groups].group_name
   -- group_name = string.sub(group_name,1,13) == "sequin_groups" and "sequin_groups" or group_name
