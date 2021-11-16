@@ -371,8 +371,8 @@ function sc.refresh_output_control_specs_map()
       {"number",'0.00',1,nil,"drywet","drywet"},                        -- drywet
       { -- delay
         {"number",'0.00',1,1,"amt","delay"}, 
-        {"number",'0.00',5,0.25,"del_time","delay time"},                         
-        {"number",'0.00',5,4,"del_dcy","delay decay"},                         
+        {"number",'0.000',5,0.25,"del_time","delay time"},                         
+        {"number",'0.000',5,4,"del_dcy","delay decay"},                         
         {"number",'0.00',5,1,"del_amp","delay amp"},    
       },                     
       { -- bitcrush
@@ -1763,7 +1763,16 @@ function sc:update_group(group_name,x, y, state, press_type)
     sc.selected_sequin_group = x
     self.update_selected_sequin_group(x,state)
   elseif group_name == "sequin_selector" then
-    self.update_sequin_selector(x, y, state)
+    print("self.ignore_next_press, press_type", self.ignore_next_press, press_type)
+    if self.ignore_next_press ~= 1 then
+      self.update_sequin_selector(x, y, state)
+    else 
+      self.ignore_next_press = nil
+    end
+    if press_type == "long" then 
+      self.ignore_next_press = 1 
+      grid_sequencer:register_flicker_at(x,y)
+    end
   elseif group_name == "sequin_output_types" then
     self.update_sequin_output_types(x, y, state)
   elseif group_name == "sequins_mods" then

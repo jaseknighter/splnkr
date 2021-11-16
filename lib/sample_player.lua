@@ -91,7 +91,7 @@ function sample_player.init()
     -- sample_player.play_modes[i] = i == 1 and 1 or 0
     sample_player.play_modes[i] = 0
 
-    sample_player.voice_rates[i] = 1
+    sample_player.voice_rates[i] = i == 1 and 1 or 0
   end
   softcut.event_phase(sample_player.playhead_position_update)
   softcut.poll_start_phase()
@@ -147,9 +147,6 @@ function sample_player.load_file(file)
     sample_player.autogenerate_cutters(sample_player.num_cutters)
     sample_player.set_play_mode(1,1)
     clock.run(cut_detector.set_bright_start)
-  else
-    -- sample_player.update()
-    --print("cancel")
   end
 end
 
@@ -161,12 +158,10 @@ end
 
 function sample_player.get_cutter_assignment(voice) 
   return sample_player.cutter_assignments[voice] 
-  --print("set cutter assignment",voice,cutter_assignment) 
 end
 
 function sample_player.set_cutter_assignment(voice, cutter_assignment) 
   sample_player.cutter_assignments[voice] = cutter_assignment
-  --print("set cutter assignment",voice,cutter_assignment) 
   sample_player.reset(voice, true)
 end
 
@@ -176,8 +171,6 @@ function sample_player.set_rate(voice, rate)
 end
 
 function sample_player.set_direction(voice, direction)
-  --print("direction",voice,direction)
-  -- sample_player.voice_rates[voice] * direction < 0 and sample_player.voice_rates[voice] * direction or sample_player.voice_rates[voice]
   if direction > 0 and sample_player.voice_rates[voice] < 0 then
     sample_player.voice_rates[voice] = sample_player.voice_rates[voice] * -1
     sample_player.reset(voice)
@@ -205,13 +198,11 @@ function sample_player.select_next_voice(direction)
     cutters[sample_player.active_cutter]:set_display_mode(display_mode)
   end
   if sample_player.enabled_voices[sample_player.selected_voice] == nil then
-    sample_player.set_play_mode(sample_player.selected_voice,1)
+    -- sample_player.set_play_mode(sample_player.selected_voice,1)
   end
 end
 
 function sample_player.reset(voice, set_position_at_start)
-  --print("reset",voice,cutters[1],sample_player.sample_positions[voice])
-  -- softcut.enable(voice,1)
   softcut.buffer(voice,1)
   softcut.loop(voice,1)
   
@@ -223,17 +214,10 @@ function sample_player.reset(voice, set_position_at_start)
       sample_player.voices_start_finish[voice][1] = 0
       sample_player.voices_start_finish[voice][2] = 0+length
     end 
-    print(sample_player.voices_start_finish[voice][1],sample_player.voices_start_finish[voice][2])
     softcut.loop_start(voice,sample_player.voices_start_finish[voice][1])
     softcut.loop_end(voice,sample_player.voices_start_finish[voice][2])
-  else  -- not sure what this is for (it does get called at script init)
-    --print("WHY AM I HERE?!?!?!")
-    -- softcut.loop_start(voice,1)
-    -- softcut.loop_end(voice,1+length)
-    -- softcut.position(voice,sample_player.sample_positions[voice])
   end 
   local play_mode = sample_player.play_modes[voice]
-  -- local rate = play_mode < 2 and sample_player.voice_rates[1] or sample_player.voice_rates[voice]
   local rate = sample_player.voice_rates[voice]
   
   softcut.rate(voice,rate)
@@ -267,6 +251,14 @@ function sample_player.set_play_mode(voice, mode)
   if sample_player.enabled_voices[voice] ~= 1 then
     sample_player.enabled_voices[voice] = 1
     softcut.position(voice,1)
+    if sample_player.voice_rates[voice] == 0 then
+      for i=1,#sample_player.voice_rates,1 do
+        if sample_player.voice_rates[i] ~= 0 then
+          sample_player.voice_rates[voice] = sample_player.voice_rates[i]
+          break
+        end
+      end
+    end
     softcut.enable(voice, 1)
   end
   sample_player.reset(voice)
@@ -307,15 +299,10 @@ function sample_player.cutters_start_finish_update()
 end
 
 function sample_player.playhead_position_update(voice,pos)
-  -- print(1,pos)
   sample_player.sample_positions[voice] = (pos) / length
-  -- if cutters[sample_player.cutter_assignments[voice]] then
   if waveform_loaded then
     local next_cutter_to_play = util.wrap(sample_player.cutter_assignments[voice]+1,1,#cutters)
-    local rate = sample_player.voice_rates[voice]
-    
-    -- local rate = sample_player.play_modes[voice] < 2 and sample_player.voice_rates[1] or sample_player.voice_rates[next_cutter_to_play]
-    -- local rate = sample_player.play_modes[voice] < 2 and sample_player.voice_rates[1] or sample_player.voice_rates[voice]
+    local rate = tonumber(sample_player.voice_rates[voice])
     if (next_cutter_to_play and (sample_player.sample_positions[voice] and sample_player.last_sample_positions[voice]) and (rate > 0 and sample_player.sample_positions[voice] < sample_player.last_sample_positions[voice]) or 
     (rate < 0 and sample_player.sample_positions[voice] > sample_player.last_sample_positions[voice])) then
       if sample_player.play_modes[voice] == 2 then -- all cuts
@@ -329,9 +316,10 @@ function sample_player.playhead_position_update(voice,pos)
         sample_player.voices_start_finish[voice][2] = util.linlin(10,120,0,length,cutters[sample_player.cutter_assignments[voice]]:get_finish_x_updated()) 
         sample_player.reset(voice)
       elseif sample_player.play_modes[voice] > 2 then -- selected cut/repeat/1shot
-        if sample_player.play_modes[voice] < 5 then
+        if sample_player.play_modes[voice] < 4 then
           sample_player.reset(voice)
-        else 
+          print("reset")
+        else -- stop 1-shot
           sample_player.set_play_mode(voice,0)
         end
       end
@@ -399,10 +387,7 @@ function sample_player.autogenerate_cutters(num_cutters)
       end
       
       table.sort(autogen_cut_indices)
-      --print(">>>>>>>>>>>>")
-      -- tab.print(autogen_cut_indices)
-      --print(">>>>>>")
-
+      
       local cutter_first_start_x = 0
       local cutter_first_finish_x = autogen_cut_indices[1]
       cutters[1] = Cutter:new(1,cutter_first_start_x,cutter_first_finish_x)
@@ -412,7 +397,6 @@ function sample_player.autogenerate_cutters(num_cutters)
       do
         local new_cutter_start_x = autogen_cut_indices[i]
         local new_cutter_finish_x = autogen_cut_indices[i+1] and autogen_cut_indices[i+1] or 128
-        --print(i+1, new_cutter_start_x, new_cutter_finish_x)
         table.insert(cutters, i+1, Cutter:new(i+1, new_cutter_start_x, new_cutter_finish_x))
         table.insert(cutter_rates, i+1,1)
       end
@@ -426,36 +410,6 @@ function sample_player.autogenerate_cutters(num_cutters)
     sample_player.update()     
   end
 end
-
--- function sample_player.autogenerate_cutters(a)
---   if waveform_loaded and sample_player.nav_active_control > 1 then
---     cutters = {}
---     sample_player.voice_rates = {}
---     local cutter1_start_x = 0
---     local cutter1_finish_x = 128/a
---     cutters[1] = Cutter:new(1,cutter1_start_x,cutter1_finish_x)
---     sample_player.voice_rates[1] = 1
-
---     local cutter_spacing = 128/a
---     for i=2,a,1
---     do
---       local new_cutter_start_x, new_cutter_finish_x
---       new_cutter_start_x = cutter_spacing*(i-1)
---       new_cutter_finish_x = cutter_spacing*(i)
-
---       table.insert(cutters, i, Cutter:new(i, new_cutter_start_x, new_cutter_finish_x))
---       table.insert(sample_player.voice_rates, i,1)
---     end
---     sample_player.cutters_start_finish_update()
-
-
---     sample_player.active_cutter = 1
---     sample_player.cutter_assignments[sample_player.selected_voice] = 1
---     local display_mode = sample_player.nav_active_control == 3 and 1 or 2
---     cutters[1]:set_display_mode(display_mode)
---     sample_player.update()
---   end
--- end
 
 function sample_player.draw_sub_nav ()
   screen.level(10)
@@ -491,7 +445,11 @@ function set_saving_elipses()
 end
 
 function sample_player.draw_top_nav (msg)
-  subnav_title = sample_player_nav_labels[sample_player.nav_active_control] 
+  if (waveform_loaded == false) or sample_player.nav_active_control == 1 or sample_player.nav_active_control == 7 then
+    subnav_title = sample_player_nav_labels[sample_player.nav_active_control] 
+  else
+    subnav_title = sample_player_nav_labels[sample_player.nav_active_control] .. "["..sample_player.selected_voice.."]"
+  end
   if msg == nil then
     if sample_player.nav_active_control == 2 then
       subnav_title = subnav_title .. ": " .. play_mode_text[sample_player.play_modes[sample_player.selected_voice]+1]
@@ -517,7 +475,7 @@ function sample_player.draw_top_nav (msg)
       subnav_title = subnav_title .. ": " .. clip_loc
     elseif sample_player.nav_active_control == 5 then
       local rate = sample_player.voice_rates[sample_player.selected_voice]
-        subnav_title = subnav_title .. "[" .. sample_player.selected_voice .. "]: " .. rate
+        subnav_title = subnav_title .. ": " .. rate
       -- local cutter_to_show = sample_player.active_cutter
       -- subnav_title = subnav_title .. "[" .. cutter_to_show .. "]: " .. rate
     elseif sample_player.nav_active_control == 6 then
@@ -581,13 +539,8 @@ function sample_player.update()
           screen.move(x, 25)
           screen.line_rel(0, 20)
           screen.stroke()
-          if numit == 0 and x_pos < 50 then
-            print("x_pos,x,brightness",x_pos,x,brightness)
-          end
           x_pos = x_pos + 1
         end
-        -- print("numit",numit)
-        numit = 1
         end
       if cut_detector.bright_checked == false then
         cut_detector.set_bright_completed()
@@ -600,7 +553,6 @@ function sample_player.update()
       -- draw the playhead positions for each voice
       for i=1,6,1 do
         local playhead_screen_level 
-        -- if sample_player.play_modes[i] > 0 then
         if i == sample_player.selected_voice then
           screen.level(15)
         elseif sample_player.play_modes[i] > 0 then

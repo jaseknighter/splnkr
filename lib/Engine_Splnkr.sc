@@ -133,14 +133,6 @@ Engine_Splnkr : CroneEngine {
       //////////////////////////////////////////
       // bandpass filters
       //////////////////////////////////////////
-      // bpfs=Array.fill(16,{arg i; 
-      //   BPF.ar(wet,bpfCenterFreqs[i],bpfRQs[i], (bpfRQs[i] ** -1) * (400 / bpfCenterFreqs[i] ** 0.5)); 
-      // });
-      // (bpfLevels[0]).poll;
-      // wet = 0;
-      // bpfs.do({arg item, i;
-      //   wet =  wet + (bpfs[i]*bpfLevels[i]);
-      // });
 
       // amplitude compensation for lower rq of bandpass filter
       bpf0 = BPF.ar(wet,centerFrequency0,reciprocalQuality0, (reciprocalQuality0 ** -1) * (400 / centerFrequency0 ** 0.5));
@@ -161,6 +153,8 @@ Engine_Splnkr : CroneEngine {
       bpf15 = BPF.ar(wet,centerFrequency15,reciprocalQuality15, (reciprocalQuality15 ** -1) * (400 / centerFrequency15 ** 0.5));
       
       wet = (bpf0*filterLevel0)+(bpf1*filterLevel1)+(bpf2*filterLevel2)+(bpf3*filterLevel3)+(bpf4*filterLevel4)+(bpf5*filterLevel5)+(bpf6*filterLevel6)+(bpf7*filterLevel7)+(bpf8*filterLevel8)+(bpf9*filterLevel9)+(bpf10*filterLevel10)+(bpf11*filterLevel11)+(bpf12*filterLevel12)+(bpf13*filterLevel13)+(bpf14*filterLevel14)+(bpf15*filterLevel15);
+
+
       //////////////////////////////////////////
       // amplitude based onset and frequency detection
       //////////////////////////////////////////

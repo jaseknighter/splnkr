@@ -189,17 +189,20 @@ local enc = function (n, d)
           end
         elseif sample_player.nav_active_control == 5 then -- set rate
           local rate = sample_player.voice_rates[sample_player.selected_voice]
-          rate = rate + d
-          rate = rate ~= 0 and rate or rate + d
-          rate = util.clamp(rate,-20,20)
           -- if sample_player.play_modes[sample_player.selected_voice] < 2 then sample_player.voice_rates[1] = rate else sample_player.voice_rates[sample_player.selected_voice] = rate end
           if alt_key_active == false then
+            rate = rate + d
+            rate = rate ~= 0 and rate or rate + d
             sample_player.voice_rates[sample_player.selected_voice] = rate 
           else
-            for i=1,#sample_player.voice_rates,1
-            do
-              sample_player.voice_rates[i] = rate
-            end
+            rate = rate + d/100
+            rate = rate ~= 0 and rate or rate + d
+            rate = util.clamp(rate,-20,20)
+            sample_player.voice_rates[sample_player.selected_voice] = rate 
+            -- for i=1,#sample_player.voice_rates,1
+            -- do
+            --   sample_player.voice_rates[i] = rate
+            -- end
           end
           
           for i=1,6,1 do sample_player.reset(i) end
