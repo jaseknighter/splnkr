@@ -9,9 +9,9 @@ function parameters.init()
   --------------------------------
   -- note params
   -- scale: the scale to use
-  -- scale lengt: the number of notes in the scale, centered around the `note_center_frequency`
+  -- scale lengt: the number of notes in the scale, centered around the `note_offset`
   -- root note: the lowest note in the scale
-  -- note_center_frequency: the note to use as "1" in the sequencer
+  -- note_offset: the note to use as "1" in the sequencer
   --------------------------------
   params:add_separator("SAVE SAMPLES")
   params:add_trigger("set_", "save samples")

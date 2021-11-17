@@ -170,7 +170,7 @@ function init()
       detected_level = fn.round_decimals(value,5,"up")
       if (detected_level and last_onset_amplitude and last_onset_frequency) and (last_onset_amplitude < detected_level or math.abs(last_onset_frequency - detected_freq) > 5)
       then 
-        local note_offset = params:get("note_center_frequency") - params:get("root_note")
+        local note_offset = params:get("note_offset") - params:get("root_note")
         note_num = MusicUtil.freq_to_note_num (detected_freq) + note_offset 
 
       

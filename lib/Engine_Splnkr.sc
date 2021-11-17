@@ -18,7 +18,7 @@ Engine_Splnkr : CroneEngine {
   var ampPollFunc, onsetDetectAmpPollFunc, freqPollFunc;
   var outArray;
   var amplitudeDetectPoll,onsetAmplitudeDetectPoll, frequencyDetectPoll;
-  var ampMinArray, ampMaxArray, freqMinArray, freqMaxArray;
+  // var ampMinArray, ampMaxArray, freqMinArray, freqMaxArray;
   var amp=1,bpm=120,drywet=1;
   var effect_phaser=0,effect_distortion=0,effect_delay=0,
       effect_bitcrush,bitcrush_bits=10,bitcrush_rate=12000, // this has parameters
@@ -84,8 +84,8 @@ Engine_Splnkr : CroneEngine {
       filterLevel13=1, centerFrequency13=440, reciprocalQuality13=1,
       filterLevel14=1, centerFrequency14=440, reciprocalQuality14=1,
       filterLevel15=1, centerFrequency15=440, reciprocalQuality15=1,
-      ampMin=ampMinArray, ampMax=ampMaxArray,
-      freqMin=freqMinArray, freqMax=freqMaxArray,
+      // ampMin=ampMinArray, ampMax=ampMaxArray,
+      // freqMin=freqMinArray, freqMax=freqMaxArray,
       effect_phaser=0,effect_distortion=0,effect_delay=0,
       effect_bitcrush,bitcrush_bits=10,bitcrush_rate=12000, 
       effect_strobe=0,effect_vinyl=0, effect_flutter_and_wow=0,
@@ -122,10 +122,10 @@ Engine_Splnkr : CroneEngine {
       // bpfCenterFreqs = Array.fill(16,{440});
       // bpfRQs = Array.fill(16,{1});
       
-      ampMinArray=Array.fill(4,{0.001});
-      ampMaxArray=Array.fill(4,{0.999});
-      freqMinArray=Array.fill(4,{40});
-      freqMaxArray=Array.fill(4,{9600});
+      // ampMinArray=Array.fill(4,{0.001});
+      // ampMaxArray=Array.fill(4,{0.999});
+      // freqMinArray=Array.fill(4,{40});
+      // freqMaxArray=Array.fill(4,{9600});
 
       wet = SoundIn.ar([0,1]);
       dry = SoundIn.ar([0,1]);
@@ -165,7 +165,7 @@ Engine_Splnkr : CroneEngine {
             fastMul: 0.6,
             thresh: 0.001
             ),
-          0.2
+          0.5
         )
       );
 

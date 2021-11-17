@@ -43,7 +43,7 @@ function externals:new(active_notes)
 
   -- externals1.note_on(1, note_num, 1, 1, nil,"engine")
   ext.note_on = function(voice_id, value, beat_frequency, envelope_time_remaining, note_source, note_target)
-    -- local note_offset = params:get("note_center_frequency") - params:get("root_note")
+    -- local note_offset = params:get("note_offset") - params:get("root_note")
     local value = fn.deep_copy(value)
     -- if type(value) == "table" then
       -- hack!!! figure out when notes[value.pitch+note_offset] would be nil
