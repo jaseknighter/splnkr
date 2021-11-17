@@ -119,7 +119,7 @@ end
 -- scale/note/quantize functions
 SCALE_LENGTH = 35 --128
 ROOT_NOTE_DEFAULT = 36 --(A0)
-NOTE_CENTER_FREQUENCY_DEFAULT = 48 --(A1)
+NOTE_OFFSET_DEFAULT = 48 --(A1)
 scale_names = {}
 notes = {}
 current_note_indices = {}
@@ -192,6 +192,7 @@ end
 -------------------------------------------
 
 MAX_CUTTERS = 12
+MIN_CUT_SPACING = 1
 OUTPUT_TYPES = {"softcut","devices","effects","time"}
 PPQN_OPTIONS = {12,24,36,48,60,72,84,96,108}
 TIME_OPTIONS = {"1/8","1/4","1/3","1/2","3/4","1","4/3","3/2","2"}

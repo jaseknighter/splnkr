@@ -202,14 +202,19 @@ function externals:new(active_notes)
     ) then
       local volts
       local mode = value.mode
-      if note_source == "engine" and value then
-        volts = (value-60)/12
+      
+      
+      if note_source == "engine" and value.pitch then
+        volts = (value.pitch-60)/12
       elseif mode == 1 and value.pitch then -- play_voice
           local pitch = value.pitch
           volts = pitch/12
+      elseif note_source =="midi" then
+        volts = (value.pitch-60)/12
       else 
-        print("NO CROW VOLTS VALUE VALUE: externals 166")
+        print("NO CROW VOLTS VALUE VALUE: externals ~166")
       end
+      
       
       crow.output[3].volts = volts
       local output_param = params:get("output_crow4")

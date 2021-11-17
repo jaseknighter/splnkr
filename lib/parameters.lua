@@ -23,8 +23,8 @@ function parameters.init()
     end
   end)
 
-  params:add_separator("SCALES AND NOTES")
-  params:add_group("scales and notes",5)
+  params:add_separator("SCALES, NOTES, AND TEMPO")
+  -- params:add_group("scales and notes",5)
   params:add{type = "option", id = "scale_mode", name = "scale mode",
   options = scale_names, default = 5,
   action = function() fn.build_scale() end}
@@ -33,13 +33,13 @@ function parameters.init()
   min = 0, max = 127, default = ROOT_NOTE_DEFAULT, formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end,
   action = function() fn.build_scale() end}
 
-  params:add{type = "number", id = "note_center_frequency", name = "note center frequency",
-  min = 0, max = 127, default = NOTE_CENTER_FREQUENCY_DEFAULT, formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end,
+  params:add{type = "number", id = "note_offset", name = "note offset",
+  min = 0, max = 127, default = NOTE_OFFSET_DEFAULT, formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end,
   action = function() fn.build_scale() end}
 
   -- latice meter
   params:add{
-    type = "option", id = "meter", name = "meter", default=4,
+    type = "option", id = "meter", name = "sequencer meter", default=4,
     options=TIME_OPTIONS,
     action=function(x)
       if initializing == false and sequencer_controller.selected_sequin_group then
@@ -49,9 +49,9 @@ function parameters.init()
     end
   }
 
-    -- pattern division
+    -- pattern division for the selected sequencer (aka sequin group)
     params:add{
-      type = "option", id = "division", name = "divisions", default=6,
+      type = "option", id = "division", name = "sequencer divisions", default=6,
       options=TIME_OPTIONS,
       action=function(x)
         if initializing == false and sequencer_controller.selected_sequin_group then
@@ -61,44 +61,6 @@ function parameters.init()
       end
     }
   
-  ------------------------------
-  -- amplitude/frequency detection params
-  ------------------------------
-  params:add_separator("amp/freq detection")
-
-  -- set the amplitude detection level
-  params:add{
-    type="taper", id = "amp_detect_level", name = "amp detect level",min=0.001, max=0.2, default = 0.03,
-    action=function(x) 
-
-    end
-  }
-  params:add{
-    type = "option", id = "quantize_freq", name = "quantize freq", 
-    options = {"off","on"}, default = 2, 
-  }
-
-  params:add{
-    type = "option", id = "detected_freq_to_midi", name = "freq to midi", 
-    options = {"off","on"}, default = 1, 
-  }
-
-  params:add{
-    type = "number", id = "detected_freq_to_midi_out_channel", name = "midi channel", 
-    min=1,max=16,default=1, 
-  }
-
-  params:add{
-    type = "option", id = "detected_freq_to_crow", name = "freq to crow", 
-    options = {"off","on"}, default = 2, 
-  }
-
-  -- params:add_group("amp detection",2)
-  -- parameters.create_amp_freq_params(amp_params)
-  -- params:add_group("freq detection",2)
-  -- parameters.create_amp_freq_params(freq_params)
-
-
 
   ------------------------------
     -- audio routing params
@@ -136,12 +98,110 @@ function parameters.init()
     type = "option", id = "audio_routing", name = "audio routing", 
     options = {"in+cut->eng","in->eng","cut->eng"},
     -- min = 1, max = 3, 
-    default = 1,
+    default = 3,
     action = function(value) 
       rerouting_audio = true
       clock.run(route_audio)
     end
   }
+  ------------------------------
+  -- amplitude/frequency detection params
+  ------------------------------
+  params:add_separator("AMP/FREQ DETECTIOn")
+  params:add_group("amp/freq detection",20)
+  -- set the amplitude detection level
+  params:add_separator("detection level/freq")
+  params:add{
+    type = "option", id = "quantize_freq", name = "quantize freq", 
+    options = {"off","on"}, default = 2, 
+  }
+
+  params:add_separator("midi detection")
+  
+  params:add{
+    type="taper", id = "amp_detect_level_midi_min", name = "min midi amp level",min=0.001, max=0.5, default = 0.03,
+    action=function(x) 
+    end
+  }
+
+  params:add{
+    type="taper", id = "amp_detect_level_midi_max", name = "max midi amp level",min=0.001, max=0.5, default = 0.05,
+    action=function(x) 
+    end
+  }
+
+  params:add{
+    type = "option", id = "detected_freq_to_midi", name = "freq to midi", 
+    options = {"off","on"}, default = 1, 
+  }
+
+  params:add{
+    type = "number", id = "detected_freq_to_midi_out_channel", name = "midi channel", 
+    min=1,max=16,default=1, 
+  }
+
+  params:add{type = "number", id = "min_midi_note_num", name = "min midi note num",
+  min = 0, max = 127, default = ROOT_NOTE_DEFAULT,
+  }
+  params:add{type = "number", id = "max_midi_note_num", name = "max midi note num",
+  min = 0, max = 127, default = 127-ROOT_NOTE_DEFAULT,
+  }
+  
+  params:add_separator("crow detection")
+  
+  params:add{
+    type="taper", id = "amp_detect_level_min_crow2", name = "min amp level crow 1/2",min=0.001, max=0.5, default = 0.03,
+    action=function(x) 
+    end
+  }
+
+  params:add{
+    type="taper", id = "amp_detect_level_max_crow2", name = "max amp level crow 1/2",min=0.001, max=0.5, default = 0.05,
+    action=function(x) 
+    end
+  }
+
+  params:add{
+    type = "option", id = "detected_freq_to_crow1", name = "freq to crow1", 
+    options = {"off","on"}, default = 2, 
+  }
+
+  params:add{type = "number", id = "min_crow1_note_num", name = "min crow 1 note num",
+  min = 0, max = 127, default = ROOT_NOTE_DEFAULT,
+  }
+  params:add{type = "number", id = "max_crow1_note_num", name = "max crow 1 note num",
+  min = 0, max = 127, default = 127-ROOT_NOTE_DEFAULT,
+  }
+
+  params:add{
+    type="taper", id = "amp_detect_level_min_crow4", name = "min amp level crow 3/4",min=0.001, max=0.5, default = 0.03,
+    action=function(x) 
+    end
+  }
+
+  params:add{
+    type="taper", id = "amp_detect_level_max_crow4", name = "max amp level crow 3/4",min=0.001, max=0.5, default = 0.05,
+    action=function(x) 
+    end
+  }
+  params:add{
+    type = "option", id = "detected_freq_to_crow3", name = "freq to crow3", 
+    options = {"off","on"}, default = 2, 
+  }
+  
+  params:add{type = "number", id = "min_crow3_note_num", name = "min crow 3 note num",
+  min = 0, max = 127, default = ROOT_NOTE_DEFAULT,
+  }
+  params:add{type = "number", id = "max_crow3_note_num", name = "max crow 3 note num",
+  min = 0, max = 127, default = 127-ROOT_NOTE_DEFAULT,
+  }
+  -- params:add_group("amp detection",2)
+  -- parameters.create_amp_freq_params(amp_params)
+  -- params:add_group("freq detection",2)
+  -- parameters.create_amp_freq_params(freq_params)
+
+
+
 
   ------------------------------
   -- sequencing
@@ -756,7 +816,7 @@ function parameters.init()
 
   params:add{type = "option", id = "output_crow4", name = "crow out4 mode",
     options = {"off","envelope","trigger","gate", "clock"},
-    default = 3,
+    default = 2,
     action = function(value)
       if value == 3 then 
         crow.output[4].action = "{to(5,0),to(0,0.25)}"

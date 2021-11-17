@@ -114,13 +114,12 @@ function sample_player.play_live()
   -- end
   
   waveform_loaded = true
-  -- clock.run(sample_player.init_cutters)
-  sample_player.autogenerate_cutters(sample_player.num_cutters)
+
+  cut_detector.set_bright_start()
+  -- sample_player.autogenerate_cutters(sample_player.num_cutters)
+  -- sample_player.autogenerate_cutters(sample_player.num_cutters)
+  -- softcut.play(1,1)
   
-  -- clock.run(cut_detector.set_bright_start)
-  
-  -- sample_player.set_play_mode(1,1)
-  softcut.play(1,1)
 
 
 end
@@ -141,13 +140,17 @@ function sample_player.load_file(file)
     for i=1,6,1 do
       sample_player.reset(i)
     end
-    -- sample_player.reset(1)
-    waveform_loaded = true
-    -- clock.run(sample_player.init_cutters)
-    sample_player.autogenerate_cutters(sample_player.num_cutters)
-    sample_player.set_play_mode(1,1)
-    clock.run(cut_detector.set_bright_start)
+    clock.run(sample_player.finish_file_load)
   end
+end
+
+function sample_player.finish_file_load()
+  clock.sleep(0.5)
+  waveform_loaded = true
+  cut_detector.set_bright_start()
+  sample_player.update()
+  sample_player.autogenerate_cutters(sample_player.num_cutters)
+  sample_player.set_play_mode(1,1)
 end
 
 function sample_player.play_check(voice)
@@ -386,7 +389,7 @@ function sample_player.autogenerate_cutters(num_cutters)
       end
       
       table.sort(autogen_cut_indices)
-
+      -- tab.print(autogen_cut_indices)
       local start_index =  num_cutters > #cutters and #cutters + 1 or num_cutters + 1
       for i=start_index,MAX_CUTTERS,1
       do
@@ -397,7 +400,7 @@ function sample_player.autogenerate_cutters(num_cutters)
         if i<=num_cutters then
           local new_cutter_start_x = autogen_cut_indices[i]
           local new_cutter_finish_x = autogen_cut_indices[i+1] and autogen_cut_indices[i+1] or 128
-          -- print(i,new_cutter_finish_x-new_cutter_start_x)
+          -- print(i,new_cutter_finish_x,new_cutter_start_x)
           table.insert(cutters, i, Cutter:new(i, new_cutter_start_x, new_cutter_finish_x))
           table.insert(cutter_rates, i,1)
         end

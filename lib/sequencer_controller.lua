@@ -247,7 +247,7 @@ end
 function sc.refresh_output_control_specs_map()
   local num_cutters = sc.get_num_cutters()
   local cutters = {}
-  local min_note = initializing == false and params:get("note_center_frequency") * -1 or NOTE_CENTER_FREQUENCY_DEFAULT
+  local min_note = initializing == false and params:get("note_center_frequency") * -1 or NOTE_OFFSET_DEFAULT
   local max_note = SCALE_LENGTH - min_note
   for i=1,num_cutters,1 do table.insert(cutters,i) end
   sc.output_control_specs_map = {

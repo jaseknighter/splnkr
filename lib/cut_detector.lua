@@ -11,9 +11,10 @@ local bright_diff_sorted_tab = {}
 -- end
 
 function cut_detector.set_bright_start()
-  clock.sleep(0.5)
+  -- clock.sleep(0.1)
   cut_detector.bright_checked = false
   cut_detector.bright_tab = {}
+  
 end
 
 function cut_detector.set_bright(bright)
@@ -43,14 +44,11 @@ end
 
 function cut_detector.find_cuts()
   bright_diff_tab = {}
-  -- print(#cut_detector.bright_tab)
-
+  
   -- first try to find cuts where there are silent areas in the sample
   for i=2,#cut_detector.bright_tab,1 do
     local b_diff = math.abs(cut_detector.bright_tab[i] - cut_detector.bright_tab[i-1])
     if (cut_detector.bright_tab[i] < 10 or  cut_detector.bright_tab[i-1] < 10) and b_diff > 100 then
-      -- b_diff = b_diff < 0 and b_diff * -1 or b_diff
-      -- print(i,b_diff,cut_detector.bright_tab[i],cut_detector.bright_tab[i-1])
       table.insert(bright_diff_tab,{i,b_diff})
     end
   end
@@ -73,16 +71,6 @@ function cut_detector.find_cuts()
     table.sort(bright_diff_sorted_tab, function(a,b) 
       return a[2][2] < b[2][2]
     end)
-
   end
-
-  
---[[
-  -- tab.print(bright_diff_sorted_tab)
-  for i=1,#bright_diff_sorted_tab,1 do
-    -- tab.print(bright_diff_sorted_tab[i][2])
-  end
-  ]]
-  
 end
 return cut_detector
