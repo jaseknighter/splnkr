@@ -362,7 +362,7 @@ function sample_player.autogenerate_cutters(num_cutters)
       cutter_rates[1] = 1
 
       local cutter_spacing = 128/num_cutters
-      for i=2,num_cutters,1
+      for i=1,num_cutters,1
       do
         local new_cutter_start_x, new_cutter_finish_x
         new_cutter_start_x = cutter_spacing*(i-1)
@@ -372,32 +372,35 @@ function sample_player.autogenerate_cutters(num_cutters)
       end
     else
       -- make cuts according to sample levels
-      cutters = {}
-      cutter_rates = {}
+      cutters = cutters and cutters or {}
+      cutter_rates = cutter_rates and cutter_rates or {}
       
       -- get the cut indices and resort them lowest to highest
       local sorted_cut_indices = cut_detector.get_sorted_cut_indices()
-      autogen_cut_indices = {}
-      for i=1,num_cutters-1,1
+      local autogen_cut_indices = {}
+      -- for i=1,num_cutters-1,1
+      for i=1,MAX_CUTTERS-1,1
       do
-        local new_cutter1, new_cutter2
-        new_cutter1 = sorted_cut_indices[i] and sorted_cut_indices[i] or 0
-        table.insert(autogen_cut_indices,new_cutter1)
+        local new_cutter = sorted_cut_indices[i] and sorted_cut_indices[i] or 0
+        table.insert(autogen_cut_indices,new_cutter)
       end
       
       table.sort(autogen_cut_indices)
-      
-      local cutter_first_start_x = 0
-      local cutter_first_finish_x = autogen_cut_indices[1]
-      cutters[1] = Cutter:new(1,cutter_first_start_x,cutter_first_finish_x)
-      cutter_rates[1] = 1
 
-      for i=1,num_cutters-1,1
+      local start_index =  num_cutters > #cutters and #cutters + 1 or num_cutters + 1
+      for i=start_index,MAX_CUTTERS,1
       do
-        local new_cutter_start_x = autogen_cut_indices[i]
-        local new_cutter_finish_x = autogen_cut_indices[i+1] and autogen_cut_indices[i+1] or 128
-        table.insert(cutters, i+1, Cutter:new(i+1, new_cutter_start_x, new_cutter_finish_x))
-        table.insert(cutter_rates, i+1,1)
+        if cutters[i] then
+          table.remove(cutters, i)
+          table.remove(cutter_rates, i)
+        end
+        if i<=num_cutters then
+          local new_cutter_start_x = autogen_cut_indices[i]
+          local new_cutter_finish_x = autogen_cut_indices[i+1] and autogen_cut_indices[i+1] or 128
+          -- print(i,new_cutter_finish_x-new_cutter_start_x)
+          table.insert(cutters, i, Cutter:new(i, new_cutter_start_x, new_cutter_finish_x))
+          table.insert(cutter_rates, i,1)
+        end
       end
     end
     sample_player.cutters_start_finish_update()
