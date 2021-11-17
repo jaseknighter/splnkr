@@ -151,14 +151,14 @@ function init()
   ----------------------------
   
     -- Init polls
-  --detect_level, detect_freq, note_num
+  --detected_level, detected_freq, note_num
   local last_note_num = 0
 
   amplitude_detect_poll = poll.set("amplitudeDetect", function(value)
-    detect_level = fn.round_decimals(value,5,"up")
-    if detect_level > 0.0002
+    detected_level = fn.round_decimals(value,5,"up")
+    if detected_level > 0.0002
     then 
-      -- print("amplitudeDetect,detect_freq",tonumber(detect_level),detect_freq) 
+      -- print("amplitudeDetect,detected_freq",tonumber(detected_level),detected_freq) 
     end
   end)
 
@@ -166,34 +166,53 @@ function init()
   last_onset_frequency = nil
 
   onset_amplitude_detect_poll = poll.set("onsetAmplitudeDetect", function(value)
-    detect_level = fn.round_decimals(value,5,"up")
-    if (detect_level and last_onset_amplitude) and detect_level > 0.03 and (last_onset_amplitude < detect_level or math.abs(last_onset_frequency - detect_freq) > 5)
+    detected_level = fn.round_decimals(value,5,"up")
+    if (detected_level and last_onset_amplitude) and detected_level > params:get("amp_detect_level") and (last_onset_amplitude < detected_level or math.abs(last_onset_frequency - detected_freq) > 5)
     then 
-      note_num = MusicUtil.freq_to_note_num (detect_freq) 
+      local note_offset = params:get("note_center_frequency") - params:get("root_note")
+      note_num = MusicUtil.freq_to_note_num (detected_freq) + note_offset 
 
-      if params:get("detect_to_midi") == 2 then
+    
+      if params:get("quantize_freq") == 2 then
+        -- local quantized_note = fn.quantize(note_num)
+        -- print("note_num, quantized_note",note_num, quantized_note)
+        note_num = fn.quantize(note_num)
+      end
+
+      if note_num and params:get("detected_freq_to_midi") == 2 then
         local value_tab = {
           pitch     = note_num,
-          velocity  = util.linlin(0,0.05,1,127,detect_level),
-          duration  = 1/4,
-          channel   = params:get("detect_to_midi_out_channel"),
+          velocity  = util.linlin(0,0.05,1,127,detected_level),
+          duration  = params:get("envelope1_max_time"), --1/4,
+          channel   = params:get("detected_freq_to_midi_out_channel"),
           mode = 1
         }      
         clock.run(externals1.note_on,1, value_tab, 1, 1,"engine","midi")
       end
 
+      if note_num and params:get("detected_freq_to_crow") == 2 and note_num > 40 then
+        local value_tab = {
+          pitch     = note_num,
+          -- velocity  = util.linlin(0,0.05,1,127,detected_level),
+          -- duration  = 1/4,
+          -- channel   = params:get("detected_freq_to_midi_out_channel"),
+          -- mode = 1
+        }      
+        clock.run(externals1.note_on,1, value_tab, 1, 1,"engine","crow")
+      end
+
     end
-    last_onset_amplitude = detect_level
-    last_onset_frequency = detect_freq
+    last_onset_amplitude = detected_level
+    last_onset_frequency = detected_freq
   end)
   
   frequency_detect_poll = poll.set("frequencyDetect", function(value)
     value = tonumber(value)
-    detect_freq = value
+    detected_freq = value
     -- note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
-    if note_num and note_num ~= last_note_num then 
+    -- if note_num and note_num ~= last_note_num then 
       -- clock.run(externals1.note_on,1, note_num, note_num, 1, nil,"engine")
-    end
+    -- end
   end)
   
   lattice_grid = Lattice:new{
@@ -225,7 +244,7 @@ function finish_init()
 
   clock.sleep(0.5)
   params:set("reverb",1)
-  params:set("root_note",12)
+  -- params:set("root_note",12)
 
   amplitude_detect_poll:start()
   onset_amplitude_detect_poll:start()

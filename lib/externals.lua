@@ -43,20 +43,16 @@ function externals:new(active_notes)
 
   -- externals1.note_on(1, note_num, 1, 1, nil,"engine")
   ext.note_on = function(voice_id, value, beat_frequency, envelope_time_remaining, note_source, note_target)
-    -- local output_bandsaw = params:get("output_bandsaw")
-    local note_offset = params:get("note_center_frequency") - root_note_default
+    -- local note_offset = params:get("note_center_frequency") - params:get("root_note")
     local value = fn.deep_copy(value)
-    if type(value) == "table" then
+    -- if type(value) == "table" then
       -- hack!!! figure out when notes[value.pitch+note_offset] would be nil
-      if note_source ~= "engine" and notes[value.pitch+note_offset] then
-        value.pitch = notes[value.pitch+note_offset]
-      end
-      -- print("note_on:",voice_id, value.pitch, beat_frequency, envelope_time_remaining, note_source, note_target)
-    else
-      -- print("eng",value,note_offset)
+      -- if note_source ~= "engine" and notes[value.pitch+note_offset] then
+      --   value.pitch = notes[value.pitch+note_offset]
+      -- end
+    -- else
       -- value = notes[value+note_offset]
-      -- print("note_on:",voice_id, value, beat_frequency, envelope_time_remaining, note_source, note_target)
-    end
+    -- end
     
     local output_midi = params:get("output_midi")
 
@@ -150,20 +146,23 @@ function externals:new(active_notes)
     -- note, trigger, envelope, gate check
     -- voice_id, value, pitch_frequency, beat_frequency, envelope_time_remaining, note_source
     if (voice_id == 1 and 
-        ((note_target == "crow" and ( note_source == "sequencer" or note_source == "engine")) 
+        ((note_target == "crow" and (note_source == "sequencer" or note_source == "engine")) 
           and 
          (output_crow1 == 2 or output_crow3 == 3 or output_crow3 == 4)) or
         (note_source == "midi" and (output_crow3 == 4 or output_crow3 == 5))
     ) then
       local volts
       local mode = value.mode
-      if note_source == "engine" and value then
-        volts = (value-60)/12
+      -- if note_source == "engine" and value then
+      if note_source == "engine" and value.pitch then
+        volts = (value.pitch-60)/12
       elseif mode == 1 and value.pitch then -- play_voice
           local pitch = value.pitch
           volts = pitch/12
+      elseif note_source =="midi" then
+        volts = (value.pitch-60)/12
       else 
-        print("NO CROW VOLTS VALUE VALUE: externals 166")
+        print("NO CROW VOLTS VALUE VALUE: externals ~166")
       end
       
       crow.output[1].volts = volts

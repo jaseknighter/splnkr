@@ -116,10 +116,10 @@ end
 
 
 
--- scale/note functions
-scale_length = 35 --128
-root_note_default = 33 --(A0)
-note_center_frequency_default = 43 --45
+-- scale/note/quantize functions
+SCALE_LENGTH = 35 --128
+ROOT_NOTE_DEFAULT = 36 --(A0)
+NOTE_CENTER_FREQUENCY_DEFAULT = 48 --(A1)
 scale_names = {}
 notes = {}
 current_note_indices = {}
@@ -130,16 +130,16 @@ end
 
 fn.build_scale = function()
   notes = {}
-  notes = MusicUtil.generate_scale_of_length(params:get("root_note"), params:get("scale_mode"), scale_length)
-  local num_to_add = scale_length - #notes
+  notes = MusicUtil.generate_scale_of_length(params:get("root_note"), params:get("scale_mode"), SCALE_LENGTH)
+  local num_to_add = SCALE_LENGTH - #notes
   for i = 1, num_to_add do
-    table.insert(notes, notes[scale_length - num_to_add])
+    table.insert(notes, notes[SCALE_LENGTH - num_to_add])
   end
   -- engine.update_scale(table.unpack(notes))
 end
 
-fn.set_scale_length = function()
-  scale_length = params:get("scale_length")
+fn.set_SCALE_LENGTH = function()
+  SCALE_LENGTH = params:get("SCALE_LENGTH")
 end
 
 fn.get_num_notes_per_octave = function()
@@ -152,6 +152,28 @@ fn.get_num_notes_per_octave = function()
       return i-1
     end
   end
+end
+
+fn.quantize = function(note_num)
+  local new_note_num
+  for i=1,#notes-1,1 do
+    if note_num >= notes[i] and note_num <= notes[i+1] then
+      if note_num - notes[i] < notes[i+1] - note_num then
+        new_note_num = notes[i]
+      else
+        new_note_num = notes[i+1]
+      end
+      break
+    end
+  end
+  -- if new_note_num == nil then 
+  --   if note_num < notes[1] then 
+  --     new_note_num = notes[1]
+  --   else
+  --     new_note_num = notes[#notes]
+  --   end
+  -- end
+  return new_note_num
 end
 
 fn.round_decimals = function (value_to_round, num_decimals, rounding_direction)

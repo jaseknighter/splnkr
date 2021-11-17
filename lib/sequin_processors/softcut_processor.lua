@@ -71,7 +71,6 @@ end
 function softcut_processor.update_voice_mode(voice, mode)
   sample_player.set_play_mode(voice,mode-1)
   if sample_player.play_modes[voice] == 4 then -- 1-shot
-    print("1-shot")
     local cutter_assignment = sample_player.get_cutter_assignment(voice) 
     sample_player.set_cutter_assignment(voice, cutter_assignment)
   end

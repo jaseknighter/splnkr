@@ -247,8 +247,8 @@ end
 function sc.refresh_output_control_specs_map()
   local num_cutters = sc.get_num_cutters()
   local cutters = {}
-  local min_note = initializing == false and params:get("note_center_frequency") * -1 or note_center_frequency_default
-  local max_note = scale_length - min_note
+  local min_note = initializing == false and params:get("note_center_frequency") * -1 or NOTE_CENTER_FREQUENCY_DEFAULT
+  local max_note = SCALE_LENGTH - min_note
   for i=1,num_cutters,1 do table.insert(cutters,i) end
   sc.output_control_specs_map = {
     { -- softcut: voices: 1-6
@@ -900,11 +900,11 @@ function sc.set_output_values(control_spec)
     sc.set_active_sequin_value_type("notes")
     -- sc:unregister_ui_group(4,6) 
 
-    -- scale_length
+    -- SCALE_LENGTH
     local root_note = params:get("root_note")
     local note_center_frequency = params:get("note_center_frequency")
     local notes_per_octave = fn.get_num_notes_per_octave()
-    local num_octaves = math.ceil(scale_length/notes_per_octave)
+    local num_octaves = math.ceil(SCALE_LENGTH/notes_per_octave)
 
     local last_key = 5
     local first_key = num_octaves > last_key and 1 or last_key - num_octaves + 1

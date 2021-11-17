@@ -318,7 +318,6 @@ function sample_player.playhead_position_update(voice,pos)
       elseif sample_player.play_modes[voice] > 2 then -- selected cut/repeat/1shot
         if sample_player.play_modes[voice] < 4 then
           sample_player.reset(voice)
-          print("reset")
         else -- stop 1-shot
           sample_player.set_play_mode(voice,0)
         end

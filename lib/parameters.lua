@@ -2,7 +2,10 @@
 local parameters = {}
 
 function parameters.init()
-  
+
+
+  params:add_separator()
+
   --------------------------------
   -- note params
   -- scale: the scale to use
@@ -20,28 +23,88 @@ function parameters.init()
     end
   end)
 
-  save_load.init()
-
-
-  params:add_separator()
   params:add_separator("SCALES AND NOTES")
+  params:add_group("scales and notes",5)
   params:add{type = "option", id = "scale_mode", name = "scale mode",
   options = scale_names, default = 5,
   action = function() fn.build_scale() end}
 
   params:add{type = "number", id = "root_note", name = "root note",
-  min = 0, max = 127, default = root_note_default, formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end,
+  min = 0, max = 127, default = ROOT_NOTE_DEFAULT, formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end,
   action = function() fn.build_scale() end}
 
   params:add{type = "number", id = "note_center_frequency", name = "note center frequency",
-  min = 0, max = 127, default = note_center_frequency_default, formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end,
+  min = 0, max = 127, default = NOTE_CENTER_FREQUENCY_DEFAULT, formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end,
   action = function() fn.build_scale() end}
-  -----------------
-    ------------------------------
+
+  -- latice meter
+  params:add{
+    type = "option", id = "meter", name = "meter", default=4,
+    options=TIME_OPTIONS,
+    action=function(x)
+      if initializing == false and sequencer_controller.selected_sequin_group then
+        print("set meter",x)
+        sequencer_controller.lattice:set_meter(fn.fraction_to_decimal(TIME_OPTIONS[x]))
+      end
+    end
+  }
+
+    -- pattern division
+    params:add{
+      type = "option", id = "division", name = "divisions", default=6,
+      options=TIME_OPTIONS,
+      action=function(x)
+        if initializing == false and sequencer_controller.selected_sequin_group then
+          local pattern = sequencer_controller.sequencers[sequencer_controller.selected_sequin_group].pattern
+          pattern:set_division(fn.fraction_to_decimal(TIME_OPTIONS[x]))
+        end
+      end
+    }
+  
+  ------------------------------
+  -- amplitude/frequency detection params
+  ------------------------------
+  params:add_separator("amp/freq detection")
+
+  -- set the amplitude detection level
+  params:add{
+    type="taper", id = "amp_detect_level", name = "amp detect level",min=0.001, max=0.2, default = 0.03,
+    action=function(x) 
+
+    end
+  }
+  params:add{
+    type = "option", id = "quantize_freq", name = "quantize freq", 
+    options = {"off","on"}, default = 2, 
+  }
+
+  params:add{
+    type = "option", id = "detected_freq_to_midi", name = "freq to midi", 
+    options = {"off","on"}, default = 1, 
+  }
+
+  params:add{
+    type = "number", id = "detected_freq_to_midi_out_channel", name = "midi channel", 
+    min=1,max=16,default=1, 
+  }
+
+  params:add{
+    type = "option", id = "detected_freq_to_crow", name = "freq to crow", 
+    options = {"off","on"}, default = 2, 
+  }
+
+  -- params:add_group("amp detection",2)
+  -- parameters.create_amp_freq_params(amp_params)
+  -- params:add_group("freq detection",2)
+  -- parameters.create_amp_freq_params(freq_params)
+
+
+
+  ------------------------------
     -- audio routing params
     ------------------------------
 
-  params:add_separator("audio routing")
+  params:add_separator("AUDIO ROUTING")
 
   rerouting_audio = false
 
@@ -84,8 +147,8 @@ function parameters.init()
   -- sequencing
   ------------------------------
 
-  params:add_separator("sequencing")
-
+  params:add_separator("SEQUENCING")
+  params:add_group("sequencing",11)
   
   params:add{
     type = "number", id = "sequin_step", name = "sequin step", min=1, max=8, default=1,
@@ -216,58 +279,19 @@ function parameters.init()
     end
   }
 
-  -- latice meter
-  params:add{
-    type = "option", id = "meter", name = "meter", default=4,
-    options=TIME_OPTIONS,
-    action=function(x)
-      if initializing == false and sequencer_controller.selected_sequin_group then
-        print("set meter",x)
-        sequencer_controller.lattice:set_meter(fn.fraction_to_decimal(TIME_OPTIONS[x]))
-      end
-    end
-  }
-
-    -- pattern division
-    params:add{
-      type = "option", id = "division", name = "divisions", default=6,
-      options=TIME_OPTIONS,
-      action=function(x)
-        if initializing == false and sequencer_controller.selected_sequin_group then
-          local pattern = sequencer_controller.sequencers[sequencer_controller.selected_sequin_group].pattern
-          pattern:set_division(fn.fraction_to_decimal(TIME_OPTIONS[x]))
-        end
-      end
-    }
   
-  -- -- latice meter
-  -- params:add{
-  --   type = "number", id = "meter", name = "meter", min=62, max=2000, default=250,
-  --   action=function(x)
-  --     print("meter",x)
-  --     if x >= 62 and initializing == false and sequencer_controller.selected_sequin_group then
-  --       sequencer_controller.lattice:set_meter(x/1000)
-  --     end
-  --   end
-  -- }
 
-  --   -- pattern division
-  --   params:add{
-  --     type = "number", id = "division", name = "divisions", min=62, max=2000, default=1000,
-  --     action=function(x)
-  --       if x >= 62 and initializing == false and sequencer_controller.selected_sequin_group then
-  --         local pattern = sequencer_controller.sequencers[sequencer_controller.selected_sequin_group].pattern
-  --         pattern:set_division(x/1000)
-  --       end
-  --     end
-  --   }
+  save_load.init()
+
+
+
   
 
   ------------------------------
   -- filter params
   ------------------------------
 
-  params:add_separator("filters")
+  params:add_separator("FILTERS")
 
   -- filter level
   params:add_group("level",16)
@@ -369,6 +393,9 @@ function parameters.init()
   ------------------------------
   -- effect params
   ------------------------------
+  params:add_separator("EFFECTS")
+
+  params:add_group("effects",21)
 
   AMP_SPEC = controlspec.def{
     min=0.0,
@@ -437,11 +464,11 @@ function parameters.init()
     -- {"pan_max","pan max",0,1,0.5,engine.pan_max,"control",},
     {"pitchshift","pitchshift",0,1,0,engine.pitchshift,"control",},
     {"   pitchshift freq","pitchshift_freq",1,50,1,engine.pitch_shift_trigger_frequency,"number",},
-    {"   pitchshift note1","pitchshift_note1",-scale_length,scale_length,0,engine.pitchshift_note1,"number",},
-    {"   pitchshift note2","pitchshift_note2",-scale_length,scale_length,0,engine.pitchshift_note2,"number",},
-    {"   pitchshift note3","pitchshift_note3",-scale_length,scale_length,0,engine.pitchshift_note3,"number",},
-    {"   pitchshift note4","pitchshift_note4",-scale_length,scale_length,0,engine.pitchshift_note4,"number",},
-    {"   pitchshift note5","pitchshift_note5",-scale_length,scale_length,0,engine.pitchshift_note5,"number",},
+    {"   pitchshift note1","pitchshift_note1",-SCALE_LENGTH,SCALE_LENGTH,0,engine.pitchshift_note1,"number",},
+    {"   pitchshift note2","pitchshift_note2",-SCALE_LENGTH,SCALE_LENGTH,0,engine.pitchshift_note2,"number",},
+    {"   pitchshift note3","pitchshift_note3",-SCALE_LENGTH,SCALE_LENGTH,0,engine.pitchshift_note3,"number",},
+    {"   pitchshift note4","pitchshift_note4",-SCALE_LENGTH,SCALE_LENGTH,0,engine.pitchshift_note4,"number",},
+    {"   pitchshift note5","pitchshift_note5",-SCALE_LENGTH,SCALE_LENGTH,0,engine.pitchshift_note5,"number",},
     {"   grain size","grain_size","0.1",1,0.1,engine.grain_size,"control",},
     {"   time dispersion","time_dispersion","0.01",1,0.01,engine.time_dispersion,"control",},
   }
@@ -552,7 +579,6 @@ function parameters.init()
     params:set(effect_id,effect_default)
   end
 
-  params:add_separator("effects")
 
   -- for i=1,10,1
   for i=1,#effect_params,1
@@ -568,228 +594,7 @@ function parameters.init()
     effect_params[i][8])
   end
 
-  --------------------------------
-  -- wow and flutter parameters
-  --------------------------------
-  --[[
-  params:add_separator("")
-
-  -- params:add_group("wow and flutter",6)
   
-  WOBBLE_AMP = cs.def{
-                      min=0,
-                      max=0.20,
-                      warp='lin',
-                      step=0.01,
-                      default=0.05,
-                      wrap=false,
-                    }
-
-  FLUTTER_AMP = cs.def{
-                      min=0,
-                      max=0.20,
-                      warp='lin',
-                      step=0.01,
-                      default=0.02,
-                      wrap=false,
-                    }
-
-  -- params:add{type = "option", id = "enable_wow_flutter", name = "enable wow and flutter",
-  --   options = {"off","on"}, default=2,
-  --   action = function(value)
-  --     if value == 1 then
-  --       engine.wobble_amp(0) 
-  --       engine.flutter_amp(0) 
-  --     else
-  --       engine.wobble_amp(params:get("wobble_amp"))
-  --       engine.wobble_amp(params:get("flutter_amp")) 
-  --     end
-  --   end
-  -- }
-
-  params:add{
-    type = "number", id = "wobble_rpm", name = "wobble rpm", min=1, max=1000, default=33,
-    action=function(x)
-      engine.wobble_rpm(x) 
-    end
-  }
-
-  params:add{
-    type = "control", id = "wobble_amp", name = "wobble amp", controlspec = WOBBLE_AMP,
-    action=function(x)
-      engine.wobble_amp(x) 
-      -- if params:get("enable_wow_flutter") == 1 then
-      --   engine.wobble_amp(0) 
-      -- else
-      --   engine.wobble_amp(x) 
-      -- end
-    end
-  }
-
-  params:add{
-    type = "number", id = "wobble_exp", name = "wobble exp", min=1, max=1000, default=39,
-    action=function(x)
-      engine.wobble_exp(x) 
-    end
-  }
-  
-  params:add{
-    type = "control", id = "flutter_amp", name = "flutter amp", controlspec = FLUTTER_AMP,
-    action=function(x)
-      engine.flutter_amp(x) 
-      -- if params:get("enable_wow_flutter") == 1 then
-      --   engine.flutter_amp(0) 
-      -- else
-      --   engine.flutter_amp(x) 
-      -- end
-    end
-  }
-
-  params:add{
-    type = "number", id = "flutter_fixedfreq", name = "flutter fixed freq", min=1, max=100, default=6,
-    action=function(x)
-      engine.flutter_fixedfreq(x) 
-    end
-  }
-
-  params:add{
-    type = "number", id = "flutter_variationfreq", name = "flutter variation freq", min=1, max=1000, default=6,
-    action=function(x)
-      engine.flutter_variationfreq(x) 
-    end
-  }
-  ]]
-    -- params:add_separator("enveloping")
-
-    -- for i=11,#effect_params,1
-    -- do
-    --   parameters.add_effect_param(
-    --     effect_params[i][1],
-    --     effect_params[i][2],
-    --     effect_params[i][3],
-    --     effect_params[i][4],
-    --     effect_params[i][5],
-    --     effect_params[i][6],
-    --     effect_params[i][7],
-    --     effect_params[i][8])
-    -- end
-
-  -- end
-
-
-  -- function fn.set_scale_length()
-  --   scale_length = params:get("scale_length")
-  -- end
-
-
-  -- params:add{type = "option", id = "scale_mode", name = "scale mode",
-  -- options = scale_names, default = 5,
-  -- action = function() fn.build_scale() end}
-
-  -- params:add{type = "number", id = "root_note", name = "root note",
-  -- min = 0, max = 127, default = root_note_default, formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end,
-  -- action = function() fn.build_scale() end}
-
-  ------------------------------
-  -- amplitude/frequency detection params
-  ------------------------------
-  params:add_separator("amp/freq detection")
-
-  function parameters.add_amp_freq_params(afd_num_params,afd_id,afd_name,afd_controlspec,afd_fn,afd_default, afd_spread_defaults)  
-    local min = afd_controlspec.minval
-    local max = afd_controlspec.maxval
-    local is_min = string.find(afd_id,"min")~=nil
-      for i=1,afd_num_params,1
-    do
-      local cspec = afd_controlspec:copy()
-      local spread = is_min == true and (max/afd_num_params) * (i-1) or  (max/afd_num_params) * (i)
-      spread = util.linexp(min,max, 20, 2000, spread)
-      if afd_spread_defaults == true then  
-        cspec.default = spread
-      elseif is_min == false then
-        cspec.default = max
-      end
-      params:add_control(afd_id..i,afd_name..i,cspec)
-    end
-  end
-
-  -- in the amp and freq action, make sure the min is never more than the max and vice versa
-  -- note: there's probably a much, much simpler way to do this
-  function parameters.set_amp_freq_param_actions(afd_num_params,afd_id,afd_fn)
-    for i=1,afd_num_params,1
-    do
-      params:set_action(afd_id..i,function(x) 
-        if (string.find(afd_id,"min")~=nil) then
-          if (string.find(afd_id,"amp")~=nil) then
-            local min_param = params:lookup_param("amp_min"..i)
-            local max_val = params:get("amp_max"..i)
-            local min_min_val = params:lookup_param("amp_min"..i).controlspec.minval
-            x = util.clamp(x,min_min_val,max_val)
-          else
-            local min_param = params:lookup_param("frequency_min"..i)
-            local max_val = params:get("frequency_max"..i)
-            local min_min_val = params:lookup_param("frequency_min"..i).controlspec.minval
-            x = util.clamp(x,min_min_val,max_val)
-          end
-        elseif (string.find(afd_id,"max")~=nil) then
-          if (string.find(afd_id,"amp")~=nil) then
-            local max_param = params:lookup_param("amp_max"..i)
-            local min_val = params:get("amp_min"..i)
-            local max_max_val = params:lookup_param("amp_min"..i).controlspec.maxval
-            x = util.clamp(x,min_val,max_max_val)
-          else
-            local max_param = params:lookup_param("frequency_max"..i)
-            local min_val = params:get("frequency_min"..i)
-            local max_max_val = params:lookup_param("frequency_min"..i).controlspec.maxval
-            x = util.clamp(x,min_val,max_max_val)
-          end
-        end
-        params:set(afd_id..i,x,true)
-        afd_fn(i-1,x)
-      end)
-    end
-  end
-
-  function parameters.create_amp_freq_params(af_params)
-
-    for i=1,#af_params,1
-    do
-      parameters.add_amp_freq_params(4,af_params[i][1],af_params[i][2],af_params[i][3],af_params[i][4],af_params[i][5],af_params[i][6])
-      parameters.set_amp_freq_param_actions(4,af_params[i][1],af_params[i][4])
-    end
-  end
-
-  function temp_fn()
-    -- print("temp_fn")
-  end
-  
-  amp_params = {
-    {"amp_min","amp min",controlspec.AMP:copy(),temp_fn,0.1,},
-    {"amp_max","amp max",controlspec.AMP:copy(),temp_fn,0.99,},
-  }
-
-  freq_params = {
-    {"frequency_min","freq min",controlspec.FREQ:copy(),temp_fn,40,true},
-    {"frequency_max","freq max",controlspec.FREQ:copy(),temp_fn,800,true},
-  }
-
-
-  params:add{
-    type = "option", id = "detect_to_midi", name = "send to midi", 
-    options = {"off","on"}, default = 1, 
-  }
-
-  params:add{
-    type = "number", id = "detect_to_midi_out_channel", name = "midi channel", 
-    min=1,max=16,default=1, 
-  }
-
-  -- params:add_group("amp detection",2)
-  -- parameters.create_amp_freq_params(amp_params)
-  -- params:add_group("freq detection",2)
-  -- parameters.create_amp_freq_params(freq_params)
-
-
   --------------------------------
   -- inputs/outputs/midi params
   --------------------------------
