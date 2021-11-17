@@ -165,7 +165,7 @@ Engine_Splnkr : CroneEngine {
             fastMul: 0.6,
             thresh: 0.001
             ),
-          0.5
+          0.2
         )
       );
 

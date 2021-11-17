@@ -116,24 +116,26 @@ function parameters.init()
     options = {"off","on"}, default = 2, 
   }
 
+  -- midi detection
   params:add_separator("midi detection")
   
   params:add{
-    type="taper", id = "amp_detect_level_midi_min", name = "min midi amp level",min=0.001, max=0.5, default = 0.03,
-    action=function(x) 
-    end
-  }
-
-  params:add{
-    type="taper", id = "amp_detect_level_midi_max", name = "max midi amp level",min=0.001, max=0.5, default = 0.05,
-    action=function(x) 
-    end
-  }
-
-  params:add{
     type = "option", id = "detected_freq_to_midi", name = "freq to midi", 
-    options = {"off","on"}, default = 1, 
+    options = {"off","on"}, default = 2, 
   }
+
+  params:add{
+    type="taper", id = "amp_detect_level_midi_min", name = "min midi amp level",min=0.001, max=0.5, default = 0.01,
+    action=function(x) 
+    end
+  }
+
+  params:add{
+    type="taper", id = "amp_detect_level_midi_max", name = "max midi amp level",min=0.001, max=0.5, default = 0.2,
+    action=function(x) 
+    end
+  }
+
 
   params:add{
     type = "number", id = "detected_freq_to_midi_out_channel", name = "midi channel", 
@@ -147,24 +149,31 @@ function parameters.init()
   min = 0, max = 127, default = 127-ROOT_NOTE_DEFAULT,
   }
   
+  -- crowdetection
   params:add_separator("crow detection")
   
-  params:add{
-    type="taper", id = "amp_detect_level_min_crow2", name = "min amp level crow 1/2",min=0.001, max=0.5, default = 0.03,
-    action=function(x) 
-    end
-  }
-
-  params:add{
-    type="taper", id = "amp_detect_level_max_crow2", name = "max amp level crow 1/2",min=0.001, max=0.5, default = 0.05,
-    action=function(x) 
-    end
-  }
-
   params:add{
     type = "option", id = "detected_freq_to_crow1", name = "freq to crow1", 
     options = {"off","on"}, default = 2, 
   }
+
+  params:add{
+    type = "option", id = "detected_freq_to_crow3", name = "freq to crow3", 
+    options = {"off","on"}, default = 2, 
+  }
+
+  params:add{
+    type="taper", id = "amp_detect_level_min_crow2", name = "min amp level crow 1/2",min=0.001, max=0.5, default = 0.01,
+    action=function(x) 
+    end
+  }
+
+  params:add{
+    type="taper", id = "amp_detect_level_max_crow2", name = "max amp level crow 1/2",min=0.001, max=0.5, default = 0.2,
+    action=function(x) 
+    end
+  }
+
 
   params:add{type = "number", id = "min_crow1_note_num", name = "min crow 1 note num",
   min = 0, max = 127, default = ROOT_NOTE_DEFAULT,
@@ -174,20 +183,17 @@ function parameters.init()
   }
 
   params:add{
-    type="taper", id = "amp_detect_level_min_crow4", name = "min amp level crow 3/4",min=0.001, max=0.5, default = 0.03,
+    type="taper", id = "amp_detect_level_min_crow4", name = "min amp level crow 3/4",min=0.001, max=0.5, default = 0.01,
     action=function(x) 
     end
   }
 
   params:add{
-    type="taper", id = "amp_detect_level_max_crow4", name = "max amp level crow 3/4",min=0.001, max=0.5, default = 0.05,
+    type="taper", id = "amp_detect_level_max_crow4", name = "max amp level crow 3/4",min=0.001, max=0.5, default = 0.2,
     action=function(x) 
     end
   }
-  params:add{
-    type = "option", id = "detected_freq_to_crow3", name = "freq to crow3", 
-    options = {"off","on"}, default = 2, 
-  }
+
   
   params:add{type = "number", id = "min_crow3_note_num", name = "min crow 3 note num",
   min = 0, max = 127, default = ROOT_NOTE_DEFAULT,
