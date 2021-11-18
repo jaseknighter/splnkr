@@ -22,6 +22,8 @@ ArbGraph = include "flora/lib/ArbitraryGraph"
 
 envelope = include "splnkr/lib/envelope"
 
+polling = include "splnkr/lib/polling"
+
 externals = include "splnkr/lib/externals"
 encoders_and_keys = include "splnkr/lib/encoders_and_keys"
 controller = include "splnkr/lib/controller"

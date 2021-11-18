@@ -662,6 +662,9 @@ end
 
 
 function grid_sequencer:draw_spacers()
+  g:led(1, 8, 0)
+  g:led(2, 8, 0)
+  g:led(3, 8, 0)
   g:led(4, 8, 2)
   g:led(5, 8, 2)
   -- g:led(11, 8, 2)

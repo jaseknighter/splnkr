@@ -147,91 +147,8 @@ function init()
   engine.strobe(1)
   sample_player.init()
 
-  
-  ----------------------------
-  
-    -- Init polls
-  --detected_level, detected_freq, note_num
-  local last_note_num = 0
+  polling.init()
 
-  amplitude_detect_poll = poll.set("amplitudeDetect", function(value)
-    detected_level = fn.round_decimals(value,5,"up")
-    if detected_level > 0.0002
-    then 
-      -- print("amplitudeDetect,detected_freq",tonumber(detected_level),detected_freq) 
-    end
-  end)
-
-  last_onset_amplitude = nil
-  last_onset_frequency = nil
-
-  onset_amplitude_detect_poll = poll.set("onsetAmplitudeDetect", function(value)
-    if initializing == false then
-      detected_level = fn.round_decimals(value,5,"up")
-      if (detected_level and last_onset_amplitude and last_onset_frequency) and (last_onset_amplitude < detected_level or math.abs(last_onset_frequency - detected_freq) > 5)
-      then 
-        local note_offset = params:get("note_offset") - params:get("root_note")
-        note_num = MusicUtil.freq_to_note_num (detected_freq) + note_offset 
-
-      
-        if params:get("quantize_freq") == 2 then
-          -- local quantized_note = fn.quantize(note_num)
-          -- print("note_num, quantized_note",note_num, quantized_note)
-          note_num = fn.quantize(note_num)
-        end
-
-        if note_num and params:get("detected_freq_to_midi") == 2 and 
-           note_num >= params:get("min_midi_note_num") and 
-           note_num <= params:get("max_midi_note_num") and 
-           detected_level >= params:get("amp_detect_level_midi_min") and 
-           detected_level <= params:get("amp_detect_level_midi_max") then
-          local value_tab = {
-            pitch     = note_num,
-            velocity  = util.linlin(0,0.05,1,127,detected_level),
-            duration  = params:get("envelope1_max_time"), --1/4,
-            channel   = params:get("detected_freq_to_midi_out_channel"),
-            mode = 1
-          }      
-          clock.run(externals1.note_on,1, value_tab, 1, 1,"engine","midi")
-        end
-
-        if note_num and params:get("detected_freq_to_crow1") == 2 and 
-           note_num >= params:get("min_crow1_note_num") and 
-           note_num <= params:get("max_crow1_note_num") and
-           detected_level >= params:get("amp_detect_level_min_crow2") and 
-           detected_level <= params:get("amp_detect_level_max_crow2") then
-          local value_tab = {
-            pitch     = note_num,
-          }      
-          clock.run(externals1.note_on,1, value_tab, 1, 1,"engine","crow")
-        end
-
-        if note_num and params:get("detected_freq_to_crow3") == 2 and 
-           note_num >= params:get("min_crow3_note_num") and 
-           note_num <= params:get("max_crow3_note_num") and
-           detected_level >= params:get("amp_detect_level_min_crow4") and 
-           detected_level <= params:get("amp_detect_level_max_crow4") then
-          local value_tab = {
-            pitch     = note_num,
-          }      
-          clock.run(externals1.note_on,2, value_tab, 1, 1,"engine","crow")
-        end
-
-      end
-      last_onset_amplitude = detected_level
-      last_onset_frequency = detected_freq
-    end
-  end)
-  
-  frequency_detect_poll = poll.set("frequencyDetect", function(value)
-    value = tonumber(value)
-    detected_freq = value
-    -- note_num = value ~= 0 and MusicUtil.freq_to_note_num (value) or last_note_num
-    -- if note_num and note_num ~= last_note_num then 
-      -- clock.run(externals1.note_on,1, note_num, note_num, 1, nil,"engine")
-    -- end
-  end)
-  
   lattice_grid = Lattice:new{
     auto = true,
     meter = 4,
@@ -240,28 +157,20 @@ function init()
   
   grid_pattern = lattice_grid:new_pattern{
     action = function(t) 
-      -- samples:play() 
-      --print("anim",g,g.cols)
-      -- if g and g.cols > 0 then 
         grid_filter:animate() 
-      -- end
     end,
     division = 1/32, --1/16,
     enabled = true
   }
  
-
-  
   clock.run(finish_init)
 end
 
 
 function finish_init()
   engine.splnk(0)
-
   clock.sleep(0.5)
-  params:set("reverb",1)
-  -- params:set("root_note",12)
+  -- params:set("reverb",1)
 
   amplitude_detect_poll:start()
   onset_amplitude_detect_poll:start()
@@ -269,42 +178,14 @@ function finish_init()
   
   sample_player.set_play_mode(1,0)
   lattice_grid:start()
-  -- lattice_sample_sequencer:start()
-  -- sequencer_lattice.init()
   params:bang()
-  
-  --[[
-    -- sequins test
-  mys = Sequins{0,2,4,7,9}
-  myt = Sequins{1,1,1,1/2,1/2}
-  crow.ii.pullup(true)
-  crow.ii.jf.mode(1)
 
-  function time_fn() 
-    while true do 
-      clock.sync(myt()) 
-      -- crow.ii.jf.play_note(mys()/12,0.9) 
-      crow.ii.wsyn.play_voice(1,mys()/12,0.9) 
-    end
-  end
-  -- function time_fn() while true do crow.clock.sync(myt()) crow.ii.wsyn.play_note(mys()/12,0.9) end end
-
-  clock.run(time_fn)
-  ]]
-
-  -- engine.set_numSegs(4)
   envelopes[1].update_envelope()
   envelopes[2].update_envelope()
   initializing = false
   params:set("envelope1_max_time",0.25)
   params:set("envelope2_max_time",0.25)
   sequencer_screen.init(16,8)
-  -- sample_player.load_file("/home/we/dust/flora_wowless.wav")
-  -- page_scroll(1)
-  
-  -- softcut.play(1, 1)
-
-  
 end
 
 --------------------------

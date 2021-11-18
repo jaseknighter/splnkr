@@ -197,7 +197,6 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
       end
       local label_pos = 1
       if output_type and output_index then
-        -- print("output_param",output_param)
         for i=1,#specs_map[output_type][output_index],1 do
           if specs_map[output_type][output_index][i][5] and output_mode ~= 2 then
             control_labels[label_pos] = control_labels[label_pos] .. specs_map[output_type][output_index][i][5] .. " "
