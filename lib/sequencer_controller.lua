@@ -792,7 +792,7 @@ function sc.update_sequin_output_modes(x, y, state)
   else
     sc:unregister_ui_group(6,6)
     sc:unregister_ui_group(6,5)
-    sc:unregister_ui_group(1,5)
+
     for i=1,14,1 do
       if grid_sequencer:find_ui_group_num_by_xy(i,7) then
         sc:unregister_ui_group(i,7)
@@ -936,11 +936,11 @@ function sc.set_output_values(control_spec)
     -- local integer_num_places = decimal_location > 0 and control_max_length - (control_max_length - decimal_location) or control_max_length
     local integer_num_places = control_max_length
     integer_num_places = (control_max <= -1 or control_max >= 1) and integer_num_places or nil
+    -- local value_selector_length = integer_num_places + decimal_num_places
     local value_place_decimals_x1, value_place_decimals_x2
     if decimal_location > 0 then
       value_place_decimals_x1 = decimal_num_places and 14 - decimal_num_places + 1 or nil
       value_place_decimals_x2 = decimal_num_places and 14 or nil
-      sc.display_num_entry()
       sc.value_place_decimals = grid_sequencer:register_ui_group("value_place_decimals",value_place_decimals_x1,7,value_place_decimals_x2,7,4,3,control_spec, control_default_index)
       sc.decimal_button = grid_sequencer:register_ui_group("decimal_button",value_place_decimals_x1-1,7,value_place_decimals_x1-1,7,15,5)
     end
@@ -964,8 +964,6 @@ function sc.set_output_values(control_spec)
         value_place_integers_x2 = value_place_integers_x1 + integer_num_places - 1
       end
       sc.value_place_integers = grid_sequencer:register_ui_group("value_place_integers",value_place_integers_x1,7,value_place_integers_x2,7,4,3,control_spec, control_default_index)
-      sc.display_num_entry()
-
       -- if there's just 1 value for the integer place auto-select it
       if(value_place_integers_x1 == value_place_integers_x2 and value_place_decimals_x1 == nil) then
         grid_sequencer.activate_grid_key_at(14,7)
@@ -982,7 +980,7 @@ function sc.set_output_values(control_spec)
     sc.set_active_sequin_value_type("option")
     
     sc:unregister_ui_group(4,6) 
-    sc:unregister_ui_group(1,5)
+
     local num_options = #control_spec[2]
     local control_default_index = control_spec[3]
     sc.value_selector_options = grid_sequencer:register_ui_group("value_selector_options",6,6,6+num_options-1,6,4,3,control_spec, control_default_index)
@@ -1011,7 +1009,6 @@ function sc.update_value_place_integers(x, y, state)
   local x2 =  sc.value_place_integers.grid_data.x2
   local x_offset = x1 - 1
   if state == "on" then
-    
     if sc.value_place_decimals then
       local decimal_x1 = sc.value_place_decimals.grid_data.x1
       local decimal_x2 = sc.value_place_decimals.grid_data.x2
@@ -1041,7 +1038,6 @@ function sc.update_value_place_integers(x, y, state)
     local last_place_value = string.sub(tostring(max),1,1)
     local selector_length = (is_last_integer_place and  tonumber(last_place_value) > 0) and 5+tonumber(last_place_value) or 14
     sc.value_selector_nums = grid_sequencer:register_ui_group("value_selector_nums",6,6,selector_length,6,4,3)
-  
     local existing_output_value = sc.get_active_output_table_slot().output_value
     if existing_output_value then
       local existing_output_value_int = tostring(math.floor(existing_output_value))
@@ -1056,7 +1052,6 @@ function sc.update_value_place_integers(x, y, state)
     end
   else
     -- sc:unregister_ui_group(6,6)
-    sc:unregister_ui_group(1,5)
     sc.value_place_integer = nil
     sc.active_output_value_text = nil
   end
@@ -1100,13 +1095,17 @@ function sc.update_value_place_decimals(x, y, state)
     local first_selector = (is_last_decimal_place and  last_place_value > 0) and 5+last_place_value or 6
     sc.value_selector_nums = grid_sequencer:register_ui_group("value_selector_nums",first_selector,6,14,6,4,3)
 
-    
+    local selector_length = (is_last_decimal_place and  last_place_value > 0) and 5+last_place_value or 14
+    -- sc.value_selector_nums = grid_sequencer:register_ui_group("value_selector_nums",6,6,selector_length,6,4,3)
+
 
     local existing_output_value = sc.get_active_output_table_slot().output_value
+    local decimal_location = existing_output_value and string.find(existing_output_value,"%.") or 0
     
     local decimal_point_at = existing_output_value and string.find(existing_output_value,"%.")
     if existing_output_value and decimal_point_at then
       local existing_output_value_dec = tostring(string.sub(existing_output_value,decimal_point_at+1))
+      local existing_output_value_dec_length = #existing_output_value_dec
       local existing_output_value_at_place = string.sub(
                                                           existing_output_value_dec,
                                                           x_location,
@@ -1117,7 +1116,6 @@ function sc.update_value_place_decimals(x, y, state)
     end
   else
     -- sc:unregister_ui_group(6,6)
-    sc:unregister_ui_group(1,5)
     sc.value_place_decimal = nil
     sc.active_output_value_text = nil
   end
@@ -1128,8 +1126,9 @@ end
 -- ui group 14 sequin value selector  - functions
 --  HERE IS WHERE THE SEQUIN GETS SET
 -----------------------------
---[[
+-- function sc.unregister_value_selectors(active_selector_type)
 function sc.unregister_value_selectors()
+  sc:unregister_ui_group(4,6) 
   if sc.value_place_integers then 
     local x1 = sc.value_place_integers.grid_data.x1
     local x2 = sc.value_place_integers.grid_data.x2
@@ -1154,7 +1153,6 @@ function sc.unregister_value_selectors()
   sc.active_value_selector_place = nil
   sc.active_output_value_text = nil
 end
-]]
 
 function sc.update_value_selector_notes(x, y, state)
   if state == "on" then  
@@ -1219,46 +1217,11 @@ function sc.update_selector_sequence_mode(x, y, state)
   sc.set_sequin_output_value_controls()
 end
 
-function sc.display_num_entry(selector_length)
-  if sc.value_num_entry == nil then 
-    sc.value_num_entry = grid_sequencer:register_ui_group("value_num_entry",1,5,3,8,6,4)
-    sc.value_num_entry_decimal = grid_sequencer:register_ui_group("value_num_entry_decimal",4,5,4,5,10,4)
-  end
-end
 
-function sc.update_value_num_entry(x, y, state, press_type)
-  sc.num_entry_pad_val = sc.num_entry_pad_val and sc.num_entry_pad_val or 0
-  if x==1 and y==7 then
-    sc.num_entry_pad_val = 1
-  elseif x==2 and y==7 then
-    sc.num_entry_pad_val = 2
-  elseif x==3 and y==7 then
-    sc.num_entry_pad_val = 3
-  elseif x==1 and y==6 then
-    sc.num_entry_pad_val = 4
-  elseif x==2 and y==6 then
-    sc.num_entry_pad_val = 5
-  elseif x==3 and y==6 then
-    sc.num_entry_pad_val = 6
-  elseif x==1 and y==5 then
-    sc.num_entry_pad_val = 7
-  elseif x==2 and y==5 then
-    sc.num_entry_pad_val = 8
-  elseif x==3 and y==5 then
-    sc.num_entry_pad_val = 9
-  end
-  sc.active_output_value_text = sc.active_output_value_text and  sc.num_entry_pad_val .. sc.num_entry_pad_val
-  print("sc.num_entry_pad_val",sc.num_entry_pad_val,x,y,state)
-end
 
-function sc.update_value_num_entry_decimal(x, y, state, press_type)
-
-  print(x,y,state)
-end
-
-function sc.update_value_selector_nums(x, y, state, press_type)
+function sc.update_value_selector_nums(x, y, state)
   local x_offset = 5 --sc.value_selector_nums.grid_data.x1 - 1
-  if state == "on" and press_type ~= "long" then
+  if state == "on" then
     local selector_value = x - x_offset
     sc.value_number = selector_value
     if sc.active_value_selector_place == "ten_thousands" then
@@ -1281,10 +1244,7 @@ function sc.update_value_selector_nums(x, y, state, press_type)
     
     sc.sequin_output_values = grid_sequencer:register_ui_group("sequin_output_values",6,8,10,8,5,3)
   else
-    if press_type == "long" then
-      sc.value_number = 0
-      sc.reset_place_values()
-    end
+    sc.value_number = nil
     if sc.active_value_selector_place == "ten_thousands" then
       sc.active_sequin_value.place_values.ten_thousands =  0
     elseif sc.active_value_selector_place == "thousands" then
@@ -1383,7 +1343,6 @@ function sc.update_sequin_output_value(x, y, state, press_type)
     local sequence_mode = sc.sequence_mode and sc.sequence_mode or 1
     if press_type == "long" then -- clear 
       output_value = "-" 
-
       sc.reset_place_values()
     else -- set
       local sequence_mode = sc.sequence_mode 
@@ -1843,11 +1802,7 @@ function sc:update_group(group_name,x, y, state, press_type)
   elseif group_name == "value_selector_polarity" then
     self.update_value_polarity(x, y, state)
   elseif group_name == "value_selector_nums" then
-    self.update_value_selector_nums(x, y, state, press_type)
-  elseif group_name == "value_num_entry" then
-    self.update_value_num_entry(x, y, state, press_type)
-  elseif group_name == "value_num_entry_decimal" then
-    self.update_value_num_entry_decimal(x, y, state, press_type)
+    self.update_value_selector_nums(x, y, state)
   elseif group_name == "sequin_output_values" then
     self.update_sequin_output_value(x, y, state, press_type)
   end
