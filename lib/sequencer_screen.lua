@@ -479,7 +479,7 @@ function sequencer_screen.update()
     screen.rect(9+output_value_label_width,53,126-10-output_value_label_width,8)
     screen.fill()
     screen.stroke()
-    if sequencer_screen.active_control == "sequin output values" and output_value then
+    if (sequencer_screen.active_control == "value selector nums" or sequencer_screen.active_control == "sequin output values") and output_value then
       -- print(control_labels, control_bcrumbs, sequence_values, sequin_values, output_value)
       screen.level(0)
       screen.move(5,60)

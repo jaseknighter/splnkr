@@ -269,16 +269,16 @@ function sc.refresh_output_control_specs_map()
       { -- midi note out 1-3 and stop/start
         { 
           {"note",min_note,max_note,nil,"pitch","pitch"},     -- note
-          {"number","0",16,0,"rp","repeats"},                   -- note_repeats
+          {"number","0",16,0,"rep","repeats"},                   -- note_repeats
           {"option",NOTE_REPEAT_FREQUENCIES,nil,nil,"rep_frq","repeat frequency"}, -- note repeat frequency
-          {"option",MIDI_DURATIONS,3,nil,"dur","dur"},        -- midi stop/start
+          {"option",MIDI_DURATIONS,3,nil,"dur","dur"},         -- midi stop/start
           {"number","0",127,80,"vel","vel"},                   -- velocity
           {"number","1",16,1,"chan","chan"},                   -- channel
         }, 
          
           
-        {{"note",min_note,max_note,nil,"pitch","pitch"},{"number","0",16,0,"rp","repeats"},{"option",NOTE_REPEAT_FREQUENCIES,nil,nil,"rp_frq","repeat frequency"},{"option",{"1","1/2","1/4","1/8","1/16"},3,nil,"dur","dur"},{"number","0",127,80,"vel","vel"},{"number","1",16,1,"chan","chan"}}, 
-        {{"note",min_note,max_note,nil,"pitch","pitch"},{"number","0",16,0,"rp","repeats"},{"option",NOTE_REPEAT_FREQUENCIES,nil,nil,"rp_frq","repeat frequency"},{"option",{"1","1/2","1/4","1/8","1/16"},3,nil,"dur","dur"},{"number","0",127,80,"vel","vel"},{"number","1",16,1,"chan","chan"}}, 
+        {{"note",min_note,max_note,nil,"pitch","pitch"},{"number","0",16,0,"rep","repeats"},{"option",NOTE_REPEAT_FREQUENCIES,nil,nil,"rp_frq","repeat frequency"},{"option",{"1","1/2","1/4","1/8","1/16"},3,nil,"dur","dur"},{"number","0",127,80,"vel","vel"},{"number","1",16,1,"chan","chan"}}, 
+        {{"note",min_note,max_note,nil,"pitch","pitch"},{"number","0",16,0,"rep","repeats"},{"option",NOTE_REPEAT_FREQUENCIES,nil,nil,"rp_frq","repeat frequency"},{"option",{"1","1/2","1/4","1/8","1/16"},3,nil,"dur","dur"},{"number","0",127,80,"vel","vel"},{"number","1",16,1,"chan","chan"}}, 
         { 
           {"number","0",127,1,"cc","cc cc"},                   -- cc cc
           {"number","0",127,1,"val","cc val"},                   -- cc value
@@ -914,6 +914,9 @@ function sc.set_output_values(control_spec)
     if sc.selector_sequence_mode == nil then
       sc.selector_sequence_mode = grid_sequencer:register_ui_group("selector_sequence_mode",4,7,5,7,10,6,control_spec, 5)
     end
+    if sc.value_note_num == nil then 
+      clock.run(sc.activate_grid_key_at,6,6) 
+    end
 
   elseif control_type == "number" then
     sc.set_active_sequin_value_type("number")
@@ -964,10 +967,8 @@ function sc.set_output_values(control_spec)
         value_place_integers_x2 = value_place_integers_x1 + integer_num_places - 1
       end
       sc.value_place_integers = grid_sequencer:register_ui_group("value_place_integers",value_place_integers_x1,7,value_place_integers_x2,7,4,3,control_spec, control_default_index)
-      -- if there's just 1 value for the integer place auto-select it
-      if(value_place_integers_x1 == value_place_integers_x2 and value_place_decimals_x1 == nil) then
-        grid_sequencer.activate_grid_key_at(14,7)
-      end
+      clock.run(sc.activate_grid_key_at,value_place_integers_x2,7) 
+      clock.run(sc.activate_grid_key_at,6,6,0.2)  
     end  
 
     
@@ -977,6 +978,7 @@ function sc.set_output_values(control_spec)
     sc:unregister_ui_group(4,6) 
   
   elseif control_type == "option" then
+    -- sc.value_place_integer = nil
     sc.set_active_sequin_value_type("option")
     
     sc:unregister_ui_group(4,6) 
@@ -985,16 +987,20 @@ function sc.set_output_values(control_spec)
     local control_default_index = control_spec[3]
     sc.value_selector_options = grid_sequencer:register_ui_group("value_selector_options",6,6,6+num_options-1,6,4,3,control_spec, control_default_index)
     local existing_output_value = sc.get_active_output_table_slot().output_value
-    if existing_output_value then
+    if existing_output_value == nil then 
+      clock.run(sc.activate_grid_key_at,6,6) 
+    elseif existing_output_value then
       clock.run(sc.activate_grid_key_at,5+tonumber(existing_output_value.value),6) 
     end
   end
 end
 
-function sc.activate_grid_key_at(x,y)
-  clock.sleep(0.001)
-  grid_sequencer.activate_grid_key_at(x,y)    
-  grid_sequencer.activate_grid_key_at(x,y)
+function sc.activate_grid_key_at(x,y, delay)
+  local delay = delay or 0.1
+  clock.sleep(delay)
+  if grid_sequencer:get_current_level_at(x,y,1) == "off" then  
+    grid_sequencer.activate_grid_key_at(x,y)
+  end
 end
 -----------------------------
 --  row 6: cols 6-14
@@ -1361,7 +1367,7 @@ function sc.update_sequin_output_value(x, y, state, press_type)
     if press_type == "long" then
       -- output_value = value_selector_default_value
       output_value = "-"
-    elseif sc.active_sequin_value.note_value then
+    elseif sc.active_sequin_value.note_value and sc.active_sequin_value.octave_value then
       local num_notes_per_octave = fn.get_num_notes_per_octave()
       local octave_offset = sc.active_sequin_value.octave_value * num_notes_per_octave
       local sequence_mode = sc.sequence_mode 

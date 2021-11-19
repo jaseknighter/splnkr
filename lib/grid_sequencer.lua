@@ -200,7 +200,9 @@ function grid_sequencer.init()
 end
 
 function grid_sequencer.activate_grid_key_at(x,y, delay)
-  if delay then clock.sleep(delay) end
+  if delay then 
+    clock.sleep(delay) 
+  end
   grid_sequencer.key(x, y, 1)
   grid_sequencer.key(x, y, 0)
 end
@@ -464,7 +466,6 @@ function grid_sequencer:unregister_ui_group(x1,y1)
       grid_sequencer.flickers[i] = {}    
       local grid_data = grid_sequencer.ui_groups[i].grid_data
       for j=grid_data.x1,grid_data.x1+(grid_data.x2-grid_data.x1),1 do
-        local j_incr = 1
         for k=grid_data.y1,grid_data.y1+(grid_data.y2-grid_data.y1),1 do
           grid_sequencer:unregister_solid_at(j, k, self.active_view)
         end
@@ -482,6 +483,9 @@ end
 function grid_sequencer:register_ui_group(group_name,x1,y1,x2, y2, off_level, selection_mode, control_spec, default_value)
   local ui_group_exists = false
   local ui_group_num
+  local has_default_value = false
+  local default_value_x, default_value_y = nil,nil
+
   for i=x1,x2,1 do
     if grid_sequencer:find_ui_group_num_by_xy(i,y1) then
       if ui_group_num == nil then
@@ -507,9 +511,6 @@ function grid_sequencer:register_ui_group(group_name,x1,y1,x2, y2, off_level, se
   grid_data.group_name = group_name
   
   local ol = off_level
-  local increment = 0
-  local has_default_value = false
-  local default_value_x, default_value_y = nil,nil
   for i=x1,x1+(x2-x1),1 do
     for j=y1,y1+(y2-y1),1 do
       grid_data.off_level=ol
@@ -519,12 +520,7 @@ function grid_sequencer:register_ui_group(group_name,x1,y1,x2, y2, off_level, se
         default_value_x, default_value_y = i,j
       end
     end
-    if has_default_value == true then 
-      clock.run(grid_sequencer.activate_grid_key_at,default_value_x, default_value_y,0.1)
-    end 
-      
   end
-  -- table.insert(grid_sequencer.ui_groups,grid_data)
   local group_num
   if ui_group_exists == true then
     group_num = ui_group_num
@@ -532,6 +528,11 @@ function grid_sequencer:register_ui_group(group_name,x1,y1,x2, y2, off_level, se
     grid_sequencer.ui_groups[grid_sequencer.get_num_ui_groups()+1] = {}
     group_num = grid_sequencer.get_num_ui_groups()
   end 
+
+  if has_default_value == true then 
+    clock.run(grid_sequencer.activate_grid_key_at,default_value_x, default_value_y,0.05)
+  end 
+
   grid_sequencer.ui_groups[group_num].grid_data = grid_data
   grid_sequencer.ui_groups[group_num].ix = group_num
   grid_sequencer.ui_groups[group_num].group_name = group_name
