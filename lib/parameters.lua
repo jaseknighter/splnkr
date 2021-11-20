@@ -27,7 +27,12 @@ function parameters.init()
   -- params:add_group("scales and notes",5)
   params:add{type = "option", id = "scale_mode", name = "scale mode",
   options = scale_names, default = 5,
-  action = function() fn.build_scale() end}
+  action = function() 
+    fn.build_scale() 
+    if initializing == false then 
+      sc.set_sequin_output_value_controls() 
+    end
+  end}
 
   params:add{type = "number", id = "root_note", name = "root note",
   min = 0, max = 127, default = ROOT_NOTE_DEFAULT, formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end,

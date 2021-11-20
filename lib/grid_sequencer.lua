@@ -430,9 +430,6 @@ function grid_sequencer:register_solid_at(x, y, view, solid_level, off_level)
   solid.current_level = off_level and off_level or solid_level
   solid.on_level = solid_level or 15
   solid.off_level = off_level or 0
-  -- if y<8 then 
-  --   solid.level = solid_level or 10
-  -- end 
   self.solids[view][x][y].solid = solid
 end
 

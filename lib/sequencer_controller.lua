@@ -367,7 +367,7 @@ function sc.refresh_output_control_specs_map()
       }, 
     },
     {   -- effects
-      {"number",'0.00',1,nil,{"amp","amp"}},                        -- level (amp)
+      {"number",'0.00',1,nil,{"amp","amp"}},                            -- level (amp)
       {"number",'0.00',1,nil,"drywet","drywet"},                        -- drywet
       { -- delay
         {"number",'0.00',1,1,"amt","delay"}, 
@@ -382,12 +382,12 @@ function sc.refresh_output_control_specs_map()
       },                     
       {   -- enveloper 
         {"option",{"off","on"},1,nil,"off_on","enveloper off/on"},        -- off/on
-        {"number", "1", 20,5,"rate","trig rate"},                             -- trig_rate 0.01 - 50.00
-        {"number",'0.01',0.99,0.99,"ovrlap","overlap"}                                   -- overlap 0-1
+        {"number", "1", 20,5,"rate","trig rate"},                         -- trig_rate 0.01 - 50.00
+        {"number",'0.01',0.99,0.99,"ovrlap","overlap"}                    -- overlap 0-1
       },
-      {   -- pitchshift                                                        -- pitchshift array
-        {"number",'0.00',1,nil,"amt","pitchshift"},                -- pitchshift
-        {"number",'1',50,1,"rate","ps_freq"},                -- pitchshift
+      {   -- pitchshift                                                   -- pitchshift array
+        {"number",'0.00',1,nil,"amt","pitchshift"},                       -- pitchshift
+        {"number",'1',50,1,"rate","ps_freq"},                             -- pitchshift
         {"note",min_note,max_note,nil,"ps_1","ps note 1"},
         {"note",min_note,max_note,nil,"ps_2","ps note 2"},
         {"note",min_note,max_note,nil,"ps_3","ps note 3"},
@@ -418,25 +418,8 @@ function sc.refresh_output_control_specs_map()
         },
         {"option", {"1/8","1/4","1/3","1/2","3/4","1","4/3","3/2","2"}, 4,nil,"meter","meter"},
         {"option", {"1/8","1/4","1/3","1/2","3/4","1","4/3","3/2","2"}, 6,nil,"pat_div","pattern division"},
-        -- {"number", "62", 2000,250,"meter","meter"},
-        -- {"number", "62", 2000,250,"pat_div","pattern division"},
       },
     },
-    -- {   -- lattice and patterns
-      -- {   -- lattice 
-        -- {"option",{"stp","strt","tgl",nil,nil,"stop_start_toggle","stop/start/toggle"}},         -- stop/start/toggle pattern
-        -- {"option",{"off","on"},nil,1,"auto_off_on","autopulse off/on"},        -- auto pulse(s) off/on
-        -- {"option",{"off","on"},nil,nil,"man_off_on","manual pulse off/on"},          -- manual pulse off/on (NOTE: setting is ignored if auto_pulse is enabled)
-        -- {"number",1,18,nil,"meter","meter"},                  -- meter: quarter notes per measure
-        -- {"option",{12,24,36,48,60,72,84,96,108},8,nil,"ppqn","ppqn"},          -- ppqn (default 96)
-        -- {"option",{"reset","hard reset"},nil,nil,"reset","reset"}                  
-        -- {"option",{"off","reset","hard reset"},nil,nil,"off/reset/hard reset","off/reset/hard reset"}                  
-      -- },
-      -- {   -- pattern (TODO: replace with more flexible pattern division selector)
-        -- {"option",{1,1/2,1/4,1/8,1/16,1/3,2/3,3/8,5/8},nil,nil,"pattern_division","pattern division"},                   -- pattern division 1-18/1-18
-        -- {"option",{"stop","start","toggle"},nil,"pat_state","pattern state"} -- stop/start/toggle pattern 
-      -- }, 
-    -- },  
   }
 end
 
@@ -858,6 +841,7 @@ end
 -- 8-10 sequin output control specs (options/number place settings)
 ----------------------------------
 function sc.set_sequin_output_value_controls()
+  grid_sequencer:unregister_ui_group(6,6)
   sc.update_active_value_heirarchy()
   local output_type_selected = sc.selected_sequin_output_type
   local output_selected = sc.selected_sequin_output
@@ -898,12 +882,12 @@ function sc.set_output_values(control_spec)
   sc.active_sequin_control_name = control_spec[6]
   if control_type == "note" then
     sc.set_active_sequin_value_type("notes")
-    -- sc:unregister_ui_group(4,6) 
 
     -- SCALE_LENGTH
     local root_note = params:get("root_note")
     local note_offset = params:get("note_offset")
     local notes_per_octave = fn.get_num_notes_per_octave()
+    local notes_per_octave = notes_per_octave < 12 and notes_per_octave or 11
     local num_octaves = math.ceil(SCALE_LENGTH/notes_per_octave)
 
     local last_key = 5
@@ -1225,50 +1209,58 @@ end
 
 
 
-function sc.update_value_selector_nums(x, y, state)
-  local x_offset = 5 --sc.value_selector_nums.grid_data.x1 - 1
-  if state == "on" then
-    local selector_value = x - x_offset
-    sc.value_number = selector_value
-    if sc.active_value_selector_place == "ten_thousands" then
-      sc.active_sequin_value.place_values.ten_thousands =  selector_value
-    elseif sc.active_value_selector_place == "thousands" then
-      sc.active_sequin_value.place_values.thousands =  selector_value
-    elseif sc.active_value_selector_place == "hundreds" then
-      sc.active_sequin_value.place_values.hundreds =  selector_value
-    elseif sc.active_value_selector_place == "ones" then
-      sc.active_sequin_value.place_values.ones =  selector_value
-    elseif sc.active_value_selector_place == "tens" then
-      sc.active_sequin_value.place_values.tens =  selector_value
-    elseif sc.active_value_selector_place == "tenths" then
-      sc.active_sequin_value.place_values.tenths =  selector_value
-    elseif sc.active_value_selector_place == "hundredths" then
-      sc.active_sequin_value.place_values.hundredths =  selector_value
-    elseif sc.active_value_selector_place == "thousandths" then
-      sc.active_sequin_value.place_values.thousandths =  selector_value
-    end
-    
-    sc.sequin_output_values = grid_sequencer:register_ui_group("sequin_output_values",6,8,10,8,5,3)
+function sc.update_value_selector_nums(x, y, state, press_type)
+  if press_type == "long" then -->>
+    sc.reset_place_values()
+
+    -- local value_selector_group_id = grid_sequencer:find_ui_group_num_by_xy(6,6)
+    -- value_selector_default_value = grid_sequencer.ui_groups[value_selector_group_id].default_value
+    -- value_selector_default_value = value_selector_default_value and value_selector_default_value or nil
   else
-    sc.value_number = nil
-    if sc.active_value_selector_place == "ten_thousands" then
-      sc.active_sequin_value.place_values.ten_thousands =  0
-    elseif sc.active_value_selector_place == "thousands" then
-      sc.active_sequin_value.place_values.thousands =  0
-    elseif sc.active_value_selector_place == "hundreds" then
-      sc.active_sequin_value.place_values.hundreds =  0
-    elseif sc.active_value_selector_place == "ones" then
-      sc.active_sequin_value.place_values.ones =  0
-    elseif sc.active_value_selector_place == "tens" then
-      sc.active_sequin_value.place_values.tens =  0
-    elseif sc.active_value_selector_place == "tenths" then
-      sc.active_sequin_value.place_values.tenths =  0
-    elseif sc.active_value_selector_place == "hundredths" then
-      sc.active_sequin_value.place_values.hundredths =  0
-    elseif sc.active_value_selector_place == "thousandths" then
-      sc.active_sequin_value.place_values.thousandths =  0
+    local x_offset = 5 --sc.value_selector_nums.grid_data.x1 - 1
+    if state == "on" then
+      local selector_value = x - x_offset
+      sc.value_number = selector_value
+      if sc.active_value_selector_place == "ten_thousands" then
+        sc.active_sequin_value.place_values.ten_thousands =  selector_value
+      elseif sc.active_value_selector_place == "thousands" then
+        sc.active_sequin_value.place_values.thousands =  selector_value
+      elseif sc.active_value_selector_place == "hundreds" then
+        sc.active_sequin_value.place_values.hundreds =  selector_value
+      elseif sc.active_value_selector_place == "ones" then
+        sc.active_sequin_value.place_values.ones =  selector_value
+      elseif sc.active_value_selector_place == "tens" then
+        sc.active_sequin_value.place_values.tens =  selector_value
+      elseif sc.active_value_selector_place == "tenths" then
+        sc.active_sequin_value.place_values.tenths =  selector_value
+      elseif sc.active_value_selector_place == "hundredths" then
+        sc.active_sequin_value.place_values.hundredths =  selector_value
+      elseif sc.active_value_selector_place == "thousandths" then
+        sc.active_sequin_value.place_values.thousandths =  selector_value
+      end
+      
+      sc.sequin_output_values = grid_sequencer:register_ui_group("sequin_output_values",6,8,10,8,5,3)
+    else
+      sc.value_number = nil
+      if sc.active_value_selector_place == "ten_thousands" then
+        sc.active_sequin_value.place_values.ten_thousands =  0
+      elseif sc.active_value_selector_place == "thousands" then
+        sc.active_sequin_value.place_values.thousands =  0
+      elseif sc.active_value_selector_place == "hundreds" then
+        sc.active_sequin_value.place_values.hundreds =  0
+      elseif sc.active_value_selector_place == "ones" then
+        sc.active_sequin_value.place_values.ones =  0
+      elseif sc.active_value_selector_place == "tens" then
+        sc.active_sequin_value.place_values.tens =  0
+      elseif sc.active_value_selector_place == "tenths" then
+        sc.active_sequin_value.place_values.tenths =  0
+      elseif sc.active_value_selector_place == "hundredths" then
+        sc.active_sequin_value.place_values.hundredths =  0
+      elseif sc.active_value_selector_place == "thousandths" then
+        sc.active_sequin_value.place_values.thousandths =  0
+      end
+      sc.sequin_output_values = grid_sequencer:register_ui_group("sequin_output_values",6,8,10,8,5,3)    
     end
-    sc.sequin_output_values = grid_sequencer:register_ui_group("sequin_output_values",6,8,10,8,5,3)    
   end
 end
 
@@ -1315,15 +1307,6 @@ function sc.update_sequin_output_value(x, y, state, press_type)
     local value_selector_group_id = grid_sequencer:find_ui_group_num_by_xy(6,6)
     value_selector_default_value = grid_sequencer.ui_groups[value_selector_group_id].default_value
     value_selector_default_value = value_selector_default_value and value_selector_default_value or nil
-
-    -- if sc.active_value_selector_place then
-    --   local reset_exception = sc.active_value_selector_place
-    --   -- sc.reset_place_values(reset_exception)
-    --   sc.reset_place_values()
-    -- else
-    --   sc.reset_place_values()
-    -- end
-
   end
 
   if sc.active_sequin_value.value_type == "number" then
@@ -1354,14 +1337,6 @@ function sc.update_sequin_output_value(x, y, state, press_type)
       local sequence_mode = sc.sequence_mode 
       output_value = sequence_mode == 1 and output_value .. "r" or output_value    
     end
-
-    -- if press_type == "long" and output_value == 0 then 
-    --   output_value = "-" 
-    -- else 
-    --   local sequence_mode = sc.sequence_mode 
-    --   output_value = sequence_mode == 1 and output_value .. "r" or output_value    
-    -- end                    
-    
     sc.active_output_value_text = output_value
   elseif sc.active_sequin_value.value_type == "notes" then
     if press_type == "long" then
@@ -1469,9 +1444,7 @@ function sc.get_active_output_table_slot()
   local par    =   sc.selected_sequin_output_param   -- output_param_selected:  value table level 7
   mod = mod ~= nil and mod or 1 -- if output mode is nil set it to one to indicate there is just 1 output mode
 
-  -- ??????????????????? IS THIS NEEDED  ???????????????????????
   sc.update_outputs_table()
-  -- ??????????????????? ??????????????????? ???????????????????
 
   if par == nil then
     return sc.sequins_outputs_table[sgp][ssg][sqn][typ][out][mod]
@@ -1808,7 +1781,7 @@ function sc:update_group(group_name,x, y, state, press_type)
   elseif group_name == "value_selector_polarity" then
     self.update_value_polarity(x, y, state)
   elseif group_name == "value_selector_nums" then
-    self.update_value_selector_nums(x, y, state)
+    self.update_value_selector_nums(x, y, state, press_type)
   elseif group_name == "sequin_output_values" then
     self.update_sequin_output_value(x, y, state, press_type)
   end

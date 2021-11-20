@@ -159,7 +159,6 @@ function Envelope:new(id, num_envelopes, env_nodes)
         if env_nodes[i] then
           
           local param = params:lookup_param(param_id_name)
-          -- print("param.id, control_value",param.id, control_value)
           param.controlspec = controlspec
           params:set(param.id, control_value) 
         end
@@ -282,7 +281,6 @@ function Envelope:new(id, num_envelopes, env_nodes)
       for i=#env_arrays.times,2,-1
       do
         if env_arrays.times[i] == env_arrays.times[i-1] then
-          --print("equal",i)
           env_arrays.times[i] = env_arrays.times[i] + 0.001
         end
       end
@@ -353,7 +351,6 @@ function Envelope:new(id, num_envelopes, env_nodes)
   end
   
   e.remove_node = function()
-    --print(e.active_node, #e.graph_nodes)
     if (e.active_node > 1 and e.active_node < #e.graph_nodes and #e.graph_nodes > 3) then
       table.remove(e.graph_nodes, e.active_node)
       e.graph:remove_point(e.active_node)
