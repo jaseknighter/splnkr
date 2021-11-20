@@ -126,6 +126,7 @@ end
 
 function sample_player.load_file(file)
   sample_player.selecting = false
+  cutters = {}
   sample_player.num_cutters = 1
   if file ~= "cancel" then
     sample_player.file_selected = true
@@ -145,7 +146,7 @@ function sample_player.load_file(file)
 end
 
 function sample_player.finish_file_load()
-  clock.sleep(0.5)
+  clock.sleep(1)
   waveform_loaded = true
   cut_detector.set_bright_start()
   sample_player.update()
