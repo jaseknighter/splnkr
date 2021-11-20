@@ -899,7 +899,7 @@ function sc.set_output_values(control_spec)
       sc.selector_sequence_mode = grid_sequencer:register_ui_group("selector_sequence_mode",4,7,5,7,10,6,control_spec, 5)
     end
     if sc.value_note_num == nil then 
-      clock.run(sc.activate_grid_key_at,6,6) 
+      -- clock.run(sc.activate_grid_key_at,6,6) 
     end
 
   elseif control_type == "number" then
@@ -972,7 +972,7 @@ function sc.set_output_values(control_spec)
     sc.value_selector_options = grid_sequencer:register_ui_group("value_selector_options",6,6,6+num_options-1,6,4,3,control_spec, control_default_index)
     local existing_output_value = sc.get_active_output_table_slot().output_value
     if existing_output_value == nil then 
-      clock.run(sc.activate_grid_key_at,6,6) 
+      -- clock.run(sc.activate_grid_key_at,6,6) 
     elseif existing_output_value then
       clock.run(sc.activate_grid_key_at,5+tonumber(existing_output_value.value),6) 
     end
