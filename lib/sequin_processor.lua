@@ -15,14 +15,11 @@ function sequin_processor.init()
 end
 
 function sequin_processor.process(sequin_to_process,sub_seq_leader_ix, ssid)
-  -- print("#sequin_to_process.active_outputs",#sequin_to_process,#sequin_to_process.active_outputs)
   if(#sequin_to_process.active_outputs)>0 then
     sequin_processor.gather_outputs(ssid,sequin_to_process.active_outputs, sequin_to_process.id, sub_seq_leader_ix)
   end
 end
 
-local previous_absolute_value = 0
-local previous_relative_values = {}
 
 --[[
 control_name    pitch
@@ -49,7 +46,7 @@ function sequin_processor.gather_outputs(ssid,output_table, sequin_id, sub_seq_l
       if selected_sequin == sequin_id then
         local selected_sequin_output_group = sequencer_controller.get_active_sequinset_id()
         local sequin_output_group = v.value_heirarchy.sgp
-        local sequin_output_type  = v.value_heirarchy.typ
+        local sequin_output_type = v.value_heirarchy.typ
         local sequin_output_type_processor = sequin_processor.processors[sequin_output_type]
         if selected_sequin_output_group == sequin_output_group then
 
@@ -99,7 +96,7 @@ function sequin_processor.gather_outputs(ssid,output_table, sequin_id, sub_seq_l
               ssid=ssid
             } 
 
-            sequin_processor.process_sub_sequins(sub_sequin_data, ssid,sub_seq_leader_ix)
+            sequin_processor.process_sub_sequins(sub_sequin_data, ssid,sub_seq_leader_ix, v.value_heirarchy)
             --
             --------------------------------------
           end
@@ -116,45 +113,107 @@ function sequin_processor.gather_outputs(ssid,output_table, sequin_id, sub_seq_l
   return num_outputs
 end
 
-function sequin_processor.process_sub_sequins(sub_sequins, ssid, sub_seq_leader_ix)
+sequin_processor.previous_absolute_values = {}
+sequin_processor.previous_relative_values = {}
+
+function sequin_processor.process_sub_sequins(sub_sequins, ssid, sub_seq_leader_ix,vh)
   local output_table = sub_sequins.output_table
   local sequin_output_type_processor = sub_sequins.sequin_output_type_processor
+  
+  local typ = vh.typ
+  local out = vh.out
+  local mod = vh.mod
+  local par = vh.par
+  print(typ,out,par,mod)
+  local pav
+  
+  if sequin_processor.previous_absolute_values[typ] == nil then sequin_processor.previous_absolute_values[typ] = {} end
+  if sequin_processor.previous_absolute_values[typ][out] == nil then sequin_processor.previous_absolute_values[typ][out] = {} end
+  if par then
+    if sequin_processor.previous_absolute_values[typ][out][mod] == nil then sequin_processor.previous_absolute_values[typ][out][mod] = {} end
+    if  sequin_processor.previous_absolute_values[typ][out][mod][par] == nil then sequin_processor.previous_absolute_values[typ][out][mod][par] = 0 end
+  else
+    if sequin_processor.previous_absolute_values[typ][out][mod] == nil then sequin_processor.previous_absolute_values[typ][out][mod] = 0 end
+  end  
+  
+  if par then
+    pav = sequin_processor.previous_absolute_values[typ][out][mod][par]
+  else
+    pav = sequin_processor.previous_absolute_values[typ][out][mod]
+  end
+
+  if sequin_processor.previous_relative_values[typ] == nil then sequin_processor.previous_relative_values[typ] = {} end
+  if sequin_processor.previous_relative_values[typ][out] == nil then sequin_processor.previous_relative_values[typ][out] = {} end
+  if sequin_processor.previous_relative_values[typ][out][mod] == nil then sequin_processor.previous_relative_values[typ][out][mod] = {} end
+  if par and sequin_processor.previous_relative_values[typ][out][mod][par] == nil then sequin_processor.previous_relative_values[typ][out][mod][par] = {} end
+  -- if par then
+  --   prv = sequin_processor.previous_relative_values[typ][out][mod][par]
+  -- else
+  --   prv = sequin_processor.previous_relative_values[typ][out][mod]
+  -- end
+
+  sequin_processor.previous_relative_values[typ] = sequin_processor.previous_relative_values[typ] and sequin_processor.previous_relative_values[typ] or {}
   local next_output_value = sub_sequins.next_output_value
   
   local value_type = output_table.value_type
   if sequin_output_type_processor and next_output_value ~= nil and next_output_value ~= "" then
     local process_mode = string.find(next_output_value,"r") == nil and "absolute" or "relative"
-    
     if process_mode == "absolute" or (value_type ~= "number" and value_type ~= "notes" ) then 
       output_table.value = next_output_value 
       output_table.calculated_absolute_value = nil
-      previous_absolute_value = next_output_value
-      if output_table.value ~= "nil" then
-        output_table.ssid = ssid
-        sequin_output_type_processor.process(output_table,sub_seq_leader_ix)
-      end
-      previous_relative_values = {}
-    elseif process_mode == "relative" and (value_type == "number" or value_type == "notes") then
-      local calculated_absolute_value = previous_absolute_value
-      for i=1,#previous_relative_values,1 do
-        calculated_absolute_value = calculated_absolute_value + previous_relative_values[i]
-      end
-
-      local number_end = string.find(next_output_value,"r") - 1
-      local val = string.sub(next_output_value,1,number_end)
-      if tonumber(calculated_absolute_value) and tonumber(val) then
-        calculated_absolute_value = tonumber(calculated_absolute_value) + tonumber(val)
+      if par then
+        sequin_processor.previous_absolute_values[typ][out][mod][par] = next_output_value
+        sequin_processor.previous_relative_values[typ][out][mod][par] = {}
       else 
-        print("sequin_processor.lua 70: can't find calculated_absolute_value or val",calculated_absolute_value, val)
+        sequin_processor.previous_absolute_values[typ][out][mod] = next_output_value
+        sequin_processor.previous_relative_values[typ][out][mod] = {}
       end
-      table.insert(previous_relative_values,val)
-      output_table.value = next_output_value 
-      output_table.calculated_absolute_value = calculated_absolute_value
       if output_table.value ~= "nil" then
         output_table.ssid = ssid
         sequin_output_type_processor.process(output_table,sub_seq_leader_ix)
       end
+    elseif process_mode == "relative" and (value_type == "number" or value_type == "notes") then
+      if par then
+        local calculated_absolute_value = sequin_processor.previous_absolute_values[typ][out][mod][par]
+        for i=1,#sequin_processor.previous_relative_values[typ][out][mod][par],1 do
+          calculated_absolute_value = calculated_absolute_value + sequin_processor.previous_relative_values[typ][out][mod][par][i]
+        end
 
+        local number_end = string.find(next_output_value,"r") - 1
+        local val = string.sub(next_output_value,1,number_end)
+        if tonumber(calculated_absolute_value) and tonumber(val) then
+          calculated_absolute_value = tonumber(calculated_absolute_value) + tonumber(val)
+        else 
+          print("sequin_processor.lua 151: can't find calculated_absolute_value or val",calculated_absolute_value, val)
+        end
+        table.insert(sequin_processor.previous_relative_values[typ][out][mod][par],val)
+        output_table.value = next_output_value 
+        output_table.calculated_absolute_value = calculated_absolute_value
+        if output_table.value ~= "nil" then
+          output_table.ssid = ssid
+          sequin_output_type_processor.process(output_table,sub_seq_leader_ix)
+        end
+      else
+        local calculated_absolute_value = sequin_processor.previous_absolute_values[typ][out][mod]
+        for i=1,#sequin_processor.previous_relative_values[typ][out][mod],1 do
+          calculated_absolute_value = calculated_absolute_value + sequin_processor.previous_relative_values[typ][out][mod][i]
+        end
+
+        local number_end = string.find(next_output_value,"r") - 1
+        local val = string.sub(next_output_value,1,number_end)
+        if tonumber(calculated_absolute_value) and tonumber(val) then
+          calculated_absolute_value = tonumber(calculated_absolute_value) + tonumber(val)
+        else 
+          print("sequin_processor.lua 151: can't find calculated_absolute_value or val",calculated_absolute_value, val)
+        end
+        table.insert(sequin_processor.previous_relative_values[typ][out][mod],val)
+        output_table.value = next_output_value 
+        output_table.calculated_absolute_value = calculated_absolute_value
+        if output_table.value ~= "nil" then
+          output_table.ssid = ssid
+          sequin_output_type_processor.process(output_table,sub_seq_leader_ix)
+        end
+      end
     end
   else 
     if sequin_output_type_processor == nil then
