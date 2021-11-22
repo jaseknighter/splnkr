@@ -1,7 +1,18 @@
 -- midi helper global variables and functions 
---  including sysex code for the 16n faderbank
 
--- todo: create a getter/setter for the device_16n and set_16n_channel_and_cc_values variables
+function clock.transport.stop()
+  if sc.selected_sequin_group and initializing == false then
+    grid_sequencer.activate_grid_key_at(sc.selected_sequin_group,1)
+  end
+end
+
+function clock.transport.start()
+  if sc.selected_sequin_group == nil and initializing == false then
+    local sequin_group = sc.last_active_sequin_group and sc.last_active_sequin_group or 1
+    grid_sequencer.activate_grid_key_at(sequin_group,1)
+  end
+end
+
 
 function get_midi_devices()
   local devices = {}
@@ -19,6 +30,7 @@ function get_midi_devices()
 end
 
 midi_out_device = midi.connect(1)
+
 
 -- set_midi_channels = function()
   --print("set midi channels")

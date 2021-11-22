@@ -483,6 +483,7 @@ function sc.get_active_sequinset_id()
 end
 
 function sc.update_selected_sequin_group(index,state)
+  sc.last_active_sequin_group = index
   sc.active_value_heirarchy = nil
   if state == "on" then
     local seq_ix = fn.deep_copy(sc.sequencers[sc.selected_sequin_group].seq.ix)

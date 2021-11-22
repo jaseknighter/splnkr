@@ -70,8 +70,8 @@ function init()
   
 
   
-  os.execute("jack_connect softcut:output_1 SuperCollider:in_1;")  
-  os.execute("jack_connect softcut:output_2 SuperCollider:in_2;")
+  -- os.execute("jack_connect softcut:output_1 SuperCollider:in_1;")  
+  -- os.execute("jack_connect softcut:output_2 SuperCollider:in_2;")
   -- os.execute("sleep 9;")
 
   audio.level_eng_cut(0)
