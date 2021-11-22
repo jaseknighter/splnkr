@@ -6,12 +6,7 @@ cut_detector.bright_tab = {}
 local bright_diff_tab = {}
 local bright_diff_sorted_tab = {}
 
--- function cut_detector.get_bright_tab()
---   return bright_diff_tab
--- end
-
 function cut_detector.set_bright_start()
-  -- clock.sleep(0.1)
   cut_detector.bright_checked = false
   cut_detector.bright_tab = {}
   

@@ -841,7 +841,7 @@ end
 -- 8-10 sequin output control specs (options/number place settings)
 ----------------------------------
 function sc.set_sequin_output_value_controls()
-  grid_sequencer:unregister_ui_group(6,6)
+  -- grid_sequencer:unregister_ui_group(6,6)
   sc.update_active_value_heirarchy()
   local output_type_selected = sc.selected_sequin_output_type
   local output_selected = sc.selected_sequin_output
@@ -895,7 +895,9 @@ function sc.set_output_values(control_spec)
     local default_key = math.floor((last_key+first_key)/2)
     sc.value_selector_notes = grid_sequencer:register_ui_group("value_selector_notes",6,6,5+notes_per_octave,6,7,3,control_spec)
     sc.value_selector_octaves = grid_sequencer:register_ui_group("value_selector_octaves",first_key,6,last_key,6,4,6,control_spec, default_key)
-    if sc.selector_sequence_mode == nil then
+    -- if sc.selector_sequence_mode == nil then
+    if grid_sequencer:find_ui_group_num_by_name("selector_sequence_mode") == nil then
+      print("ssm")
       sc.selector_sequence_mode = grid_sequencer:register_ui_group("selector_sequence_mode",4,7,5,7,10,6,control_spec, 5)
     end
     if sc.value_note_num == nil then 
@@ -937,7 +939,8 @@ function sc.set_output_values(control_spec)
       sc.value_selector_polarity = grid_sequencer:register_ui_group("value_selector_polarity",4,6,5,6,4,6,control_spec, 5)
     end
 
-    if sc.selector_sequence_mode == nil then
+    -- if sc.selector_sequence_mode == nil then
+    if grid_sequencer:find_ui_group_num_by_name("selector_sequence_mode") == nil then
       sc.selector_sequence_mode = grid_sequencer:register_ui_group("selector_sequence_mode",4,7,5,7,10,6,control_spec, 5)
     end
 

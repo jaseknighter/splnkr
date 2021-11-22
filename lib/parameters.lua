@@ -1045,20 +1045,12 @@ function parameters.init()
   local ENV_TIME = cs.new(0.0,MAX_ENV_LENGTH,'lin',0,ENV_TIME_MAX,'')
 
   parameters.init_envelope_controls = function(envelope_id)
-    -- local env = envelopes[envelope_id].graph_nodes
-    -- set the values of the individual envelope nodes 
-    -- local env = envelopes[1].graph_nodes
-    -- local env =  envelopes[1].get_envelope_arrays().segments
-    -- local num_envelope2_controls = envelopes[2].get_envelope_arrays().segments
-    -- local num_envelope_controls = envelope_id == 1 and num_envelope1_controls or num_envelope2_controls
     local num_envelope_controls = envelopes[envelope_id].get_envelope_arrays().segments 
-    print('envelope_id,num_envelope_controls',envelope_id,num_envelope_controls)
     local envelope_times = envelope_id == 1 and envelope1_times or envelope2_times
     local envelope_levels = envelope_id == 1 and envelope1_levels or envelope2_levels
     local envelope_curves = envelope_id == 1 and envelope1_curves or envelope2_curves
     
     
-    -- set the envelope's overall max level
     params:add{
       type="control",
       id = envelope_id == 1 and "envelope1_max_level" or "envelope2_max_level",
@@ -1070,7 +1062,6 @@ function parameters.init()
       end
     }
   
-    -- set the envelope's overall max time
     params:add{
       type="control",
       id = envelope_id == 1 and "envelope1_max_time" or "envelope2_max_time",

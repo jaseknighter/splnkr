@@ -304,7 +304,8 @@ function sequencer_screen.set_control_bcrumbs(control_bcrumbs)
 end
 
 function sequencer_screen.update()
-  if grid_mode == "sequencer" then
+  -- if grid_mode == "sequencer" then
+  if pages.index == 3 and show_instructions == false then
     sequencer_screen.active_control = sequencer_controller:get_active_ui_group_name()
     sequencer_screen.active_control = ((string.sub(sequencer_screen.active_control,1,13) == "sequin groups") and "sequin groups" or sequencer_screen.active_control)
 
@@ -487,6 +488,9 @@ function sequencer_screen.update()
     end
 
 
+  elseif  pages.index == 3 then 
+    screen_dirty = true
+    instructions.display() 
   end
 end
 

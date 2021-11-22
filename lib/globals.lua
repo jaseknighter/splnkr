@@ -191,7 +191,7 @@ end
 -- global variables
 -------------------------------------------
 
-MAX_CUTTERS = 12
+MAX_CUTTERS = 10
 MIN_CUT_SPACING = 1
 OUTPUT_TYPES = {"softcut","devices","effects","time"}
 PPQN_OPTIONS = {12,24,36,48,60,72,84,96,108}

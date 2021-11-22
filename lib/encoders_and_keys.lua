@@ -16,9 +16,6 @@ local function grid_key(x, y, z)
   end
 end
 
-p1_index = 1
-p3_index = 1
-
 local enc = function (n, d)
   -- set variables needed by each page/example
   d = util.clamp(d, -1, 1)
@@ -105,7 +102,7 @@ local enc = function (n, d)
           end
         else
           sample_player.nav_active_control = util.clamp(sample_player.nav_active_control+d,1,#sample_player_nav_labels)
-          if waveform_loaded then 
+          if waveform_loaded and cutters[sample_player.active_cutter] then 
             if sample_player.nav_active_control > 2 and sample_player.active_cutter == 0 then
               sample_player.active_cutter = 1
               if sample_player.cutter_assignments[sample_player.active_cutter] < 1 then 
@@ -154,7 +151,7 @@ local enc = function (n, d)
           else -- update play mode for the selected voice
             sample_player.set_play_mode(sample_player.selected_voice,new_play_mode)
           end
-        elseif sample_player.nav_active_control == 3 then -- move cutter edge
+        elseif sample_player.nav_active_control == 3 and cutters[sample_player.active_cutter] then -- move cutter edge
           if alt_key_active == true then
             local active_edge = cutters[sample_player.active_cutter]:get_active_edge()
             local cutter = cutters[sample_player.active_cutter]
@@ -168,7 +165,7 @@ local enc = function (n, d)
               sample_player.cutter_assignments[sample_player.selected_voice] == sample_player.active_cutter then 
                 for i=1,6,1 do sample_player.reset(i) end
               end 
-          else
+            elseif cutters[sample_player.active_cutter] then
             cutters[sample_player.active_cutter]:rotate_cutter_edge(d)
           end
         elseif sample_player.nav_active_control == 4 then -- move cutter
@@ -208,12 +205,11 @@ local enc = function (n, d)
           for i=1,6,1 do sample_player.reset(i) end
         elseif sample_player.nav_active_control == 6 then -- set level
           if alt_key_active == true then -- update play mode for all voices
-          for i=1,6,1 do
-            local new_level = util.clamp(sample_player.levels[i]+(d)/100,0,1)
-            new_level = fn.round_decimals (new_level, 3, "down")
-            sample_player.levels[i] = new_level
-            softcut.level(i,sample_player.level)
-            
+            for i=1,6,1 do
+              local new_level = util.clamp(sample_player.levels[i]+(d)/100,0,1)
+              new_level = fn.round_decimals (new_level, 3, "down")
+              sample_player.levels[i] = new_level
+              softcut.level(i,sample_player.levels[i])
             end
           else
             local new_level = util.clamp(sample_player.levels[sample_player.selected_voice]+(d)/100,0,1)
@@ -349,25 +345,17 @@ local key = function (n,z)
           end
         end
       elseif n==3 and z==1 then
-        if sample_player.nav_active_control == 1 then
-          sample_player.playing = sample_player.playing == 1 and 0 or 1
-          softcut.play(sample_player.selected_voice, sample_player.playing)
-        elseif sample_player.nav_active_control > 1 and #cutters < MAX_CUTTERS then
-          local sorted_cut_indices = cut_detector.get_sorted_cut_indices()
-          local num_cutters = util.clamp(sample_player.num_cutters+1,1,MAX_CUTTERS)
-          num_cutters = num_cutters <= #sorted_cut_indices and num_cutters or #sorted_cut_indices
+        -- if sample_player.nav_active_control == 1 then
+        --   sample_player.playing = sample_player.playing == 1 and 0 or 1
+        --   softcut.play(sample_player.selected_voice, sample_player.playing)
+        -- elseif sample_player.nav_active_control > 1 and #cutters < MAX_CUTTERS then
+        --   local sorted_cut_indices = cut_detector.get_sorted_cut_indices()
+        --   local num_cutters = util.clamp(sample_player.num_cutters+1,1,MAX_CUTTERS)
+        --   num_cutters = num_cutters <= #sorted_cut_indices and num_cutters or #sorted_cut_indices
 
-          sample_player.num_cutters = num_cutters
-          sample_player.autogenerate_cutters(sample_player.num_cutters)
-        end
-        -- for i=1,#cutters,1
-        -- do
-        --   cutters[i]:set_cutter_id(i)
-        --   cutters[i]:set_display_mode(0)
+        --   sample_player.num_cutters = num_cutters
+        --   sample_player.autogenerate_cutters(sample_player.num_cutters)
         -- end
-        -- local display_mode = sample_player.nav_active_control == 3 and 1 or 2
-        -- cutters[sample_player.active_cutter]:set_display_mode(display_mode)
-        -- sample_player.update()
       end
     end
     if ((not waveform_loaded or sample_player.nav_active_control == 1) and alt_key_active == false) and n==2 and z==1 then
@@ -378,50 +366,57 @@ local key = function (n,z)
 
 
   elseif pages.index == 2 then
-    if z==1 then
+    
+    if n == 3 and alt_key_active and z == 1 then
+      show_instructions = true
+      screen.clear() 
+      screen_dirty = true
+    elseif z==0 then
+      show_instructions = false
       screen.clear()
       screen_dirty = true
       envelopes[active_envelope].key(n, z)     
     end
-    -- if n==1 and z==1 then
-    -- elseif n==2 and z==1 then
-
-    -- elseif n==3 and z==1 then
-      
-    -- end
   elseif pages.index == 3 then
-    screen_dirty = true
-    local startup = encoders_and_keys.active_ui_group == nil and true or false
-      
-    if (n==2 or n==3) and z==1 and 
-      (encoders_and_keys.next_sequins_group or startup or encoders_and_keys.active_ui_group.ix < 6) then 
+    if n == 3 and alt_key_active and z == 1 then
+      show_instructions = true
+      screen.clear() 
+      screen_dirty = true
+    elseif z==0 then
+      show_instructions = false
+      screen.clear()
+      screen_dirty = true
+      local startup = encoders_and_keys.active_ui_group == nil and true or false
+        
+      if (n==2 or n==3) and z==1 and 
+        (encoders_and_keys.next_sequins_group or startup or encoders_and_keys.active_ui_group.ix < 6) then 
 
-      local x
-      
-      if encoders_and_keys.next_sequins_group then
-        x = encoders_and_keys.next_sequins_group 
-        grid_sequencer.activate_grid_key_at(x, 1)
-        -- if encoders_and_keys.active_ui_group and encoders_and_keys.active_ui_group.ix ~= x then
-        --   print("redo")
-        -- end
-      elseif startup == true then
-        x = 1
-        grid_sequencer.activate_grid_key_at(x, 1)
-      else
-        if n==2 then
-          x = encoders_and_keys.active_ui_group.grid_data.x1 - 1
-        elseif n==3 then
-          x = encoders_and_keys.active_ui_group.grid_data.x1 + 1
+        local x
+        
+        if encoders_and_keys.next_sequins_group then
+          x = encoders_and_keys.next_sequins_group 
+          grid_sequencer.activate_grid_key_at(x, 1)
+          -- if encoders_and_keys.active_ui_group and encoders_and_keys.active_ui_group.ix ~= x then
+          --   print("redo")
+          -- end
+        elseif startup == true then
+          x = 1
+          grid_sequencer.activate_grid_key_at(x, 1)
+        else
+          if n==2 then
+            x = encoders_and_keys.active_ui_group.grid_data.x1 - 1
+          elseif n==3 then
+            x = encoders_and_keys.active_ui_group.grid_data.x1 + 1
+          end
+          x = util.wrap(x,1,5)
+          grid_sequencer.activate_grid_key_at(x, 1)
         end
-        x = util.wrap(x,1,5)
-        grid_sequencer.activate_grid_key_at(x, 1)
+        encoders_and_keys.next_sequins_group = nil
+        local next_y = sc:get_active_ui_group().grid_data.y1
+        if next_y<=5 then
+          encoders_and_keys.active_ui_group = sc:get_active_ui_group()
+        end
       end
-      encoders_and_keys.next_sequins_group = nil
-      local next_y = sc:get_active_ui_group().grid_data.y1
-      if next_y<=5 then
-        encoders_and_keys.active_ui_group = sc:get_active_ui_group()
-      end
-    
     elseif n==2 and z==1 then
       local active_group_index = encoders_and_keys.active_ui_group.ix
       local prev_active_group = grid_sequencer.ui_groups[active_group_index-1]

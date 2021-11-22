@@ -43,15 +43,15 @@ local draw_top_nav = function()
         env_nav_text = env_nav_text.. ' curve ' .. curve
       end
     end 
-    
     if show_instructions == true then
       env_nav_text = "instructions" 
     elseif show_env_mod_params then
       env_nav_text = envelopes[active_envelope].get_control_label()
+    else
+      envelopes[active_envelope].update_envelope()
     end
     screen.text("env " .. env_nav_text)
     -- if show_env_mod_params == true then
-      envelopes[active_envelope].update_envelope()
     -- end
   elseif pages.index == 3 then
     local bcrumbs = sequencer_screen.get_control_bcrumbs() 

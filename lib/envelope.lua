@@ -503,7 +503,10 @@ function Envelope:new(id, num_envelopes, env_nodes)
     end
 
   e.redraw = function ()
-    if screen_dirty == true then
+    if show_instructions == true then 
+      screen_dirty = true
+      instructions.display() 
+    elseif screen_dirty == true then
       e.graph:redraw()
       local hightlight_style = "rect"
       local time_bar_percentage = e.env_time_max /e.x_max

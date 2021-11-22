@@ -1,91 +1,117 @@
 # splnkr
-this script is something like an amplitude/frequency tracking sequencer/sampler/effects processor for monome norns with a set of 16 grid-controlled bandpass filters. 
+an amplitude and frequency tracking effects processor/sampler/sequencer for monome norns with a set of 16 grid-controlled bandpass filters. 
 
-*additional documentation in progress*
-
-*IMPORTANT WARNING*: animating the center frequency of the bandpass filterbank with the grid interface can result in loud percussive sounds. use caution!
+*IMPORTANT WARNING*: animating the bandpass filters with the grid interface can result in loud percussive sounds. use caution!
 
 ## installation from maiden
 `;install https://github.com/jaseknighter/splnkr`
 
 (restart after installing)
 
-<!-- ### IMPORTANT: prior to running the splnkr script:
-* open a terminal/powershell
-* ssh to norns (`ssh we@norns.local`) and login
-* run this code to reset, recompile, and reconnect jacks: 
-
-  ```~/norns/stop.sh; sleep 1; ~/norns/start.sh; sleep 9; jack_disconnect crone:output_5 SuperCollider:in_1; jack_disconnect crone:output_6 SuperCollider:in_2; jack_connect softcut:output_1 SuperCollider:in_1; jack_connect softcut:output_2 SuperCollider:in_2``` -->
-
-## bugs to fix (this is just a small sampling of the bugs to be found and liberated from the code)
-* wobble and flutter aren't working yet
-* enveloping: 
-** pan type and pan max don't work
-** get rid of minor clicks when changing the envelope size/shape
-** env length on screen 2 should change the length of the sample envelope 
-* externals
-** lots of little bugs related to just having one envelope (instead of the two from flora)
-* samples
-** sample player breaks when in `all cuts` mode and cuts have rates going in different directions (e.g. -1 and 1)
-
-
 ## norns ui: key/encoder controls
 <!-- access instructions for key/encoder controls within the script by pressing k1+e3 -->
 
-### Page 1: sample selector/slicer*
-* All screens
+### page 1: sample selector/slicer
+* all screens
   * e1: previous page 
   * e2: next/prev control
   * k1 + k2: stop/start selected voice
-* Screen 1: select/play sample 
+  * k1 + k3: show instructions
+* screen 1: select/scrub sample/voice
   * k2: select audio sample
-  * e3: select softcut voice
+  * e3: select playhead
   * k1 + e3: scrub playhead
-* Screen 2: play mode
+  <!-- * k3: start/stop playhead -->
+* screen 2: play mode
   * k2/k3: delete/add cutter
-  * e3: set play mode sel
-  * k1 + e3: set play mode all
-* Screen 3: adjust cut ends
+  * e3: set play mode selected cutter
+  * k1 + e3: set play mode all cutters
+* screen 3: adjust cut ends
   * k2/k3: delete/add cutter
-  * k1 + e2: select cutter
-  * k1 + e3: adjust cutter
-  * k1 + e1: fine adjust cutter
+  * k1 + e2: select end
+  * k1 + e3: adjust end
+  * k1 + e1: fine adjust end
   * e3: select cutter end
-* Screen 4: move cutter
+* screen 4: move cutter
   * k2/k3: delete/add cutter
   * k1 + e2: select cutter
-  * k1 + e3: adjust cutter
-  * k1 + e1: fine adjust cutter
-* Screen 5: adjust rate
+  * k1 + e3: move cutter
+  * k1 + e1: fine move cutter
+* screen 5: adjust rate
   * k2/k3: delete/add cutter
-  * k1 + e2: select rate
-  * e3: adjust all cutter rates
-  * k1 + e1: fine adjust rate
-  * k1 + e3: adjust selected cutter rate
-* Screen 6: adjust level
+  * e3: adjust selected playhead rate
+  * k1 + e3: fine adjust selected playhead rate
+* screen 6: adjust level
   * k2/k3: delete/add cutter
-  * e3: adjust level
-* Screen 7: autogenerate cutters
+  * e3: adjust selected playhead level
+  * e3: adjust all playhead levels
+* screen 7: autogenerate cutters
   * e3: autogenerate clips by level (up to 20)
   * k1 + e3: autogenerate clips with even spacing (up to 20)
 
-### Page 2: envelope*
+### page 2: envelopes*
 * e1: previous/next page 
-<!-- * k1 + e1: select active plant   -->
+* k1 + e1: select active envelope  
 * e2: select envelope control  
 * e3: change envelope control value  
 * k2/k3: delete/add envelope control point  
+* k1 + k3: show instructions
 
-the envelope is used with/sent to external devices (crow, jf, midi, w/). 
+##### envelope modulation
+* k1+k3: show/hide plow modulation menu
+* k1+e1: select active plant  
+* k2: select control
+* k3: change control value
 
-the envelope controls also update the granular envelope that is built into the supercollider splnkr engine. in the params menu, use the *enveloping* param to activate live-signal enveloping.
+### page 3: sequencer*
+* e1: previous/next page 
+* k2: select seq group
+* k3: -/+ ctrl item
+* k2: nav up")
+* k3: nav down")
 
-### Page 3: sequencer*
-* e1: previous page
+## norns ui: page details
+### page 1: sample selector/slicer*
+the sample selector/slicer page provides controls for a sample player/slicer that allows for 1-6 voices. voices can loop through the entire sample, between all the slices, or a single slice.
 
-todo: enable updates to the sequencer via the norns ui
+### page 2: envelopes*
 
-## filterbank
+envelopes are sent to external devices (crow, jf, midi, w/). 
+
+the envelope controls also control the shape the granular envelope (activated in the PARAMS menu). 
+
+an extension of Mark Eats' [envgraph class](https://github.com/monome/norns/blob/main/lua/lib/envgraph.lua), the two envelopes may be set with a variable number of control points or 'nodes.' 
+
+there are 5 types of controls for each of the two envelopes: 
+
+`env level`: the maximum amplitude of the envelope  
+`env length`: the length of the envelope  
+`node time`: when the node is processed by the envelope  
+`node level`: the amplitude of the envelope at the node time  
+`node angle`: the shape of the ramp from the prior node time to the current node time
+
+with a few exceptions, the last of the three control types (node time, node level, and node angle) are adjustable for each of envelopes nodes.
+
+fine grain controls: All of the envelope controls allow for fine grain control using K1+E3.
+
+##### envelope modulation
+pressing K1+K3 on the plow screen brings up the `plow modulators` menu, which can be navigated using E2 and E3. there are eight parameters for each of the two envelops for modulating the envelopes:  
+  
+* `mod prob`: The probability that one of the other modulation parameters will be evaluated. If it is set to 0%, no envelope modulation will occur for the selected plant.  
+* `time prob`: The probability that the time value for each of the envelope's nodes will be modulated.  
+* `time mod amt`: The amount of modulation that will be applied to the time value of each of the envelope's nodes.  
+* `level prob`: The probability that the level value for each of the envelope's nodes will be modulated.  
+* `level mod amt`: The amount of modulation that will be applied to the level value of each of the envelope's nodes.  
+* `curve prob`: The probability that the curve value for each of the envelope's nodes will be modulated.  
+* `curve mod amt`: The amount of modulation that will be applied to the curve value of each of the envelope's nodes.  
+* `env mod nav`: Selects which of the above seven parameters are selected on when plow modulation is visible (by pressing K1+K3) on the plow screen. This parameter is useful for controlling the plow ui via midi. 
+
+<!-- In addition, the `show env mod params` parameter makes the parameter modulation navigation visible (again, useful for controlling the ui via midi). -->
+
+### page 3: sequencer*
+
+## grid controls
+### filterbank
 
 parameters for the 16 channel filterbank may be controlled via the params menu or using the grid.
 
@@ -116,7 +142,7 @@ selecting button 8 on the bottom row turns overlays the values of all three filt
 
 ## sequencer interfaces
 
-selecting the third screen (*sqncr*) using norns encoder *e1* brings up the sequencer, which is controllable with a grid. the norns ui provides information about the sequencer's state. the sequencer is built around the Lattice library and Tyler Etter's [port of Sequins](https://mapcorps.net/university/#12). 
+selecting the third page (*sqncr*) using norns encoder E1 brings up the sequencer view, which is controllable with 16 column grid. the norns ui provides information about the sequencer's state. the sequencer is built around the Lattice library and Tyler Etter's [port of Sequins](https://monome.org/docs/norns/reference/lib/sequins). 
 
 ### sequencer grid controls
 
