@@ -243,7 +243,7 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
     elseif output_type == 3 then
       control_labels[1] = "effects:"
       control_labels[2] = "amp drywet delay"
-      control_labels[3] = "bitcrshr env pshift"
+      control_labels[3] = "bitcrush env pshift"
       -- control_bcrumbs =  control_bcrumbs .. "eff"
     elseif output_type == 4 then
       control_labels[1] = "time:"

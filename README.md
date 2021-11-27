@@ -249,6 +249,7 @@ selecting the third page (*sqncr*) using norns encoder e1 brings up the sequence
 by default, the sequencer has 9 steps. each sequence step has 5 sub-steps by default. values are assigned to the sequencer's sub-steps. each time the sequencer completes a cycle, the values assigned to the next sub-step are activated. 
 
 *EXAMPLE*
+
 if step 1 of the sequencer has a sample rate of 1 assigned to sub-step 1 and a sample rate of 2 assigned to sub-step 2: 
 
   * the first time the sequencer arrives at step 1 the sample rate will be set 1
@@ -262,68 +263,174 @@ the sequencer is built around the [Lattice](http://norns.local/doc/modules/Latti
 <img src="images/sequencer_grid.png" width="66%">
 <!-- ![](images/sequencer_grid.png) -->
 
-* (1) *grid mode* selector: selecting grid key 15,8 switches the grid to the bandpass filter control mode
-* (2) *sequencer mode* selector: selecting grid key 16,8 brings up the grid controls for the sequencer. 
+* (1) *filter mode* selector (row 8, col 15): switches the grid to the bandpass filter control mode.
+* (2) *sequencer mode* selector (row 8, col 16): switches the grid to the sequencer control mode.
   * note: using encoder e1 to select the norns sequencer view (page 3) will automatically switch the grid to the sequencer mode.
-* (A) *sequence sets*: each sequence set defines a unique sequence of up to 9 sequence steps with each sequence step containing up to 5 sub-sequence values which are cycled as the sequencer completes its active steps (see *EXAMPLE* above)
-* (B) *sequin(s)*: each sequence set contains up to 9 sequence steps defined with the Sequins port referenced above. At each sequence step, multiple types of outputs may be sequenced
-  * the number of active steps may be controlled with from the params menu (PARAMETERS>EDIT>sequencing) by updating the *num steps* parameter
-  * todo: allow each sequence set to have their own *num steps* step value
-* (C) *output types*: at each step of the sequence, one or more *output types* may be selected. 
-  * there are 4 *output types*
-    * softcut (sc): 6 voice sampler
-    * devices (dev): 4 devices are currently supported 
-    * effects (eff): 6 effects are currently defined (see *outputs* below)
-    * pattern (pat): each sequence set runs according to its own lattice pattern
-    * lattice (lat): there is one lattice running that triggers the selected sequence set but each sequence set can individually control the lattice parameters
-  * NOTE: currently, only settings for three output types are working so far: softcut, devices/crow, and devices/just friends. other *output types* (effects, w/, lattice, patterns) aren't yet working.
-* (D) *outputs*
-  * 3 of the 7 *output types* allow for multiple *outputs* to be sequenced:
-    * softcut (sc): outputs 1-6 correspond to a softcut voice. 
-    * devices (dev): midi, crow, just friends, w/
-    * effects (eff): level, drywet, pitchshifter (pshift), p_offset, phaser, delay
-* (E) *modes*
-  * some of the *output types* and *outputs* have multiple *modes*:
-    * dev/crow modes: *volts* and *drum*
-    * dev/just friends modes: *play_note*, *play_voice*
-    * dev/w/ modes: *w_syn pitch* and *w_del karplus pitch*
-* (F) *params*
-  * some of the *output types'* *outputs* and *modes* have multiple *params*: 
-    * sc/voice[1-6] params: 
-      * *voice_mode*: 
-        * *stop*: stop the *voice*
-        * *loop all*: loops through the whole sequence
-        * *all cuts*: loop between active *cutters*
-        * *sel cut*: loop within the *cutter* assigned to the *voice*
-      * *cutter*: select the *cutter* assigned to the *voice*
-      * *rate*: the speed of the *voice*
-      * *direction*: the direction of the *voice*
-      * *level*: the amplitude of the *voice*
-    * *dev*/*just friends* play_note and play_voice (channels 1-6) params: 
-      * *pitch*
-      * *level*
-* (J) option/place value selection: depending on the configuration of the selected option/mode/param, this ui group is used to ether select from a list of options or a place value (see *number selection* ui groups below for details about place values). 
-* note selection ui groups: 
-  * (K) *note sequence mode* selector: if a note is set to a sequence mode of *relative*, its value is added to the previous value. the *number sequence mode* selector is set to *absolute* for each value by default (meaning, the value selected will be the value used, irrespective of the prior value).
-  * (L) *octave* selector: shifts the note up/down octaves. the *octave* selector is set to 0 by default.
-
+* (A) *sequence sets* (rows 1, cols 1-5): each sequence set defines a unique sequence of up to 9 sequence steps with each sequence step containing up to 5 sub-sequence values which are cycled as the sequencer completes its active steps (see *EXAMPLE* above)
+* (B) *sequence steps* (rows 1, cols 6-14): each sequence set contains up to 9 steps. At each sequence step, multiple types of outputs may be sequenced.
+  * the number of active sequence steps may be controlled from the params menu (PARAMETERS>EDIT>sequencing) by updating the *num steps* parameter.
+* (C) *output types* (row 2, cols 6-14): there are 4 *output types*
+    * softcut (sc): select to control the sample loaded on norns page 1
+    * devices (dev): select to control external devices
+    * effects (eff): select to activate effects defined in the SuperCollider engine.
+    * time: select to update values related to the sequencer's step and tempo parameters
+* (D) *outputs* (row 3, cols 6-14)
+  * each *output type* has multiple *outputs*:
+    * softcut (sc): sequence a softcut voice (up to 6 voices can be sequenced at each step)
+    * devices (dev): there are 4 device outputs that may be selected: midi, crow, just friends, and w/
+    * effects (eff): there are 6 effect outputs that may be selected:
+      * amp (level): sets the level of the SuperCollider engine's audio output
+      * drywet: sets the amount of audio signal sent to the SuperCollider engine to which effects will be applied
+      * delay: sets a delay using SuperCollider's [BufCombC](https://doc.sccode.org/Classes/BufCombC.html) UGen
+      * bitcrush: bitcrushes the audio signal with SuperCollider's [Decimator](https://doc.sccode.org/Classes/Decimator.html) UGen
+      * granular enveloper (env): using live granulation with server-driven enveloping, based on example 1.b in the SuperCollider [Live Granulation tutorial](https://pustota.basislager.org/_/sc-help/Help/Tutorials/Live_Granulation.html)
+        * note: the granular enveloper uses the envelope defined by the first envelope on the *splnkr* script's second page (env)
+      * pitchshift (pshift): sets an arpeggiating pitchshifter using SuperCollider's time domain granular pitchshifter [PitchShift](https://doc.sccode.org/Classes/PitchShift.html) UGen.
+    * time: there are 3 time outputs that may be selected
+      * sequence
+      * sub-sequence
+      * clock/lattice/pattern (clp)assigned to each *sequence set*. 
+    * time: sequence parameters related to time and the sequencer
+* (E) *modes* (row 4, cols 6-14)
+  * each *output* has multiple *modes*
+    * *IMPORTANT NOTE* multiple modes may be active for each output at each sequence step
+    * softcut (sc) voices 1-6
+        * v_mode: the voice/playhead mode 
+          <!-- * *stop*: stop the *voice*
+          * *loop all*: loops through the whole sequence
+          * *all cuts*: loop between active *cutters*
+          * *sel cut*: loop within the *cutter* assigned to the *voice* -->
+        * cutter: assign a cutter assigned to the selected voice
+        * rate: the speed of the selected voice
+        * direction: the direction of selected the voice
+        * level: the amplitude of the selected voice
+    * external devices (dev): 
+      * midi: there are 7 modes for midi
+        * v[1-3]: select up to 3 midi notes to play 
+        * cc[1-3]: set up to 3 midi cc values 
+        * stop/start: sends a stop/start signal to the selected midi output(s)
+      * crow: there are 6 modes for crow
+        * crow 1 pitch (c1_pitch): sets the pitch of crow output 1
+        * crow 1 repeats (c1_rp): sets the number of times crow output 1 repeats the pitch
+        * crow 1 repeat frequency (c1_rpfreq): sets the frequency at which crow output 1 repeats the pitch
+        * crow 3 pitch (c3_pitch): sets the pitch of crow output 3
+        * crow 3 repeats (c3_rp): sets the number of times crow output 3 repeats the pitch
+        * crow 3 repeat frequency (c3_rpfreq): sets the frequency at which crow output 3 repeats the pitch
+      * just friends (uses just friends' synthesis mode): there are 7 modes for just friends
+        * play_note: sets the pitch of just friends using [dynamic voice allocation](https://github.com/whimsicalraps/Just-Friends/blob/main/Just-Type.md#dynamic-voice-allocation-6-voice-polysynth)
+        * vce[1-6]: sets the pitch of the specified just friends channel using [individual voice control](https://github.com/whimsicalraps/Just-Friends/blob/main/Just-Type.md#individual-voice-control-6-monosynth-voices)
+      * w/: there are 5 w/ modes
+        * wsyn[1-3]: selects a wsyn voice to play
+        * wdel-ks: karplus-strong synthesis
+        * wdel: set delay parameters
+    * effects (eff): 
+      * delay: 
+        * amount (amt): sets the amount of audio signal to send to the delay effect
+        * delay time (del_time)
+        * delay decay (del_decay)
+        * delay amp (del_am)
+      * bitcrush:
+        * amount (amt): sets the amount of audio signal to send to the bitcrusher effect
+        * bits: bit depth that the signal will be reduced to
+        * rate:  the sample rate that the signal will be resampled at
+      * granular enveloper (env):
+        * off/on (off_on)
+        * rate
+        * overlap (ovrlap)
+      * pitchshift (pshift):
+        * amount (amt): sets the amount of audio signal to send to the bitcrusher effect
+        * rate
+        * ps_1 - ps_5: sets the amount to shift the pitch at each step of the 5-step arpeggio
+        * note: there are two additional parameters that may be set in the PARAMETERS>EDIT menu that currently are not sequenced with the grid sequencer:
+          * grain size
+          * time dispersion
+    * time: 
+      * sequence: 
+        * step: skip sequence steps according to the value set by the step parameter (a value of 1 doesn't result in skipped steps)
+        * number of steps (#seq): sets the number of steps in the sequence
+        * starting step: the step to start the sequence
+      * sub-sequence: 
+        * step: skip sub-sequence steps according to the value set by the step parameter (a value of 1 doesn't result in skipped steps)
+        * number of steps (#seq): sets the number of steps in the sub-sequence
+        * starting step: the step to start the sub-sequence
+      * clock/lattice/pattern (clp):
+        * clock: sets the norns clock speed
+        * clock morph (c_morph): sets the speed and shape of a transition to a new clock speed
+        * meter: sets the meter of the splnkr script
+        * division: sets the division of the selected sequence set 
+* (F) *params* (row 5, cols 6-14)
+  * some of output modes have multiple params that may be sequenced: 
+    * external devices (dev): 
+      * midi: 
+        * v[1-3]: midi voices 1-3 each have 6 parameters that may be set
+          * pitch: sets the pitch
+          * repeats (rep): sets the number of times each pitch is repeated
+          * repeat frequency (rep_frq): sets the frequency (i.e. speed) of each repeat
+          * duration (dur): sets the duration of each note
+          * velocity (vel): sets the velocity of each note
+          * channel (chan): sets the channel used for each note
+        * cc[1-3]: midi cc's 1-3 each have 3 parameters that may be set
+          * control change (cc): the control change value
+          * value (val): the value to send to the selected midi cc
+          * channel (chan): the channel to use to send the cc value
+      * just friends: there are two parameters that may be set for each just friends' mode:
+        * pitch: the pitch
+        * level: the level (amp)
+      * w/: 
+        * wsyn[1-3]: wsyn voices 1-3 each have 9 parameters that may be set:
+          * pitch
+          * velocity (vel)
+          * curve (crv)
+          * ramp (rmp)
+          * fm index (fm_ix)
+          * fm envelope (fm_env)
+          * fm ratio (fm_rat)
+          * lpg time (lpg_tme)
+          * lpg symmetry (lpg_sym)
+        * wdel-ks: there are 4 parameters that may be set for /w_del in karplus-strong mode
+          * pitch
+          * mix
+          * feedback (fbk)
+          * filter (flt)
+        * wdel: there are 9 paramerter that may be set for /w_del in delay mode
+          * mix
+          * time (tme)
+          * feedback (fbk)
+          * filter (flt)
+          * rate (rte)
+          * frequency (frq)
+          * mod rate (mod_rte)
+          * mod amount (mod_amt)
+          * freeze (frz)
 * number selection ui groups: 
-  * (G) *decimal place value* selectors: one or more decimal place number selection may be assigned to a sequencer value. decimal place values are defined going from left to right from the *decimal point* button (*I*):
-    * tenths, hundredths, thousandths, etc
-  * (H) *integer place value* selectors: one or more integer place number selection may be assigned to a sequencer value. integer place values are defined going from right to left from the *decimal point* button (*I*):
-    * ones, tens, hundres, thousands, etc.
-  * (I) *decimal point* button: this button separates *integer place value* selectors from *decimal place value* selectors does nothing function
-  * (J) *place value* selector: sets the place value. For example, if the *integer place value* is set to `3` and the *place value* selector is selected, the place value will be set to 0.3. This value will be added to the other selected place values (with exceptions noted below) 
-    * note: if 
-  * (K) *number sequence mode* selector: if a number is set to a sequence mode of *relative*, its value is added to the previous value. the *number sequence mode* selector is set to *absolute* for each value by default (meaning, the value selected will be the value used, irrespective of the prior value).
-  * (L) *polarity* selector: sets the value to positive or negative. the *polarity* selector is set to positive by default.
-  * (M) *sub-sequence* value selector: sets the value at each step of a five step sub-sequence based on the option selected with (UI group J) or the number selected (UI groups (G-L)). When a value is active within this five step sub-sequence, this value is used to set the value of the selected output/mode/param.
+  * (G) *integer place value* selectors: one or more integer place number selections (ones, tens, hundreds, thousands, etc.) may be applied to a sequencer value. integer place values are defined going from right to left from the *decimal point* button (*I*)
+  * (H) *decimal point* indicator: this grid button separates *integer place value* selectors from *decimal place value* selectors. 
+  * (I) *decimal place value* selectors: one or more decimal place number selections (tenths, hundredths, thousandths, etc.) may be assigned to a sequencer value. decimal place values are defined going from left to right from the *decimal point* button (*I*)
+  * (J) *place value* selector: sets the place value. This value will be added to the other selected place values.
+    * examples:
+      * if the *decimal place value* is set to tenths and the first *place value* selector is selected, the place value will be set to 0.1. 
+      * if the *integer place value* is set to ones and the third *place value* selector is selected, the place value will be set to 3.
+  * (K) *number sequence mode* selector: 
+    * the *number sequence mode* selector is set to *absolute* for each value by default (meaning, the value selected will be the value used, irrespective of the prior value).
+    * if a number is set to a sequence mode of *relative*, its value is added to the previous value. 
+  * (L) *polarity* selector: sets the value to positive or negative. the *polarity* selector is set to positive by default. the polarity selector only appear's does not appear for some numerical values
   * notes about number selection: 
     * number selection occurs by first selecting a place value (ui groups *G* and/or *H*) and then selecting a number (ui group *J*).   
     * if mulitple place values are set, they are added together. For example, if the *ones integer place value* is set to `5` and the *tenths integer place value* is set to `4`  
     * if a *decimal place* value or *integer place* value is set with a short press with nothing selected in the number row (*J*), the value is set to 0 at that place
     * if a *decimal place* value or *integer place* value is set with a long press and nothing selected in the number row (*J*), the value for the selected output/mode/param is set to nil and will be skipped
     * if a place value is set with a long press with a number selected in the number row (*J*), only the selected place value is used and other place values are cleared. 
+* note selection ui groups: 
+  * (K) *note sequence mode* selector: 
+    * there are two possible note sequence mode values: *absolute* and *relative* 
+    * if the *number sequence mode* selector is set to *absolute*, the value selected will be the value used in the sequence, irrespective of the prior value.
+    * if a note is set to a sequence mode of *relative*, its value is added to the previous value. 
+    * the *number sequence mode* selector is set to *absolute* by default
+  * (L) *octave* selector: shifts the note up/down octaves. the *octave* selector is set to 0 by default.
+* (J) option/note/place value selection: depending on the configuration of the selected option/mode/param, this ui group is used to ether select from a list of options a place value or a note value. 
+* (M) *sub-sequence* value selector: 
+  * sets the value at each step of a five step sub-sequence based on the selections made UI groups G-L. 
+  * sub-sequence values are set in sequential order, switching to a new set of sub-sequence values each time the main sequence completes its steps (9 by default).
 
 ##### grid navigation with norns ui
 some navigation of the grid is also possible via the norns ui:
@@ -331,20 +438,19 @@ some navigation of the grid is also possible via the norns ui:
   * e2: highlight sequence set
   * e3: highlight next control set
   * k2: select previous control set
-  * k3
-    * if a sequence set has been highlighted with e2, select the highlighted set
-    * otherwise, select the next control set
+  * k3:
+    * if a sequence set has been highlighted with e2, k3 selects the highlighted sequence set
+    * otherwise, k3 select the next control set
 
 
-##### clear sequence data
+##### clearing sequence data
 * what data can be cleared:
-  * a sequence set (row 1-5, column 1) 
-  * a sequin (ie an individual sequence steps) (rows 6-14, column 1)
-  * an individual value within a sub-sequence (rows 6-10, row 8)
+  * all values set within a sequence set (row 1-5, column 1) 
+  * all values set within a single a sequence step (rows 6-14, column 1)
+  * all values set within a sub-sequence step (rows 6-10, row 8)
 * to clear sequence data:
-  * select the data element (sequence set or sequin) you want to clear to activate it 
+  * select the data element (sequence set, sequence step or sub-sequence step) you want to clear to activate it 
   * long press the key selected in the previous step and then release it
-* to clear an indivdual value within a sub-sequence long press the sub-sequence key (i.e. a key in rows 6-10, row 8)
 
 ##### copy/paste sequence data
 copy paste is available in a number of areas:
