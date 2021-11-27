@@ -98,18 +98,15 @@ function dmp.init_ratchet(ssid, ratchet_data)
     local lattice = sequencer_controller.lattice
     local next_pat_ix = #dmp.ratchet_pats+1
     dmp.ratchet_pats[next_pat_ix] = {}
-    -- local ratchet_data = value_tab
-    -- print("ratchet", ratchet_data.pitch, ratchet_data.repeats)
     dmp.ratchet_pats[next_pat_ix] = lattice:new_pattern({
       action = function()
         local pat = dmp.ratchet_pats[next_pat_ix]
         if active_ssid == ssid then
           pat.num_times_repeated = pat.num_times_repeated and pat.num_times_repeated + 1 or 0
-          -- print(pat.ix,ratchet_data.repeats,pat.num_times_repeated)
           if ratchet_data.repeats - pat.num_times_repeated == 0 then
             pat:destroy()
           elseif ratchet_data.repeats > 1 then
-            externals1.note_on(1,ratchet_data,1,1,"sequencer", "midi")
+            externals1.note_on(1,fn.deep_copy(ratchet_data),1,1,"sequencer", "midi")
           end
         end
       end,
@@ -117,7 +114,6 @@ function dmp.init_ratchet(ssid, ratchet_data)
       enabled = true
     })
     dmp.ratchet_pats[next_pat_ix].ix = next_pat_ix
-    -- dmp.ratchet_pats[next_pat_ix].ratchet_data = fn.deep_copy(ratchet_data)
   end
 
 end
@@ -136,9 +132,9 @@ function dmp.play_note(mod, ssid,subsequin_ix)
   value_tab.repeats = type(value_tab.repeats) == 'number' and value_tab.repeats or 0
 
   if dmp["voice"..mod].repeats[subsequin_ix] > 0 then
-    dmp.init_ratchet(ssid, value_tab)  
+    dmp.init_ratchet(ssid, fn.deep_copy(value_tab))  
   end
-  externals1.note_on(1,value_tab,1,1,"sequencer", "midi")
+  externals1.note_on(1,fn.deep_copy(value_tab),1,1,"sequencer", "midi")
 end
 
 function dmp.set_cc(mod)
@@ -152,7 +148,6 @@ end
 
 function dmp.end_note(value_tab)
   clock.sleep(0.001)
-  -- print("end note")
   externals1.midi_note_off_beats(value_tab.duration,value_tab.pitch,value_tab.channel,1,value_tab.pitch)
 end
 
@@ -161,7 +156,7 @@ function dmp.stop_start(val)
     stop_start = val,
     mode = 2
   }
-  externals1.note_on(1,value_tab,1,1,"sequencer", "midi")
+  externals1.note_on(1,fn.deep_copy(value_tab),1,1,"sequencer", "midi")
 end
 
 return dmp

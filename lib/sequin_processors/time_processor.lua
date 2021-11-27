@@ -16,21 +16,21 @@ function time_processor.process(output_table)
   local par = output_table.value_heirarchy.par
   if out == 1 then -- sequin
     if mod == 1 then -- step
-      if params:get("sequin_step") ~= value then
-        params:set("sequin_step",value)
+      if params:get("step_size") ~= value then
+        params:set("step_size",value)
       end
-    elseif mod == 2 then -- num sequin
-      params:set("num_sequin",value)
-    elseif mod == 3 then -- starting sequin
-      params:set("starting_sequin",value)
+    elseif mod == 2 then -- num steps
+      params:set("num_steps",value)
+    elseif mod == 3 then -- starting step
+      params:set("starting step",value)
     end
   elseif out == 2 then -- sub-sequin
     if mod == 1 then -- step
-      params:set("sub_sequin_step",value)
-    elseif mod == 2 then -- num sequin
-      params:set("num_sub_sequin",value)
-    elseif mod == 3 then -- starting sequin
-      params:set("starting_sub_sequin",value)
+      params:set("sub_step_size",value)
+    elseif mod == 2 then -- num steps
+      params:set("num_sub_steps",value)
+    elseif mod == 3 then -- starting step
+      params:set("starting_sub_step",value)
     end
   elseif out == 3 then -- clock, lattice, patterns
     local time_between_beats = sc.sequencers[5].pattern.division

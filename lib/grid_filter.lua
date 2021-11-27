@@ -68,7 +68,7 @@ function grid_filter:short_press(x, y, from_view)
     end
     if from_view == 1 then -- set level
       if clear_col ~= true then
-        local level = util.linlin(2,8,0,cs_level.maxval,params:get("num_sequin")-y)
+        local level = util.linlin(2,8,0,cs_level.maxval,params:get("num_steps")-y)
         params:set("filter_level"..x,level)
       else 
         params:set("filter_level"..x,0)
@@ -246,8 +246,7 @@ function grid_filter:animate()
       for j=1,16,1 do
         if grid_filter.animator[i] == 1 then
           local col_level = (grid_filter.solids[i][j] == nil or grid_filter.solids[i][j][1] == nil) and 
-            0 or 
-            grid_filter.solids[i][j][1].active_led_height
+            0 or grid_filter.solids[i][j][1].active_led_height
           local new_col_level
           if col_level and col_level ~= 0 then
             if col_level - 1 == 0 then
@@ -258,7 +257,7 @@ function grid_filter:animate()
             grid_filter:short_press(j, new_col_level,i)
           end
         elseif grid_filter.animator[i] == 2 then
-          k = j<16 and j+1 or 1
+          local k = j<16 and j+1 or 1
           local next_col_level = (grid_filter.solids[i][k] ~= nil and grid_filter.solids[i][k][1] ~= nil) and 
             grid_filter.solids[i][k][1].active_led_height or (grid_filter.solids[i][j] and grid_filter.solids[i][j][1]) and grid_filter.solids[i][j][1].active_led_height or nil
           if next_col_level then grid_filter:short_press(j, next_col_level,i) end

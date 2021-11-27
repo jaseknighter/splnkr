@@ -117,9 +117,9 @@ end
 
 
 -- scale/note/quantize functions
-SCALE_LENGTH = 35 --128
-ROOT_NOTE_DEFAULT = 36 --(A0)
-NOTE_OFFSET_DEFAULT = 48 --(A1)
+SCALE_LENGTH_DEFAULT = 45 
+ROOT_NOTE_DEFAULT = 33 --(A0)
+NOTE_OFFSET_DEFAULT = 33 --(A0)
 scale_names = {}
 notes = {}
 current_note_indices = {}
@@ -130,26 +130,29 @@ end
 
 fn.build_scale = function()
   notes = {}
-  notes = MusicUtil.generate_scale_of_length(params:get("root_note"), params:get("scale_mode"), SCALE_LENGTH)
-  local num_to_add = SCALE_LENGTH - #notes
-  for i = 1, num_to_add do
-    table.insert(notes, notes[SCALE_LENGTH - num_to_add])
+  notes = MusicUtil.generate_scale_of_length(params:get("root_note"), params:get("scale_mode"), params:get("scale_length"))
+  -- local num_to_add = SCALE_LENGTH_DEFAULT - #notes
+  local scale_length = params:get("scale_length") and params:get("scale_length") or SCALE_LENGTH_DEFAULT
+  -- for i = 1, num_to_add do
+  for i = 1, scale_length do
+    table.insert(notes, notes[scale_length])
+    -- table.insert(notes, notes[SCALE_LENGTH_DEFAULT - num_to_add])
   end
   -- engine.update_scale(table.unpack(notes))
 end
 
-fn.set_SCALE_LENGTH = function()
-  SCALE_LENGTH = params:get("SCALE_LENGTH")
-end
-
 fn.get_num_notes_per_octave = function()
   -- local num_notes_per_octave
-  local starting_note = notes[1]
-  for i=2,#notes,1 do
-    if notes[i]-starting_note < 12 then
-      -- do nothing
-    else
-      return i-1
+  if initializing == false and params:get("scale_length") < 12 then
+    return params:get("scale_length") 
+  else
+    local starting_note = notes[1]
+    for i=2,#notes,1 do
+      if notes[i]-starting_note < 12 then
+        -- do nothing
+      else
+        return i-1
+      end
     end
   end
 end
@@ -202,7 +205,7 @@ MORPH_SHAPES = {"lin","exp","log"}
 g = grid.connect()
 grid_mode = "filter"
 grid_long_press_length = 0.5
-NUM_PAGES = 3
+NUM_PAGES = (g.cols ~= nil and g.cols >= 16) and 3 or 2
 show_instructions = false
 updating_controls = false
 OUTPUT_DEFAULT = 4
@@ -227,8 +230,8 @@ pre_save_play_mode = false
 sequencer_playing = false
 SEQUIN_GROUP_OFF_LEVEL = 3
 DEFAULT_SUB_SEQUINS_TAB = {"","","","",""}
-num_sub_sequin = #DEFAULT_SUB_SEQUINS_TAB
-starting_sub_sequin = 1
+num_sub_steps = #DEFAULT_SUB_SEQUINS_TAB
+starting_sub_step = 1
 
 max_sub_seq_repeats = 3
 

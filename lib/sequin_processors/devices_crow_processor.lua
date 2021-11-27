@@ -58,18 +58,15 @@ function dcp.init_ratchet(ssid, ratchet_data)
     local lattice = sequencer_controller.lattice
     local next_pat_ix = #dcp.ratchet_pats+1
     dcp.ratchet_pats[next_pat_ix] = {}
-    -- local ratchet_data = value_tab
-    -- print("ratchet", ratchet_data.pitch, ratchet_data.repeats)
     dcp.ratchet_pats[next_pat_ix] = lattice:new_pattern({
       action = function()
         local pat = dcp.ratchet_pats[next_pat_ix]
         if active_ssid == ssid then
           pat.num_times_repeated = pat.num_times_repeated and pat.num_times_repeated + 1 or 0
-          -- print(pat.ix,ratchet_data.repeats,pat.num_times_repeated)
           if ratchet_data.repeats - pat.num_times_repeated == 0 then
             pat:destroy()
           elseif ratchet_data.repeats > 1 then
-            externals1.note_on(1,ratchet_data,1,1,"sequencer", "crow")
+            externals1.note_on(1,fn.deep_copy(ratchet_data),1,1,"sequencer", "crow")
           end
         end
       end,
@@ -77,7 +74,6 @@ function dcp.init_ratchet(ssid, ratchet_data)
       enabled = true
     })
     dcp.ratchet_pats[next_pat_ix].ix = next_pat_ix
-    -- dcp.ratchet_pats[next_pat_ix].ratchet_data = fn.deep_copy(ratchet_data)
   end
 
 end
@@ -90,13 +86,12 @@ function dcp.play_note(output, voice_id, ssid,subsequin_ix)
     repeat_freq = dcp["voice"..output].repeat_freq[subsequin_ix],
     mode = 1
   } 
-  -- tab.print(value_tab)
   value_tab.repeats = type(value_tab.repeats) == 'number' and value_tab.repeats or 0
 
   if dcp["voice"..output].repeats[subsequin_ix] > 0 then
-    dcp.init_ratchet(ssid, value_tab)  
+    dcp.init_ratchet(ssid, fn.deep_copy(value_tab))  
   end
-  externals1.note_on(voice_id,value_tab,1,1,"sequencer", "crow")
+  externals1.note_on(voice_id,fn.deep_copy(value_tab),1,1,"sequencer", "crow")
 end
 
 

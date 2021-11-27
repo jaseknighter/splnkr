@@ -66,7 +66,7 @@ function devices_jf_processor.play_note()
     level = devices_jf_processor.play_note_level,
     mode = 1
   }
-  externals1.note_on(1,value_tab,1,1,"sequencer", "jf")
+  externals1.note_on(1,fn.deep_copy(value_tab),1,1,"sequencer", "jf")
 end
 
 function devices_jf_processor.play_voice()
@@ -76,7 +76,7 @@ function devices_jf_processor.play_voice()
     level = devices_jf_processor.play_voice_level,
     mode = 2
   }
-  externals1.note_on(1,value_tab,1,1,"sequencer", "jf")
+  externals1.note_on(1,fn.deep_copy(value_tab),1,1,"sequencer", "jf")
 end
 
 function devices_jf_processor.portamento()
@@ -84,7 +84,7 @@ function devices_jf_processor.portamento()
     portamento = devices_jf_processor.portamento,
     mode = 3
   }
-  externals1.note_on(1,value_tab,1,1,"sequencer", "jf")
+  externals1.note_on(1,fn.deep_copy(value_tab),1,1,"sequencer", "jf")
 end
 
 return devices_jf_processor

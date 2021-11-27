@@ -9,7 +9,7 @@ end
 
 function sequencer_screen.update_screen_instructions(selected_control_indices)
   local active_ui_group_name = sequencer_controller:get_active_ui_group_name()
-  active_ui_group_name = (string.sub(active_ui_group_name,1,13) == "sequin groups") and "sequin groups" or active_ui_group_name
+  active_ui_group_name = (string.sub(active_ui_group_name,1,13) == "sequin groups") and "sequence groups" or active_ui_group_name
   specs_map = sequencer_controller.get_output_control_specs_map()
   local selected_sequin = selected_control_indices.selected_sequin
   local output_type = selected_control_indices.selected_sequin_output_type
@@ -90,7 +90,7 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
           control_bcrumbs = control_bcrumbs .. "stp/strt" 
         end
       elseif output_index == 2 then -- crow
-        control_bcrumbs = "dev crow "
+        control_bcrumbs = control_bcrumbs .. "dev crow "
         local label_pos = 1
         if output_mode == nil and output_param == nil then
           for i=1,#specs_map[2][2],1 do
@@ -226,7 +226,7 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
   -- if active_ui_group_name == "sequin groups" then
   --   control_labels = {"group 1-5"}
   -- elseif active_ui_group_name == "sequin selector" then
-  --   control_labels = {"sequin 1-" .. params:get("num_sequin")}
+  --   control_labels = {"sequin 1-" .. params:get("num_steps")}
   -- elseif active_ui_group_name == "sequin output types" then
   --   control_labels = {"seq", "subseq", "lat/pat"}
   -- elseif active_ui_group_name == "sequin outputs" then
@@ -247,7 +247,7 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
       -- control_bcrumbs =  control_bcrumbs .. "eff"
     elseif output_type == 4 then
       control_labels[1] = "time:"
-      control_labels[2] = "sequins sub-sequins"
+      control_labels[2] = "sequence sub-sequence"
       control_labels[3] = "clock/lat/pat (clp)"
     end
   elseif active_ui_group_name == "sequin output modes" then
@@ -305,9 +305,10 @@ end
 
 function sequencer_screen.update()
   -- if grid_mode == "sequencer" then
-  if pages.index == 3 and show_instructions == false then
+  if g.cols ~= nil and g.cols >= 16 and pages.index == 3 and show_instructions == false then
+
     sequencer_screen.active_control = sequencer_controller:get_active_ui_group_name()
-    sequencer_screen.active_control = ((string.sub(sequencer_screen.active_control,1,13) == "sequin groups") and "sequin groups" or sequencer_screen.active_control)
+    sequencer_screen.active_control = ((string.sub(sequencer_screen.active_control,1,13) == "sequin groups") and "sequence groups" or sequencer_screen.active_control)
 
 
     selected_control_indices = sequencer_controller.get_selected_indices()
@@ -349,29 +350,43 @@ function sequencer_screen.update()
           local empty_decimal = string.find(val,"%.0") - 1
           local r = string.find(val,"r")
           val = string.sub(val,1,empty_decimal)
+          -- if string.find(control_bcrumbs,"pitch") then
+          --   local num_notes_per_octave = fn.get_num_notes_per_octave()
+          --   local octaves_above_root = math.floor(val/num_notes_per_octave)
+          --   val = val%num_notes_per_octave+1 .. "+" .. octaves_above_root
+          -- end  
           val = r and val .. "r" or val
         end
         local calculated_absolute_val = sequence_values[i][2]
         if calculated_absolute_val ~= "nil" then 
-          -- screen_text = screen_text .. val.."/".. calculated_absolute_val .. "  " 
           if string.find(calculated_absolute_val,"%.0") then
             local empty_decimal = string.find(calculated_absolute_val,"%.0") - 1
             calculated_absolute_val = string.sub(calculated_absolute_val,1,empty_decimal)
             calculated_absolute_val = fn.round_decimals(calculated_absolute_val, 2, "up")  
+
           end
-          -- screen_text = val .."/".. calculated_absolute_val .. "  " 
+          if string.find(control_bcrumbs,"pitch") then
+            local num_notes_per_octave = fn.get_num_notes_per_octave()
+            local octaves_above_root = math.floor(calculated_absolute_val/num_notes_per_octave)
+            calculated_absolute_val = math.floor(calculated_absolute_val%num_notes_per_octave+1) .. "+" .. octaves_above_root
+          end
           screen_text = calculated_absolute_val .. "  " 
         else
           if val == "nil" then 
-            -- screen_text = screen_text .. "x" .. "  "
             screen_text = "x" .. "  "
           else -- show option text
-            -- screen_text = screen_text .. val .. "  "
             -- check if the value needs to be shown as an option value vs a num
             local options = sequencer_controller.get_options_text()
             val = options == nil and val or options[val]
             val = val and val or "x"
-            screen_text = val .. "  "
+            if type(val) == "number" and string.find(control_bcrumbs,"pitch") then
+              local num_notes_per_octave = fn.get_num_notes_per_octave()
+              local octaves_above_root = math.floor(val/num_notes_per_octave)
+              val = val%num_notes_per_octave+1 .. "+" .. octaves_above_root
+              screen_text = val .. "  "
+            else
+              screen_text = val .. "  "
+            end
           end
         end
         local screen_level = i == sequencer_controller.selected_sequin and 15 or 5
@@ -400,6 +415,11 @@ function sequencer_screen.update()
         screen.move(lx,ly)
         local val = (sequin_values and #sequin_values > 0) and sequin_values[i] or val
         val = (val ~= "" and val ~= "nil") and val or "-"
+        if type(val) == "number" and string.find(control_bcrumbs,"pitch") then
+          local num_notes_per_octave = fn.get_num_notes_per_octave()
+          local octaves_above_root = math.floor(val/num_notes_per_octave)
+          val = val%num_notes_per_octave+1 .. "+" .. octaves_above_root
+        end
         screen_text = screen_text .. val .. "  "
         local screen_level = selected_sequin_index == i and 15 or 5
         screen.level(screen_level)
@@ -416,9 +436,11 @@ function sequencer_screen.update()
       end
       screen.level(2)
       screen.move(5,48)
-      screen.text("sequins")
+      screen.text("sequence")
+      -- screen.text("sequins")
       screen.move(70,48)
-      screen.text("sub-sequins")
+      screen.text("sub-sequence")
+      -- screen.text("sub-sequins")
 
     elseif sequencer_screen.active_control == "value selector options" then
     -- elseif sequencer_screen.active_control == "value selector options" then
@@ -460,7 +482,21 @@ function sequencer_screen.update()
                         sequencer_screen.active_control ==   "value place integers"  or
                         sequencer_screen.active_control ==   "value place digits"
 
-    local text = select_num == true and "select number" or sequencer_screen.active_control 
+    local active_control
+    if sequencer_screen.active_control  == "sequin selector" then
+      active_control = "step selector"
+    elseif sequencer_screen.active_control  == "sequin output types" then
+      active_control = "step output types"
+    elseif sequencer_screen.active_control  == "sequin outputs" then
+      active_control = "step outputs"
+    elseif sequencer_screen.active_control  == "sequin output modes" then
+      active_control = "step output modes"
+    elseif sequencer_screen.active_control  == "sequin output paramss" then
+      active_control = "step output params"
+    else
+      active_control = sequencer_screen.active_control
+    end
+    local text = select_num == true and "select number" or active_control 
     screen.text(text)
     
     
@@ -484,13 +520,22 @@ function sequencer_screen.update()
       -- print(control_labels, control_bcrumbs, sequence_values, sequin_values, output_value)
       screen.level(0)
       screen.move(5,60)
-      screen.text(output_value_label ..output_value)
+      if type(output_value) == "number" and string.find(control_bcrumbs,"pitch") then
+        local num_notes_per_octave = fn.get_num_notes_per_octave()
+        local octaves_above_root = math.floor(output_value/num_notes_per_octave)
+        local output_value = output_value%num_notes_per_octave+1 .. "+" .. octaves_above_root
+        screen.text(output_value_label .. output_value)
+      else
+        screen.text(output_value_label .. output_value)
+      end
     end
 
 
-  elseif  pages.index == 3 then 
+  elseif pages.index == 3 and show_instructions == true then 
     screen_dirty = true
     instructions.display() 
+  else 
+    pages.index = 2
   end
 end
 

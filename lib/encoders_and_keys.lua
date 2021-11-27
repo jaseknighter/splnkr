@@ -388,11 +388,12 @@ local key = function (n,z)
       screen_dirty = true
       local startup = encoders_and_keys.active_ui_group == nil and true or false
         
-      if (n==2 or n==3) and z==1 and 
+      if (n==2 or n==3) and 
+      -- if (n==2 or n==3) and z==1 and 
         (encoders_and_keys.next_sequins_group or startup or encoders_and_keys.active_ui_group.ix < 6) then 
 
         local x
-        
+
         if encoders_and_keys.next_sequins_group then
           x = encoders_and_keys.next_sequins_group 
           grid_sequencer.activate_grid_key_at(x, 1)
@@ -409,6 +410,7 @@ local key = function (n,z)
             x = encoders_and_keys.active_ui_group.grid_data.x1 + 1
           end
           x = util.wrap(x,1,5)
+          print("x",x)
           grid_sequencer.activate_grid_key_at(x, 1)
         end
         encoders_and_keys.next_sequins_group = nil
@@ -417,7 +419,7 @@ local key = function (n,z)
           encoders_and_keys.active_ui_group = sc:get_active_ui_group()
         end
       end
-    elseif n==2 and z==1 then
+    elseif n==2 and z==1 and encoders_and_keys.active_ui_group then
       local active_group_index = encoders_and_keys.active_ui_group.ix
       local prev_active_group = grid_sequencer.ui_groups[active_group_index-1]
       -- print("prev_active_group.ix",prev_active_group.ix)
@@ -449,7 +451,7 @@ local key = function (n,z)
     elseif n==3 and z==1 then
       if startup == true or (encoders_and_keys.x_selected and encoders_and_keys.x_selected < 6) then
         -- do something here?
-      elseif encoders_and_keys.active_ui_group and encoders_and_keys.x_selected then
+      elseif encoders_and_keys.active_ui_group and encoders_and_keys.x_selected and encoders_and_keys.next_sequins_group == nil then
         local y = encoders_and_keys.active_ui_group.grid_data.y1    
         -- local current_level = grid_sequencer.solids[1][encoders_and_keys.x_selected][y].solid.current_level
         -- local off_level = grid_sequencer.solids[1][encoders_and_keys.x_selected][y].solid.off_level

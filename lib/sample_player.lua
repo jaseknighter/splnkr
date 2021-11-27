@@ -105,7 +105,7 @@ function sample_player.play_live()
   
   sample_player.num_cutters = 1
   
-  sample_player_nav_labels[1] = "select/play/scrub voice: " .. 1
+  sample_player_nav_labels[1] = "select/scrub voice: " .. 1
 
   softcut.buffer_clear_region(1,-1)
   
@@ -130,7 +130,7 @@ function sample_player.load_file(file)
   sample_player.num_cutters = 1
   if file ~= "cancel" then
     sample_player.file_selected = true
-    sample_player_nav_labels[1] = "select/play/scrub voice: " .. 1
+    sample_player_nav_labels[1] = "select/scrub voice: " .. 1
 
     softcut.buffer_clear_region(1,-1)
     local ch, samples = audio.file_info(file)
@@ -192,7 +192,7 @@ function sample_player.select_next_voice(direction)
   sample_player.selected_voice = util.clamp(direction+sample_player.selected_voice,1,6)
   sample_player.active_cutter = sample_player.cutter_assignments[sample_player.selected_voice]
   sample_player.selected_cutter_group = sample_player.active_cutter
-  sample_player_nav_labels[1] = "select/play/scrub voice: " .. sample_player.selected_voice
+  sample_player_nav_labels[1] = "select/scrub voice: " .. sample_player.selected_voice
   for i=1,#cutters,1
   do
     cutters[i]:set_display_mode(0)
@@ -446,7 +446,9 @@ function set_saving_elipses()
 end
 
 function sample_player.draw_top_nav (msg)
-  if (waveform_loaded == false) or sample_player.nav_active_control == 1 or sample_player.nav_active_control == 7 then
+  if show_instructions == true then
+    subnav_title = "sampler instructions"
+  elseif (waveform_loaded == false) or sample_player.nav_active_control == 1 or sample_player.nav_active_control == 7 then
     subnav_title = sample_player_nav_labels[sample_player.nav_active_control] 
   else
     subnav_title = sample_player_nav_labels[sample_player.nav_active_control] .. "["..sample_player.selected_voice.."]"

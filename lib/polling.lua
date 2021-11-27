@@ -28,8 +28,6 @@ function polling.init()
 
       
         if params:get("quantize_freq") == 2 then
-          -- local quantized_note = fn.quantize(note_num)
-          -- print("note_num, quantized_note",note_num, quantized_note)
           note_num = fn.quantize(note_num)
         end
 

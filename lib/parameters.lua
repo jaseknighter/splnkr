@@ -3,18 +3,8 @@ local parameters = {}
 
 function parameters.init()
 
-
-  params:add_separator()
-
-  --------------------------------
-  -- note params
-  -- scale: the scale to use
-  -- scale lengt: the number of notes in the scale, centered around the `note_offset`
-  -- root note: the lowest note in the scale
-  -- note_offset: the note to use as "1" in the sequencer
-  --------------------------------
-  params:add_separator("SAVE SAMPLES")
-  params:add_trigger("set_", "save samples")
+  params:add_separator("RECORD PLAYER")
+  params:add_trigger("set_", "record player")
   params:set_action("set_", function(x)
     if Namesizer ~= nil then
       textentry.enter(pre_save,Namesizer.phonic_nonsense().."_"..Namesizer.phonic_nonsense())
@@ -23,24 +13,68 @@ function parameters.init()
     end
   end)
 
+    --------------------------------
+  -- note params
+  -- scale: the scale to use
+  -- scale length: the number of notes in the scale, centered around the `note_offset`
+  -- root note: the lowest note in the scale
+  -- note_offset: the note to use as "1" in the sequencer
+  --------------------------------
+
+  function parameters.update_note_offset()
+    local offset = params:lookup_param("note_offset")
+    local offset_options = {}
+    for k,v in pairs(notes) do 
+      if v then
+        table.insert(offset_options,MusicUtil.note_num_to_name(v,true))
+      end
+    end
+    offset.options = offset_options
+    offset.count = #offset_options
+  end
+
   params:add_separator("SCALES, NOTES, AND TEMPO")
   -- params:add_group("scales and notes",5)
-  params:add{type = "option", id = "scale_mode", name = "scale mode",
-  options = scale_names, default = 5,
-  action = function() 
-    fn.build_scale() 
-    if initializing == false then 
-      sc.set_sequin_output_value_controls() 
-    end
+
+  local max_notes = fn.get_num_notes_per_octave() and fn.get_num_notes_per_octave() * 5 or SCALE_LENGTH_DEFAULT
+  
+  params:add{type = "number", id = "scale_length", name = "scale length",
+    min = 1, max = max_notes, default = ROOT_NOTE_DEFAULT, 
+    action = function(val) 
+      fn.build_scale() 
+      parameters.update_note_offset()
+      local sl = params:lookup_param("scale_length")
+      sl.maxval = fn.get_num_notes_per_octave() * 5
   end}
 
-  params:add{type = "number", id = "root_note", name = "root note",
-  min = 0, max = 127, default = ROOT_NOTE_DEFAULT, formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end,
-  action = function() fn.build_scale() end}
+  params:hide("scale_length")
 
-  params:add{type = "number", id = "note_offset", name = "note offset",
-  min = 0, max = 127, default = NOTE_OFFSET_DEFAULT, formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end,
-  action = function() fn.build_scale() end}
+  params:add{type = "option", id = "scale_mode", name = "scale mode",
+    options = scale_names, default = 5,
+    action = function() 
+      fn.build_scale() 
+      if initializing == false then 
+        parameters.update_note_offset()
+        sc.set_sequin_output_value_controls() 
+      end
+  end}
+
+  
+  params:add{type = "number", id = "root_note", name = "root note",
+    min = 0, max = 127, default = ROOT_NOTE_DEFAULT, formatter = function(param) return MusicUtil.note_num_to_name(param:get(), true) end,
+    action = function() 
+      fn.build_scale() 
+      parameters.update_note_offset()
+  end}
+
+  params:add{type = "option", id = "note_offset", name = "note offset",
+    options={"A","B","C"}, default = 1,
+    action = function(value) 
+      -- do something here???
+  end}
+
+  -- params:hide("note_offset")
+
 
   -- latice meter
   params:add{
@@ -48,7 +82,6 @@ function parameters.init()
     options=TIME_OPTIONS,
     action=function(x)
       if initializing == false and sequencer_controller.selected_sequin_group then
-        print("set meter",x)
         sequencer_controller.lattice:set_meter(fn.fraction_to_decimal(TIME_OPTIONS[x]))
       end
     end
@@ -103,7 +136,7 @@ function parameters.init()
     type = "option", id = "audio_routing", name = "audio routing", 
     options = {"in+cut->eng","in->eng","cut->eng"},
     -- min = 1, max = 3, 
-    default = 3,
+    default = 1,
     action = function(value) 
       rerouting_audio = true
       clock.run(route_audio)
@@ -126,7 +159,7 @@ function parameters.init()
   
   params:add{
     type = "option", id = "detected_freq_to_midi", name = "freq to midi", 
-    options = {"off","on"}, default = 2, 
+    options = {"off","on"}, default = 1, 
   }
 
   params:add{
@@ -159,12 +192,12 @@ function parameters.init()
   
   params:add{
     type = "option", id = "detected_freq_to_crow1", name = "freq to crow1", 
-    options = {"off","on"}, default = 2, 
+    options = {"off","on"}, default = 1, 
   }
 
   params:add{
     type = "option", id = "detected_freq_to_crow3", name = "freq to crow3", 
-    options = {"off","on"}, default = 2, 
+    options = {"off","on"}, default = 1, 
   }
 
   params:add{
@@ -217,139 +250,124 @@ function parameters.init()
   ------------------------------
   -- sequencing
   ------------------------------
-
-  params:add_separator("SEQUENCING")
-  params:add_group("sequencing",11)
-  
-  params:add{
-    type = "number", id = "sequin_step", name = "sequin step", min=1, max=8, default=1,
-    action=function(x)
-      if initializing == false and sequencer_controller.selected_sequin_group then
-        local seq = sequencer_controller.sequencers[sequencer_controller.selected_sequin_group].seq
-        seq:step(x)
-      end
-    end
-  }
-
-  params:add{
-    type = "number", id = "num_sequin", name = "num sequin", min=1, max=9, default=9,
-    action=function(x)
-      if initializing == false then
-        -- local selected_sequin = sequencer_controller.selected_sequin and sequencer_controller.selected_sequin or 1
-        -- for i=1,9,1 do
-        --   -- sequencer_controller.update_sequin_selector(5+selected_sequin,1,"off")
-        --   sequencer_controller.update_sequin_selector(5+i,1,"off")
-        --   grid_sequencer:unregister_solid_at(5+i,1, 1)
-        --   grid_sequencer:solid_off(5+i,1, 1)
-        -- end
-        local starting_sequin = 5+params:get("starting_sequin")
-        local last_sequin = starting_sequin+x-1
-        last_sequin = last_sequin <= 14 and last_sequin or 14
-
-        
-        -- for i=6,14,1 do
-        --   if grid_sequencer:find_ui_group_num_by_xy(i,1) then
-        --     print("unreg",i)
-        --     sc:unregister_ui_group(i,1)
-        --   end
-        -- end
-        sequencer_controller.sequin_selector = grid_sequencer:register_ui_group("sequin_selector",starting_sequin,1,last_sequin,1,2,3)
-      end
-    end
-  }
-  
-  params:add{
-    type = "number", id = "starting_sequin", name = "starting sequin", min=1, max=9, default=1,
-    action=function(x)
-      if initializing == false then
-        for i=1,9,1 do
-          sequencer_controller.update_sequin_selector(5+i,1,"off")
-          grid_sequencer:solid_off(5+i,1, 1)
-          grid_sequencer:unregister_solid_at(5+i,1, 1)
+  if g.cols and g.cols >= 16 then 
+    params:add_separator("SEQUENCING")
+    params:add_group("sequencing",11)
+    
+    params:add{
+      type = "number", id = "step_size", name = "step size", min=1, max=8, default=1,
+      action=function(x)
+        if initializing == false and sequencer_controller.selected_sequin_group then
+          local seq = sequencer_controller.sequencers[sequencer_controller.selected_sequin_group].seq
+          seq:step(x)
         end
-        local starting_sequin = 5+x
-        local last_sequin = 5+x+params:get("num_sequin")
-        last_sequin = last_sequin <= 14 and last_sequin or 14
-        -- for i=6,14,1 do
-        --   if grid_sequencer:find_ui_group_num_by_xy(i,1) then
-        --     sc:unregister_ui_group(i,1)
-        --   end
-        -- end
-        sequencer_controller.sequin_selector = grid_sequencer:register_ui_group("sequin_selector",starting_sequin,1,last_sequin,1,2,3)
-        
-        local num_sequin = params:get("num_sequin")
-        -- num_sequin = util.clamp(1,9-x+1,num_sequin)
-        params:set("num_sequin",num_sequin+1)
-        params:set("num_sequin",num_sequin)
       end
-    end
-  }
+    }
 
-  params:add{
-    type = "number", id = "sub_sequin_step", name = "sub sequin step", min=1, max=4, default=1,
-    action=function(x)
-      if initializing == false and sequencer_controller.selected_sequin_group then
-        local seq = sequencer_controller.sequencers[sequencer_controller.selected_sequin_group].sub_seq_leader
-        seq:step(x)
-      end
-    end
-  }
-
-  params:add{
-    type = "number", id = "num_sub_sequin", name = "num sub sequin", min=1, max=5, default=5,
-    action=function(x)
-      if initializing == false and sequencer_controller.sequin_output_values then
-        -- local selected_sequin = selected_sub_sequin_ix and selected_sub_sequin_ix or 1
-        for i=x,5,1 do
-          -- sequencer_controller.update_sequin_selector(5+selected_sequin,8,"off")
-          sequencer_controller.update_sequin_output_value(5+i,8,"off")
-          grid_sequencer:unregister_solid_at(5+i,8, 1)
-          grid_sequencer:solid_off(5+i,8, 1)
+    params:add{
+      type = "number", id = "num_steps", name = "num steps", min=1, max=9, default=9,
+      action=function(x)
+        if initializing == false then
+          local starting_step = 5+params:get("starting_step")
+          local last_sequin = starting_step+x-1
+          last_sequin = last_sequin <= 14 and last_sequin or 14
+          sequencer_controller.sequin_selector = grid_sequencer:register_ui_group("sequin_selector",starting_step,1,last_sequin,1,2,3)
         end
-        local starting_sequin = 5+params:get("starting_sub_sequin")
-        local last_sequin = starting_sequin+x-1
-        -- last_sequin = last_sequin <= 10 and last_sequin or 10
-        -- for i=6,10,1 do
-        --   if grid_sequencer:find_ui_group_num_by_xy(i,8) then
-        --     sc:unregister_ui_group(i,8)
-        --   end
-        -- end
-        
-        -- sequencer_controller.sequin_selector = grid_sequencer:register_ui_group("sequin_selector",starting_sequin,1,last_sequin,1,2,3)
-        sequencer_controller.sequin_output_values = grid_sequencer:register_ui_group("sequin_output_values",starting_sequin,8,last_sequin,8,5,3)
-        -- num_sub_sequin = last_sequin - starting_sequin + 1
       end
-    end
-  }
-
-  params:add{
-    type = "number", id = "starting_sub_sequin", name = "starting sub sequin", min=1, max=5, default=1,
-    action=function(x)
-      if initializing == false then
-        for i=1,5,1 do
-          sequencer_controller.update_sequin_output_value(5+i,8,"off")
-          grid_sequencer:solid_off(5+i,8, 1)
-          grid_sequencer:unregister_solid_at(5+i,8, 1)
+    }
+    
+    params:add{
+      type = "number", id = "starting_step", name = "starting step", min=1, max=9, default=1,
+      action=function(x)
+        if initializing == false then
+          for i=1,9,1 do
+            sequencer_controller.update_sequin_selector(5+i,1,"off")
+            grid_sequencer:solid_off(5+i,1, 1)
+            grid_sequencer:unregister_solid_at(5+i,1, 1)
+          end
+          local starting_step = 5+x
+          local last_sequin = 5+x+params:get("num_steps")
+          last_sequin = last_sequin <= 14 and last_sequin or 14
+          -- for i=6,14,1 do
+          --   if grid_sequencer:find_ui_group_num_by_xy(i,1) then
+          --     sc:unregister_ui_group(i,1)
+          --   end
+          -- end
+          sequencer_controller.sequin_selector = grid_sequencer:register_ui_group("sequin_selector",starting_step,1,last_sequin,1,2,3)
+          
+          local num_steps = params:get("num_steps")
+          -- num_steps = util.clamp(1,9-x+1,num_steps)
+          params:set("num_steps",num_steps+1)
+          params:set("num_steps",num_steps)
         end
-        local starting_sequin = 5+x
-        local last_sequin = 5+x+params:get("num_sub_sequin")
-        -- last_sequin = last_sequin <= 10 and last_sequin or 10
-        -- for i=6,10,1 do
-        --   if grid_sequencer:find_ui_group_num_by_xy(i,8) then
-        --     sc:unregister_ui_group(i,8)
-        --   end
-        -- end
-        
-        sequencer_controller.sequin_output_values = grid_sequencer:register_ui_group("sequin_output_values",starting_sequin,8,last_sequin,8,5,3)
-        
-        local num_sub_sequin = params:get("num_sub_sequin")
-        -- num_sub_sequin = util.clamp(1,5-x+1,num_sub_sequin)
-        params:set("num_sub_sequin",num_sub_sequin+1)
-        params:set("num_sub_sequin",num_sub_sequin)
       end
-    end
-  }
+    }
 
+    params:add{
+      type = "number", id = "sub_step_size", name = "sub step size", min=1, max=4, default=1,
+      action=function(x)
+        if initializing == false and sequencer_controller.selected_sequin_group then
+          local seq = sequencer_controller.sequencers[sequencer_controller.selected_sequin_group].sub_seq_leader
+          seq:step(x)
+        end
+      end
+    }
+
+    params:add{
+      type = "number", id = "num_sub_steps", name = "num sub steps", min=1, max=5, default=5,
+      action=function(x)
+        if initializing == false and sequencer_controller.sequin_output_values then
+          -- local selected_sequin = selected_sub_sequin_ix and selected_sub_sequin_ix or 1
+          for i=x,5,1 do
+            -- sequencer_controller.update_sequin_selector(5+selected_sequin,8,"off")
+            sequencer_controller.update_sequin_output_value(5+i,8,"off")
+            grid_sequencer:unregister_solid_at(5+i,8, 1)
+            grid_sequencer:solid_off(5+i,8, 1)
+          end
+          local starting_step = 5+params:get("starting_sub_step")
+          local last_sequin = starting_step+x-1
+          -- last_sequin = last_sequin <= 10 and last_sequin or 10
+          -- for i=6,10,1 do
+          --   if grid_sequencer:find_ui_group_num_by_xy(i,8) then
+          --     sc:unregister_ui_group(i,8)
+          --   end
+          -- end
+          
+          -- sequencer_controller.sequin_selector = grid_sequencer:register_ui_group("sequin_selector",starting_step,1,last_sequin,1,2,3)
+          sequencer_controller.sequin_output_values = grid_sequencer:register_ui_group("sequin_output_values",starting_step,8,last_sequin,8,5,3)
+          -- num_sub_steps = last_sequin - starting_step + 1
+        end
+      end
+    }
+
+    params:add{
+      type = "number", id = "starting_sub_step", name = "starting sub step", min=1, max=5, default=1,
+      action=function(x)
+        if initializing == false then
+          for i=1,5,1 do
+            sequencer_controller.update_sequin_output_value(5+i,8,"off")
+            grid_sequencer:solid_off(5+i,8, 1)
+            grid_sequencer:unregister_solid_at(5+i,8, 1)
+          end
+          local starting_step = 5+x
+          local last_sequin = 5+x+params:get("num_sub_steps")
+          -- last_sequin = last_sequin <= 10 and last_sequin or 10
+          -- for i=6,10,1 do
+          --   if grid_sequencer:find_ui_group_num_by_xy(i,8) then
+          --     sc:unregister_ui_group(i,8)
+          --   end
+          -- end
+          
+          sequencer_controller.sequin_output_values = grid_sequencer:register_ui_group("sequin_output_values",starting_step,8,last_sequin,8,5,3)
+          
+          local num_sub_steps = params:get("num_sub_steps")
+          -- num_sub_steps = util.clamp(1,5-x+1,num_sub_steps)
+          params:set("num_sub_steps",num_sub_steps+1)
+          params:set("num_sub_steps",num_sub_steps)
+        end
+      end
+    }
+  end
   
 
   save_load.init()
@@ -362,10 +380,12 @@ function parameters.init()
   -- filter params
   ------------------------------
 
+
   params:add_separator("FILTERS")
 
   -- filter level
-  params:add_group("level",16)
+  params:add_group("filter levels",16)
+
   local filter_levelgrid_view = 1
   -- cs_level = controlspec.AMP:copy()
   -- cs_level.maxval = 5
@@ -397,8 +417,6 @@ function parameters.init()
   cs_rq = controlspec.AMP:copy()
   for i=1,16,1 do
     params:add_control("reciprocal_quality"..i,"reciprocal q"..i,cs_rq)
-    -- local default_val = ((i-1)%5)+2
-    --print(default_val)
     local default_val = 1
     params:set("reciprocal_quality"..i,default_val)
     params:set_action("reciprocal_quality"..i,function(x) 
@@ -407,18 +425,15 @@ function parameters.init()
         params:set("reciprocal_quality"..i,0.1, false)
       end
         engine.set_reciprocal_quality(i-1,x)
-      -- update grid
-      -- if grid_filter.last_known_height > 0 then
+
+        -- update grid
       if grid_filter.last_known_height then
           local j = i
-        -- local l =math.floor(util.linlin(cs_rq.minval,cs_rq.maxval,8,1,x))
         local l =math.floor(util.linlin(cs_rq.minval,cs_rq.maxval,1,8,x))
-        --print("l",cs_rq.minval,cs_rq.maxval,x,l)
 
         grid_filter.solids[filter_rqgrid_view][j] = {}
         for k=7,l,-1
         do
-          --print(j, k, l, filter_rqgrid_view)
           grid_filter:register_solid_at(j, k, l, filter_rqgrid_view)
         end
       end
@@ -535,11 +550,11 @@ function parameters.init()
     -- {"pan_max","pan max",0,1,0.5,engine.pan_max,"control",},
     {"pitchshift","pitchshift",0,1,0,engine.pitchshift,"control",},
     {"   pitchshift freq","pitchshift_freq",1,50,1,engine.pitch_shift_trigger_frequency,"number",},
-    {"   pitchshift note1","pitchshift_note1",-SCALE_LENGTH,SCALE_LENGTH,0,engine.pitchshift_note1,"number",},
-    {"   pitchshift note2","pitchshift_note2",-SCALE_LENGTH,SCALE_LENGTH,0,engine.pitchshift_note2,"number",},
-    {"   pitchshift note3","pitchshift_note3",-SCALE_LENGTH,SCALE_LENGTH,0,engine.pitchshift_note3,"number",},
-    {"   pitchshift note4","pitchshift_note4",-SCALE_LENGTH,SCALE_LENGTH,0,engine.pitchshift_note4,"number",},
-    {"   pitchshift note5","pitchshift_note5",-SCALE_LENGTH,SCALE_LENGTH,0,engine.pitchshift_note5,"number",},
+    {"   pitchshift note1","pitchshift_note1",-params:get("scale_length"),params:get("scale_length"),0,engine.pitchshift_note1,"number",},
+    {"   pitchshift note2","pitchshift_note2",-params:get("scale_length"),params:get("scale_length"),0,engine.pitchshift_note2,"number",},
+    {"   pitchshift note3","pitchshift_note3",-params:get("scale_length"),params:get("scale_length"),0,engine.pitchshift_note3,"number",},
+    {"   pitchshift note4","pitchshift_note4",-params:get("scale_length"),params:get("scale_length"),0,engine.pitchshift_note4,"number",},
+    {"   pitchshift note5","pitchshift_note5",-params:get("scale_length"),params:get("scale_length"),0,engine.pitchshift_note5,"number",},
     {"   grain size","grain_size","0.1",1,0.1,engine.grain_size,"control",},
     {"   time dispersion","time_dispersion","0.01",1,0.01,engine.time_dispersion,"control",},
   }
@@ -1132,7 +1147,6 @@ function parameters.init()
               envelopes[envelope_id].graph:edit_graph(env_nodes)
               local num_envelope_controls = envelope_id == 1 and "num_envelope1_controls" or "num_envelope2_controls"
               local num_env_nodes = #envelopes[envelope_id].graph_nodes
-              --print("reset_envelope_control_params",envelope_id,i)
               reset_envelope_control_params(envelope_id)
               params:set(num_envelope_controls,num_env_nodes)
             end

@@ -25,26 +25,26 @@ function Sequencer:new(lattice,id)
   }
 
   function s:pattern_event(t)
-    local starting_sequin = params:get("starting_sequin")
-    if s.seq.ix < starting_sequin then
-      s.next_sequin = starting_sequin
+    local starting_step = params:get("starting_step")
+    if s.seq.ix < starting_step then
+      s.next_sequin = starting_step
     -- else
     --   s.seq:select(1)
     --   s.next_sequin = s.seq()
     end
 
-    local last_sequin = params:get("num_sequin") + params:get("starting_sequin") - 1
+    local last_sequin = params:get("num_steps") + params:get("starting_step") - 1
     
     if s.seq.ix < last_sequin  then
       s.next_sequin = s.seq()
     else
-      s.seq:select(starting_sequin)
+      s.seq:select(starting_step)
       s.next_sequin = s.seq()
       s.sub_seq_leader()
     end
-    if (s.sub_seq_leader.ix > params:get("num_sub_sequin") + params:get("starting_sub_sequin") - 1) or
-        (s.sub_seq_leader.ix < params:get("starting_sub_sequin")) then
-      s.sub_seq_leader:select(params:get("starting_sub_sequin"))
+    if (s.sub_seq_leader.ix > params:get("num_sub_steps") + params:get("starting_sub_step") - 1) or
+        (s.sub_seq_leader.ix < params:get("starting_sub_step")) then
+      s.sub_seq_leader:select(params:get("starting_sub_step"))
       s.sub_seq_leader()
     end
     selected_sub_sequin_ix = s.sub_seq_leader.ix

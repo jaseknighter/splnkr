@@ -3,6 +3,11 @@ an amplitude and frequency tracking effects processor/sampler/sequencer for mono
 
 *IMPORTANT WARNING*: animating the bandpass filters with the grid interface can result in loud percussive sounds. use caution!
 
+## requirements
+
+* norns
+* 16-column grid (required for sequencing)
+
 ## installation from maiden
 `;install https://github.com/jaseknighter/splnkr`
 
@@ -65,7 +70,7 @@ an amplitude and frequency tracking effects processor/sampler/sequencer for mono
 
 ##### envelope modulation
 * k1+k3: show/hide plow modulation menu
-* k1+e1: select active plant  
+* k1+e1: select active envelope  
 * k2: select control
 * k3: change control value
 
@@ -77,16 +82,20 @@ an amplitude and frequency tracking effects processor/sampler/sequencer for mono
 * k3: nav down
 
 ## norns ui: pages
+
+on all pages the first encoder (e1) switches between the script's 3 pages.
+
+note: if a 16-column grid is not connected, the script's 3rd (sequencer) screen is disabled.
+
 ### page 1: sample selector/cutter
-the sample selector/cutter page provides controls for a sample player/slicer that allows for 1-6 voices. voices can loop through the entire sample, between all the slices, or a single slice.
+the sample selector/cutter page controls a simple sample player/cutter with 1-6 voices. 
 
 key terms: 
 
 * *playhead*: there are 6 playheads that may be set independently to play through a loaded sample
-* *cutter*: a section of a loaded sample
+* *cutter*: a slice of a loaded sample
 
 sample controls available on all page 1 screens:
-  * e1: previous page 
   * e2: next/prev control screen
   * k1 + k2: stop/start selected voice
   * k1 + k3: show instructions
@@ -97,21 +106,18 @@ with no sample loaded:<br>
 <img src="images/pages/page1/page1_s1_start.png" width="66%">
 <!-- ![](images/pages/page1/page1_s1_start.png) -->
 
+the script first loads with instructions to press k2 to select a sample. once a sample has been selected, e2 navigates to other page 1 screens. 
 
 with sample loaded:<br>
 <img src="images/pages/page1/page1_s1_sample.png" width="66%">
 <!-- ![](images/pages/page1/page1_s1_sample.png) -->
 
-the script first loads with instructions to press k2 to select a sample. once a sample has been selected, other screens may be navigated (e2). 
-
 the banded graphic that appears once a sample has been loaded depicts amplitude (volume) changes in the sample. darker bands represent softer sounds and lighter bands represent louder sounds.
 
-[note: the script's two other pages (envelope* and *sequencing*) may be navigated to with e1 whether or not a sample has been loaded]
-
 screen 1 controls:
-  * select a new sample to play (k2)
-  * select the playhead for updating subsequent screens (e3)
-  * scrub the playhead (k1 + e3)
+  * k2: select a new sample to play 
+  * k1 + e3: scrub the playhead 
+  * e3: select the active voice
 
 #### screen 2 controls: play mode
 <img src="images/pages/page1/page1_s2_play_mode.png" width="66%">
@@ -128,8 +134,9 @@ there are five play modes that can be set individually (e3) for each of the 6 pl
 on this screen, k1 + e3 sets the play modes for all six playheads at once.
 
 screen 2 controls:
-  * e3: set play mode selected cutter
-  * k1 + e3: set play mode all cutters
+  * k1 + k2: stop/start sel voice
+  * e3: set the play mode of the selected cutter
+  * k1 + e3: set the play mode of all cutters
   <!-- * k2/k3: delete/add cutter -->
 
 #### screen 3 controls: adjust cut ends
@@ -140,10 +147,12 @@ the cutter(s) ends may be controlled on this screen.
 
 screen 3 controls:
   <!-- * k2/k3: delete/add cutter -->
-  * k1 + e2: select end
-  * k1 + e3: adjust end
-  * k1 + e1: fine adjust end
-  * e3: select cutter end
+  * k1 + k2: stop/start sel voice
+  * k1 + e2: select cutter
+  * e3: select cutter end to adjust
+  * k1 + e3: adjust selected cutter end
+  * k1 + e1: fine adjust selected cutter end
+
 #### screen 4 controls: move cutter
 <img src="images/pages/page1/page1_s4_move_cutter.png" width="66%">
 <!-- ![](images/pages/page1/page1_s4_move_cutter.png) -->
@@ -152,9 +161,10 @@ the location of the cutter(s) may be controlled on this screen.
 
 screen 4 controls:
   <!-- * k2/k3: delete/add cutter -->
+  * k1 + k2: stop/start sel voice
   * k1 + e2: select cutter
-  * k1 + e3: move cutter
-  * k1 + e1: fine move cutter
+  * k1 + e3: adjust selected cutter location
+  * k1 + e1: fine adjust selected cutter location
 
 #### screen 5 controls: adjust rate
 <img src="images/pages/page1/page1_s5_rate.png" width="66%">
@@ -164,8 +174,9 @@ the rate of each playhead may be controlled on this screen.
 
 screen 5 controls:
   <!-- * k2/k3: delete/add cutter -->
-  * e3: adjust selected playhead rate
-  * k1 + e3: fine adjust selected playhead rate
+  * k1 + k2: stop/start sel voice
+  * e3: adjust selected voice rate
+  * k1 + e3: fine adjust selected voice rate
 
 #### screen 6 controls: adjust level
 <img src="images/pages/page1/page1_s6_level.png" width="66%">
@@ -175,16 +186,22 @@ the audio level of each playhead may be controlled on this screen.
 
 screen 6 controls:
   <!-- * k2/k3: delete/add cutter -->
-  * e3: adjust selected playhead level
-  * e3: adjust all playhead levels
+  * k1 + k2: stop/start sel voice
+  * e3: adjust selected voice level
+  * k1 + e3: adjust all voice levels
 
 #### screen 7 controls: autogenerate cutters
 <img src="images/pages/page1/page1_s7_autogenerate.png" width="66%">
 <!-- ![](images/pages/page1/page1_s7_autogenerate.png) -->
 
-cutters may be added and removed from this screen. if cutters are added with e3, each cutter is set at a point of the sample where a large change in levels has been detected (i.e. the start/end of a sound). if cutters are added with k1 + e3, each cutter is evenly spaced
+cutters may be added and removed from this screen. 
+
+if cutters are added with e3, each cutter is set at a point of the sample where a large change in levels has been detected (e.g. at the start/end of a sound). 
+
+if cutters are added with k1 + e3, each cutter is evenly spaced.
 
 screen 7 controls:
+  * k1 + k2: stop/start sel voice
   * e3: autogenerate clips by level (up to 20)
   * k1 + e3: autogenerate clips with even spacing (up to 20)
 
@@ -192,7 +209,7 @@ screen 7 controls:
 <img src="images/pages/page2/page2_envelopes.png" width="66%">
 <!-- ![](images/pages/page2/page2_envelopes.png) -->
 
-the two shapes displayed on page 2 represent envelopes which may be sent to external devices (crow, jf, midi, w/) and used to shape the granular envelope (see *effects* below for details). 
+the two shapes displayed on page 2 represent envelopes which may be applied to external devices (i.e. crow, jf, midi, w/). the first envelope is also be used to shape the granular envelope if enabled (see *effects* below for details). 
 
 an extension of Mark Eats' [envgraph class](https://github.com/monome/norns/blob/main/lua/lib/envgraph.lua), the two envelopes may be set with a variable number of control points or 'nodes.' 
 
@@ -206,15 +223,15 @@ there are 5 types of controls for each of the two envelopes:
 
 with a few exceptions, the last of the three control types (node time, node level, and node angle) are adjustable for each of envelopes nodes.
 
-fine grain controls: All of the envelope controls allow for fine grain control using k1+e3.
+fine grain controls: all of the envelope controls allow for fine grain control using k1+e3.
 
 #### envelope modulation
 <img src="images/pages/page2/page2_envelope_mods.png" width="66%">
 <!-- ![](images/pages/page2/page2_envelope_mods.png) -->
 
-pressing k1+k3 on the plow screen brings up the `plow modulation` menu, which can be navigated using e2 and e3. each envelope has eight modulation parameters:  
+pressing k1+k2 on the plow screen brings up the `plow modulation` menu. once enabled, the menu, which can be navigated using e2 and e3. each envelope has eight modulation parameters:  
   
-* `mod prob`: The probability that one of the other modulation parameters will be evaluated. If it is set to 0%, no envelope modulation will occur for the selected plant.  
+* `mod prob`: The probability that one of the other modulation parameters will be evaluated. If it is set to 0%, no envelope modulation will occur for the selected envelope.  
 * `time prob`: The probability that the time value for each of the envelope's nodes will be modulated.  
 * `time mod amt`: The amount of modulation that will be applied to the time value of each of the envelope's nodes.  
 * `level prob`: The probability that the level value for each of the envelope's nodes will be modulated.  
@@ -227,61 +244,36 @@ pressing k1+k3 on the plow screen brings up the `plow modulation` menu, which ca
 
 ### page 3: sequencer
 
-selecting the third page (*sqncr*) using norns encoder e1 brings up the sequencer view, which is controllable with a 16 column grid. 
+selecting the third page (*sqncr*) using norns encoder e1 brings up the sequencer view. this page is only available if a grid with 16 or more columns is attached to the norns.
 
-by default, the sequencer has 9 steps. each sequence step has 5 sub-steps by default. the sequencer is built around the [Lattice](http://norns.local/doc/modules/Lattice.html) and [Sequins](https://monome.org/docs/norns/reference/lib/sequins) libraries. 
+by default, the sequencer has 9 steps. each sequence step has 5 sub-steps by default. values are assigned to the sequencer's sub-steps. each time the sequencer completes a cycle, the values assigned to the next sub-step are activated. 
+
+*EXAMPLE*
+if step 1 of the sequencer has a sample rate of 1 assigned to sub-step 1 and a sample rate of 2 assigned to sub-step 2: 
+
+  * the first time the sequencer arrives at step 1 the sample rate will be set 1
+  * after the sequencer has gone through all the active steps (9 steps by default) and returns to step 1, the 2nd sub-step will be activated and the sample rate will be set to 2
+
+the sequencer is built around the [Lattice](http://norns.local/doc/modules/Lattice.html) and [Sequins](https://monome.org/docs/norns/reference/lib/sequins) libraries. 
 
 
-#### norns ui
-<img src="images/sequencer_screen_1.png" width="66%">
-<!-- ![](images/sequencer_screen_1.png) -->
-
- the norns ui provides information about the sequencer's state. the screenshot above shows the norns ui when the a sequence step is being setup, prior to a sub-step value being set.
-
-LEGEND
-* (A) *breadcrumbs*: displays the following details: *sequence set number, sequin number, output type, output, output mode, output param*
-  * The breadcrumb in the screenshot above indicates the following has been selected on the grid: *sequence set (5), sequin (1), output type (softcut), output(voice 1)*
-* (B) *active ui group*: displays the currently selected ui group
-  * The screenshot above shows the *output params* ui group has been selected
-* (D) selection values: displays the values available based on the ui group selected 
-  * in the example above, the values shown are the parameters available for the softcut output types (i.e., *cutter, mode, rate, direction, level*)
-
-<img src="images/sequencer_screen_2.png" width="66%">
-<!-- ![](images/sequencer_screen_2.png) -->
-
-  the screenshot above shows the values set for a given output/mode/param for a single sequin (sequence step) for a selected sequence set. 
-
-LEGEND
-  * (A)-(C) sections (A) through (C) in the above screenshot display the same information as in the prior screenshot (see above for details).
-  * (D) sequence step: three rows of three values are displayed representing the current value at each step of the sequence (going left to right, top to bottom). section *D* in the image above shows: 
-    * the steps are shown for sequence set 5, sequin (step) 1, softcut voice 1, rate parameter
-    * steps 2,3,4,6,7,8 have an *x* assigned to them, indicating nothing is happening at this step with regards to softcut voice 1's rate for this sequence set
-    * step 1 is set to *1, meaning at the first step, the rate of the softcut voice is set to 1. it is brighter than the other step indicators, showing it is currently the active value being processed by the script.
-    * step 5 is set to *2.4r*, which means the value at this step is relative to the prio.pr step(s). in this case, since there is just 1 prior step, set at one and the *relative* value at step 5 is 2.4, this the rate value sent to the softcut engine at this step will be 3.4 (1+2.4).
-    * step 9 is set to *2.1r*. Like the prior step it is a relative step. The value sent to the softcut engine at this step will be 5.1 (1+2.4+2.1)
-  * (E) sub-sequence values: the value at each step of the sequence (for each output type, output, mode/param, etc.) is selected from one of five *sub-sequence values*. in other words, for each individual output type, output, mode/param, etc. at each step of a sequence there is a five step sub-sequence (implemented as sequins nested within sequins). the screenshot above shows:
-    * for sequins group 5, step 1, softcut voice 1's rate parameter:
-      * three of the five sub-sequence step's have no value
-      * the first sub-sequence step has a value of one, meaning that when this value is active in the sub-sequence, the voice's rate will be set to 1
-      * the third sub-sequence step has a value of two, meaning that when this value is active in the sub-sequence, the voice's rate will be set to 2
 
 #### grid controls
 <img src="images/sequencer_grid.png" width="66%">
 <!-- ![](images/sequencer_grid.png) -->
 
-the grid ui is organized into multiple ui groups:
-
-* (1) *sequencer mode* selector: selecting grid key 16,8 brings up the grid controls for the sequencer. selecting the key to the left right (key 15,8) returns the the bandpass filter controls
-* (A) *sequence sets*: each set defines a unique sequence
+* (1) *grid mode* selector: selecting grid key 15,8 switches the grid to the bandpass filter control mode
+* (2) *sequencer mode* selector: selecting grid key 16,8 brings up the grid controls for the sequencer. 
+  * note: using encoder e1 to select the norns sequencer view (page 3) will automatically switch the grid to the sequencer mode.
+* (A) *sequence sets*: each sequence set defines a unique sequence of up to 9 sequence steps with each sequence step containing up to 5 sub-sequence values which are cycled as the sequencer completes its active steps (see *EXAMPLE* above)
 * (B) *sequin(s)*: each sequence set contains up to 9 sequence steps defined with the Sequins port referenced above. At each sequence step, multiple types of outputs may be sequenced
-  * the number of active steps may be controlled with from the params menu by updating the *num steps* parameter
+  * the number of active steps may be controlled with from the params menu (PARAMETERS>EDIT>sequencing) by updating the *num steps* parameter
   * todo: allow each sequence set to have their own *num steps* step value
 * (C) *output types*: at each step of the sequence, one or more *output types* may be selected. 
-  * there are 7 *output types*
+  * there are 4 *output types*
     * softcut (sc): 6 voice sampler
     * devices (dev): 4 devices are currently supported 
     * effects (eff): 6 effects are currently defined (see *outputs* below)
-    * enveloper (env): this is an envelope applied to the live signal passed into norns and generated by the sequencer
     * pattern (pat): each sequence set runs according to its own lattice pattern
     * lattice (lat): there is one lattice running that triggers the selected sequence set but each sequence set can individually control the lattice parameters
   * NOTE: currently, only settings for three output types are working so far: softcut, devices/crow, and devices/just friends. other *output types* (effects, w/, lattice, patterns) aren't yet working.
@@ -325,7 +317,7 @@ the grid ui is organized into multiple ui groups:
     * note: if 
   * (K) *number sequence mode* selector: if a number is set to a sequence mode of *relative*, its value is added to the previous value. the *number sequence mode* selector is set to *absolute* for each value by default (meaning, the value selected will be the value used, irrespective of the prior value).
   * (L) *polarity* selector: sets the value to positive or negative. the *polarity* selector is set to positive by default.
-  * (M) *sub-sequins* selector: sets the values at each step of a five step sub-sequence based on the option selected (UI group J) or the number selected (UI groups (G-L)). When a value is active within this five step sub-sequence, this value is used to set the value of the selected output/mode/param.
+  * (M) *sub-sequence* value selector: sets the value at each step of a five step sub-sequence based on the option selected with (UI group J) or the number selected (UI groups (G-L)). When a value is active within this five step sub-sequence, this value is used to set the value of the selected output/mode/param.
   * notes about number selection: 
     * number selection occurs by first selecting a place value (ui groups *G* and/or *H*) and then selecting a number (ui group *J*).   
     * if mulitple place values are set, they are added together. For example, if the *ones integer place value* is set to `5` and the *tenths integer place value* is set to `4`  
@@ -369,7 +361,36 @@ copy paste is available in a number of areas:
 * sequin: to copy from one sequin (sequence step) to another follow the directions for one of the two methods detailed above for sequence set copying
 
 
-      
+
+#### norns ui
+<img src="images/sequencer_screen_1.png" width="66%">
+<!-- ![](images/sequencer_screen_1.png) -->
+
+ the norns ui provides information about the sequencer's state. the screenshot above shows the norns ui when a sequence step is being setup, prior to a sub-step value being set.
+
+LEGEND
+* (A) *breadcrumbs*: displays the following details: *sequence set number, sequin number, output type, output, output mode, output param*
+  * The breadcrumb in the screenshot above (*sqncr 5-1 sc voice 1*) indicates the following has been selected on the grid: *sequence set (5), sequence step (1), output type (softcut), output(voice 1)*
+* (B) *active ui group*: displays the currently selected ui group
+  * The screenshot above shows the *output modes* ui group has been selected
+* (C) selection values: displays the values available based on the ui group selected 
+  * in the example above, the values shown are the parameters available for the softcut output types (i.e., *v_mode, cutter, rate, direction, level*)
+
+<img src="images/sequencer_screen_2.png" width="66%">
+<!-- ![](images/sequencer_screen_2.png) -->
+
+  the screenshot above shows the values set for a given output/mode/param for a single sequin (sequence step) for a selected sequence set. 
+
+LEGEND
+  * (A) *breadcrumbs*: displays the following details: *sequence set number, sequin number, output type, output, output mode, output param*
+    * The breadcrumb in the screenshot above (*sqncr 5-1 sc voice 1*) indicates the following has been selected on the grid: *sequence set (5), sequence step (1), output type (softcut), output(voice 1)*
+  * (B) *active ui group*: displays the currently selected ui group
+    * The screenshot above shows the *output modes* ui group has been selected
+  * (C) sequence step: three rows of values are displayed on the right representing the current output value at each step of the sequence (going left to right, top to bottom). 
+  * (D) sub-sequence values: at each step of a sequence, there is a five step sub-sequence implemented as sequins nested within sequins. 
+  * (E) selected output value *E* represents the value currently selected with the grid. when a sub-sequence step is selected on the grid, this selected output value is assigned to the selected sub-sequence step.
+  
+
 ## filterbank
 
 parameters for the 16 channel filterbank may be controlled via the params menu or using the grid.

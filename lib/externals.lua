@@ -41,7 +41,8 @@ function externals:new(active_notes)
   ext.note_on = function(voice_id, value, beat_frequency, envelope_time_remaining, note_source, note_target)
     -- local note_offset = params:get("note_offset") - params:get("root_note")
     if initializing == false then
-      if value.pitch then
+      if value.pitch and source ~= "engine" then
+        value.pitch = util.clamp(value.pitch,1,#notes)
         value.pitch = notes[value.pitch]
       end  
 
@@ -119,7 +120,6 @@ function externals:new(active_notes)
         end
       
         asl_envelope = "{" .. asl_envelope .. "}"
-        --print(asl_envelope)
         return asl_envelope 
       end
 
@@ -144,7 +144,6 @@ function externals:new(active_notes)
       ) then
         local volts
         local mode = value.mode
-        -- if note_source == "engine" and value then
         if note_source == "engine" and value.pitch then
           volts = (value.pitch-60)/12
         elseif mode == 1 and value.pitch then -- play_voice
@@ -304,8 +303,8 @@ function externals:new(active_notes)
       end
 
         -- wdel karplus-strong out
-      if ((note_source == "engine" and (output_wdel_ks == 2 or output_wdel_ks == 3 or output_wdel_ks > 4)) or
-        (note_source == "midi" and (output_wdel_ks > 3 ))) then
+      if ((note_source == "engine" and (output_wdel_ks > 1)) or
+        (note_source == "midi" and (output_wdel_ks > 2 ))) then
         local pitch = (value-48)/12
         local level = voice_id == 1 and params:get("envelope1_max_level") or params:get("envelope2_max_level") 
         crow.send("ii.wdel.pluck(" .. level .. ")")

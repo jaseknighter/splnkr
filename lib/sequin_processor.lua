@@ -79,10 +79,10 @@ function sequin_processor.gather_outputs(ssid,output_table, sequin_id, sub_seq_l
             if v.last_ix and v.last_ix == sub_seq_leader_ix then
               v.ix_repeats = v.ix_repeats + 1
               if v.ix_repeats > max_sub_seq_repeats then
-                params:set("sequin_step",params:get("sequin_step")-1)
-                params:set("sub_sequin_step",params:get("sequin_step")-1)
-                params:set("num_sequin",params:get("num_sequin")+1)
-                params:set("num_sub_sequin",params:get("num_sub_sequin")+1)
+                params:set("step_size",params:get("step_size")-1)
+                params:set("sub_step_size",params:get("step_size")-1)
+                params:set("num_steps",params:get("num_steps")+1)
+                params:set("num_sub_steps",params:get("num_sub_steps")+1)
               end
             else
               v.ix_repeats = 0
@@ -124,8 +124,6 @@ function sequin_processor.process_sub_sequins(sub_sequins, ssid, sub_seq_leader_
   local out = vh.out
   local mod = vh.mod
   local par = vh.par
-  print(typ,out,par,mod)
-  local pav
   
   if sequin_processor.previous_absolute_values[typ] == nil then sequin_processor.previous_absolute_values[typ] = {} end
   if sequin_processor.previous_absolute_values[typ][out] == nil then sequin_processor.previous_absolute_values[typ][out] = {} end
@@ -146,12 +144,7 @@ function sequin_processor.process_sub_sequins(sub_sequins, ssid, sub_seq_leader_
   if sequin_processor.previous_relative_values[typ][out] == nil then sequin_processor.previous_relative_values[typ][out] = {} end
   if sequin_processor.previous_relative_values[typ][out][mod] == nil then sequin_processor.previous_relative_values[typ][out][mod] = {} end
   if par and sequin_processor.previous_relative_values[typ][out][mod][par] == nil then sequin_processor.previous_relative_values[typ][out][mod][par] = {} end
-  -- if par then
-  --   prv = sequin_processor.previous_relative_values[typ][out][mod][par]
-  -- else
-  --   prv = sequin_processor.previous_relative_values[typ][out][mod]
-  -- end
-
+  
   sequin_processor.previous_relative_values[typ] = sequin_processor.previous_relative_values[typ] and sequin_processor.previous_relative_values[typ] or {}
   local next_output_value = sub_sequins.next_output_value
   
@@ -219,7 +212,7 @@ function sequin_processor.process_sub_sequins(sub_sequins, ssid, sub_seq_leader_
     if sequin_output_type_processor == nil then
       -- print("ERROR, can't find processor for sequin output type")
     else
-      --print("no value defined at sequin step")
+      --print("no value defined at step size")
     end
   end
 end

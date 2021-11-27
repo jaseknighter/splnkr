@@ -157,6 +157,7 @@ based on tyler etter's code: https://gist.github.com/tyleretters/a62a27e22dc7021
           
 ]]
 local grid_sequencer = {}
+grid_sequencer.ui_groups = {}
 
 grid_sequencer.flicker_level = 15
 
@@ -169,14 +170,14 @@ end
 function grid_sequencer.init()
   grid_sequencer.grid_views = {'sequencer'}
   grid_sequencer.active_view = 1
-  long_presses = {}
+  grid_sequencer.long_presses = {}
   grid_sequencer.long_press_counter = {}
   grid_sequencer.flickers = {}
-  grid_sequencer.flicker_counter = nil
-  grid_sequencer.flicker_scheduling = false -- 1 = not scheduled, 2 = scheduled, 3 = ready to flicker
   grid_sequencer.solids = {}
   grid_sequencer.ui_groups = {}
   grid_sequencer.animator = {0,0,0}
+  grid_sequencer.flicker_counter = nil
+  grid_sequencer.flicker_scheduling = false -- 1 = not scheduled, 2 = scheduled, 3 = ready to flicker
   grid_sequencer.animation_mode = {0,0,0}
   grid_sequencer.filter_param_overlay = false
   grid_sequencer.frame = 0
@@ -208,9 +209,8 @@ function grid_sequencer.activate_grid_key_at(x,y, delay)
 end
 
 function grid_sequencer.key(x, y, z)
-  -- graphics:set_message(x, y, z)
-  -- fn.break_splash(true)
-  -- fn.dirty_screen(true)
+  if g.cols == nil or g.cols < 16 then return end
+  
   if z == 1 and (y < 8 or (x > 5 and x < 11)) then
     grid_sequencer.long_press_counter[x][y] = clock.run(grid_sequencer.grid_long_press, g, x, y, grid_sequencer.active_view)
   end
@@ -337,7 +337,7 @@ end
 function grid_sequencer:grid_long_press(x, y, from_view)
   clock.sleep(grid_long_press_length)
 
-  table.insert(long_presses,{x,y})
+  table.insert(grid_sequencer.long_presses,{x,y})
   grid_sequencer:register_flicker_at(x, y)
   -- grid_sequencer:set_long_press(true)
   -- grid_sequencer:unregister_solid_at(x, y, from_view) 
@@ -730,7 +730,7 @@ function grid_sequencer:get_height()
   return  grid_sequencer.last_known_height
 end
 
--- local long_presses = {}
+-- local grid_sequencer.long_presses = {}
 
 function grid_sequencer:process_long_press(first_press,second_press)
   if (first_press[1] < 6 and second_press == nil) and (first_press[2] == 1) then
@@ -769,31 +769,31 @@ end
 function grid_sequencer:set_long_press(bool,x,y)
   -- self.long_press = bool
   
-  if bool == false and #long_presses > 0 then
-    for i=#long_presses,1,-1 do
-      local long_x = long_presses[i][1]
-      local long_y = long_presses[i][2]
+  if bool == false and #grid_sequencer.long_presses > 0 then
+    for i=#grid_sequencer.long_presses,1,-1 do
+      local long_x = grid_sequencer.long_presses[i][1]
+      local long_y = grid_sequencer.long_presses[i][2]
       if x==long_x and y==long_y then
         local ui_group_num = grid_sequencer:find_ui_group_num_by_xy(x, y)
         if ui_group_num == nil or x == nil or y == nil then print("no ui_group at ",x,y) return end
         grid_sequencer:unregister_flicker_at(x,y)
-        table.insert(long_presses,{x,y})
-        -- table.remove(long_presses,i)
+        table.insert(grid_sequencer.long_presses,{x,y})
+        -- table.remove(grid_sequencer.long_presses,i)
       end
     end
-    if #long_presses > 3 then
-      long_presses = {}
-    elseif #long_presses == 3 then
-      table.remove(long_presses)
-      local first_press = long_presses[1]
-      local second_press = long_presses[2]
-      long_presses = {}
+    if #grid_sequencer.long_presses > 3 then
+      grid_sequencer.long_presses = {}
+    elseif #grid_sequencer.long_presses == 3 then
+      table.remove(grid_sequencer.long_presses)
+      local first_press = grid_sequencer.long_presses[1]
+      local second_press = grid_sequencer.long_presses[2]
+      grid_sequencer.long_presses = {}
       grid_sequencer:process_long_press(first_press,second_press)
     else 
-      local first_press = long_presses[1]
+      local first_press = grid_sequencer.long_presses[1]
       grid_sequencer:process_long_press(first_press)
       grid_sequencer:key_press(x, y, 1, "long")
-      long_presses = {}
+      grid_sequencer.long_presses = {}
     end
   end
 end
