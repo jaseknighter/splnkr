@@ -477,6 +477,7 @@ page 3 of the norns ui shows the sequencer's state.
  the screenshot above shows the norns ui when a sequence step is being setup, prior to a sub-sequence step value being set.
 
 LEGEND
+
 * (A) *breadcrumbs*: displays the following details: *sequence set number, sequin number, output type, output, output mode, output param*
   * The breadcrumb in the screenshot above (*sqncr 5-1 sc voice 1*) indicates the following has been selected on the grid: 
     * sequence set: 5 
@@ -494,6 +495,7 @@ LEGEND
   the screenshot above shows the values set for a given output/mode/param for a single sequin (sequence step) for a selected sequence set. 
 
 LEGEND
+
   * (A) *breadcrumbs*: displays the following details: *sequence set number, sequin number, output type, output, output mode, output param*
     * The breadcrumb in the screenshot above (*sqncr 5-1 sc voice 1*) indicates the following has been selected on the grid: 
       * sequence set: 5 
@@ -522,6 +524,7 @@ there are three parameters for each of the filterbanks' 16 channels:
 <img src="images/filter_grid.png" width="100%">
 
 LEGEND
+
 *mode selectors*
 (1) *filter mode* selector (row 8, col 15): switches the grid to the bandpass filter control mode.
 (2) *sequencer mode* selector (row 8, col 16): switches the grid to the sequencer control mode. (note: using encoder e1 to select the norns sequencer view (page 3) will automatically switch the grid to the sequencer mode.)
