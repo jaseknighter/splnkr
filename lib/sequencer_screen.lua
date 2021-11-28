@@ -491,8 +491,10 @@ function sequencer_screen.update()
       active_control = "step outputs"
     elseif sequencer_screen.active_control  == "sequin output modes" then
       active_control = "step output modes"
-    elseif sequencer_screen.active_control  == "sequin output paramss" then
+    elseif sequencer_screen.active_control  == "sequin output params" then
       active_control = "step output params"
+    elseif sequencer_screen.active_control  == "sequin output values" then
+      active_control = "output values"
     else
       active_control = sequencer_screen.active_control
     end

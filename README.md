@@ -259,7 +259,7 @@ the sequencer is built around the [Lattice](http://norns.local/doc/modules/Latti
 
 
 
-#### grid controls
+#### sequencer grid controls
 <img src="images/sequencer_grid.png" width="66%">
 <!-- ![](images/sequencer_grid.png) -->
 
@@ -402,7 +402,7 @@ the sequencer is built around the [Lattice](http://norns.local/doc/modules/Latti
           * mod rate (mod_rte)
           * mod amount (mod_amt)
           * freeze (frz)
-* number selection ui groups: 
+* (G-L) number selection ui groups: 
   * (G) *integer place value* selectors: one or more integer place number selections (ones, tens, hundreds, thousands, etc.) may be applied to a sequencer value. integer place values are defined going from right to left from the *decimal point* button (*I*)
   * (H) *decimal point* indicator: this grid button separates *integer place value* selectors from *decimal place value* selectors. 
   * (I) *decimal place value* selectors: one or more decimal place number selections (tenths, hundredths, thousandths, etc.) may be assigned to a sequencer value. decimal place values are defined going from left to right from the *decimal point* button (*I*)
@@ -420,7 +420,7 @@ the sequencer is built around the [Lattice](http://norns.local/doc/modules/Latti
     * if a *decimal place* value or *integer place* value is set with a short press with nothing selected in the number row (*J*), the value is set to 0 at that place
     * if a *decimal place* value or *integer place* value is set with a long press and nothing selected in the number row (*J*), the value for the selected output/mode/param is set to nil and will be skipped
     * if a place value is set with a long press with a number selected in the number row (*J*), only the selected place value is used and other place values are cleared. 
-* note selection ui groups: 
+* (K-L) note selection ui groups: 
   * (K) *note sequence mode* selector: 
     * there are two possible note sequence mode values: *absolute* and *relative* 
     * if the *number sequence mode* selector is set to *absolute*, the value selected will be the value used in the sequence, irrespective of the prior value.
@@ -468,18 +468,24 @@ copy paste is available in a number of areas:
 
 
 
-#### norns ui
+#### sequencer norns ui
+page 3 of the norns ui shows the sequencer's state. 
+
 <img src="images/sequencer_screen_1.png" width="66%">
 <!-- ![](images/sequencer_screen_1.png) -->
 
- the norns ui provides information about the sequencer's state. the screenshot above shows the norns ui when a sequence step is being setup, prior to a sub-step value being set.
+ the screenshot above shows the norns ui when a sequence step is being setup, prior to a sub-sequence step value being set.
 
 LEGEND
 * (A) *breadcrumbs*: displays the following details: *sequence set number, sequin number, output type, output, output mode, output param*
-  * The breadcrumb in the screenshot above (*sqncr 5-1 sc voice 1*) indicates the following has been selected on the grid: *sequence set (5), sequence step (1), output type (softcut), output(voice 1)*
+  * The breadcrumb in the screenshot above (*sqncr 5-1 sc voice 1*) indicates the following has been selected on the grid: 
+    * sequence set: 5 
+    * sequence step: 1 
+    * output type: softcut
+    * output: voice 1
 * (B) *active ui group*: displays the currently selected ui group
   * The screenshot above shows the *output modes* ui group has been selected
-* (C) selection values: displays the values available based on the ui group selected 
+* (C) *selection values*: displays the items available to select based on the active ui group 
   * in the example above, the values shown are the parameters available for the softcut output types (i.e., *v_mode, cutter, rate, direction, level*)
 
 <img src="images/sequencer_screen_2.png" width="66%">
@@ -489,49 +495,57 @@ LEGEND
 
 LEGEND
   * (A) *breadcrumbs*: displays the following details: *sequence set number, sequin number, output type, output, output mode, output param*
-    * The breadcrumb in the screenshot above (*sqncr 5-1 sc voice 1*) indicates the following has been selected on the grid: *sequence set (5), sequence step (1), output type (softcut), output(voice 1)*
+    * The breadcrumb in the screenshot above (*sqncr 5-1 sc voice 1*) indicates the following has been selected on the grid: 
+      * sequence set: 5 
+      * sequence step: 6 
+      * output type: softcut
+      * output: voice 1
+      * mod: rate
+      * selected value: 5 (relative)
   * (B) *active ui group*: displays the currently selected ui group
-    * The screenshot above shows the *output modes* ui group has been selected
-  * (C) sequence step: three rows of values are displayed on the right representing the current output value at each step of the sequence (going left to right, top to bottom). 
-  * (D) sub-sequence values: at each step of a sequence, there is a five step sub-sequence implemented as sequins nested within sequins. 
-  * (E) selected output value *E* represents the value currently selected with the grid. when a sub-sequence step is selected on the grid, this selected output value is assigned to the selected sub-sequence step.
+    * The screenshot above shows the *output values* ui group has been selected
+  * (C) *sequence step*: three rows of values are displayed on the right representing the current output value at each step of the sequence (going left to right, top to bottom). 
+  * (D) *sub-sequence value*: at each step of a sequence, there is a five step sub-sequence implemented as sequins nested within sequins. 
+  * (E) *selected output value*: represents the value currently selected. when a sub-sequence step is selected on the grid (columns 6-10, row 8), this selected output value is assigned to the selected sub-sequence step.
   
 
 ## filterbank
 
-parameters for the 16 channel filterbank may be controlled via the params menu or using the grid.
+parameters for the 16 channel bandpass filterbank may be controlled via the params menu or using the grid.
 
-three parameters may be set for each of the filterbanks 16 channelsw: 
-* channel level (amp)
+there are three parameters for each of the filterbanks' 16 channels: 
+* level (amp)
 * reciprocal quality (rq)
 * center frequency (cf)
 
 ### filterbank grid controls
 <img src="images/filter_grid.png" width="66%">
-*parameter adjustment*
-the top 7 buttons in each row indicate the intensity of the setting for the filterbank parameter. if none of the top 7 buttons are lit in one of the grid's 16 columns, the filter at the selected slot is at its lowest intensity. if all 7 buttons lit, the filter at the selected slot is at its highest intensity.
 
-selecting a button that is already lit sets the parameter to its lowest value.
+LEGEND
+*mode selectors*
+(1) *filter mode* selector (row 8, col 15): switches the grid to the bandpass filter control mode.
+(2) *sequencer mode* selector (row 8, col 16): switches the grid to the sequencer control mode. (note: using encoder e1 to select the norns sequencer view (page 3) will automatically switch the grid to the sequencer mode.)
 
-*toggling between parameters*
-each of the three parameters listed above may be controled via the grid by toggling between first three buttons on the grid's bottom row.
+*filterbank view selectors*
+(3) *level view selector*
+(4) *reciprocal quality (rq) view selector*: 
+(5) *center frequency (cf) view selector*
+
+(A) *parameter value selectors*
+the top 7 buttons in each row of the grid are used to set the value of the parameters of the filterbank's 16 bandpass filters. if none of the top 7 buttons are lit in a grid column, the selected parameter (level, rq, or cf) of the bandpass filter at the selected slot is at its lowest value. if all 7 buttons lit in a column, the active parameter filter at the selected slot is at its highest value.
 
 *animation controls*
-the 5th and 6th buttons on the grid's bottom row control animation options for each of the three filter channel parameters:
-
-*button 5*: pressing this button sweeps the values of each channel to the left cycling the values around to the far right channel after the values pass by the far left channel. if lit, pressing the button again turns off the animation.
-*button 6*: pressing this button sweeps the values of each channel to the upwards, cycling back to the channel's min value when the max value is reached. if lit, pressing the button again turns off the animation.
-
-selecting a buttons 5 or 6 when they are already lit turns off the animation for the selected filter parameter
+(6) *horizontal animation*: pressing this button (column 5, row 8) sweeps the values of each channel to the left cycling the values around to the far right channel after the values pass by the far left channel. if lit, pressing the button again turns off the animation.
+(7) *vertical animation*: pressing this button (column 6, row 8) sweeps the values of each channel to the upwards, cycling back to the channel's min value when the max value is reached. if lit, pressing the button again turns off the animation.
 
 *parameter overlay*
-selecting button 8 on the bottom row turns overlays the values of all three filter parameters over one another, making it easier to see how they interact with animation turned on.
+(8) selecting button (column 8, row 8) overlays the values of all three filter parameters over one another, making it easier to see how they interact, especially with animation turned on.
 
 ## misc parameters
-the controls covered in the section below are found in the PARAMETERS>EDIT menu. with a few exceptions, these controls are not controllable with the grid sequencer.
+the controls covered in the section below are found in the PARAMETERS>EDIT menu. with a few exceptions, these are not controllable with the grid sequencer.
 
 ### record player
-what gets recorded depends on the `play mode` setting:
+records the loaded audio sample. how the sample gets recorded depends on the `play mode` setting:
 * *stop*: record the entire sample 
 * *loop all*: record the entire sample 
 * *all cuts*: record all sample areas set by cutters
@@ -540,7 +554,7 @@ what gets recorded depends on the `play mode` setting:
 *important note*: if *play mode* is set to `all cuts`, all *rate* settings must either be positive or negative. 
 
 ### scales, notes, and tempo
-options are provided here to set scale mode, root note, sequencer meter, and sequencer divisions
+set scale mode, root note, meter, and divisions
 
 ### audio routing
 unline most other norn's scripts, the *splnkr* script changes how audio is internally routed. this was done so that softcut audio can be processed by SuperCollider which isn't the case with the default routing configuration. Three routing options are provided in the params menu:
@@ -548,7 +562,7 @@ unline most other norn's scripts, the *splnkr* script changes how audio is inter
 * *in->eng*: sends audio in to the supercollider engine 
 * *cut->eng*: sends audio in and softcut audio to the supercollider engine 
 
-when the *splnkr* script is unloaded (e.g. when loading a different script or restarting the norns), the script will reset the routing to the norns default settings.
+when the *splnkr* script is unloaded (e.g. when loading a different script or restarting norns), the script will reset the routing to the norns default settings.
 
 ### amp/freq detection
 the *splnkr* script's SuperCollider engine includes frequency and amplitude detection which can be set in the params menu to trigger midi notes and crow notes/envelopes/gates/triggers. a number of options are provided to filter the frequency and amplitude (level) ranges sent to midi and crow. the notes sent to midi and crow can also be quantized to the values set in in SCALES, NOTES, AND TEMPO section of the params menu.
@@ -556,25 +570,13 @@ the *splnkr* script's SuperCollider engine includes frequency and amplitude dete
 interesting feedback occurs when the source of audio that is routed to the SuperCollider engine from the norns audio in jacks (see *audio routing* above), is also being controlled with the *splnkr* script's amp/freq detection capabilities.
 
 ### saving sequences 
-sequence data may be saved in the *sequencing* sub-menu.
+the current state of the grid sequencer may be saved and recalled from the *sequencing* sub-menu.
 
-## effects
-there are four main effects built into the *splnkr* script: delay, bitcrush, enveloper, and pitchshift. these may be controlled with the grid sequencer and in the params menu.
+### inputs/outputs 
+settings for midi, crow, jf, and w/ are avaiable in the params menu.
 
-### delay
-delay time, decay, and amp controls are provided. when delay is set to very small amounts, resonating sounds may occur (like karplus-strong)
-### bitcrush
-control the number of bits and bitcrush rate
-### enveloper
-the enveloper is a granular synthesis-based enveloper that uses the shape of the *splnkr* scripts first envelope (see *page 2: envelopes* above). this allows for shaping of whatever audio is routed to the SuperCollider engine (see *audio routing* above), including softcut audio samples. 
-
-### outputs 
-
-midi, crow, jf, and w/ outputs are avaiable in the params menu (lots of bugs here to sort out). 
-
-*pitch/frequency tracking*
-
-after the wet signal is sent to the SuperCollider engine's bandpass filters, pitch and amplitude is tracked and sent back to norns, which passes the info on to external devices (midi, crow, jf, w/) depending on their (buggy) settings  
+### amp/frequency detection
+after the wet signal is sent to the SuperCollider engine's bandpass filters, pitch and amplitude is tracked and sent back to norns, which passes the info to external devices (midi, crow, jf, w/) depending on their settings.
 
 ## credits
 * first and foremost, i'd like to thank [SPIKE the Percussionist](http://manipulate.net) for tremendous amount of testing, feedback, and encouragement he provided as i was working to get this script ready to publish.

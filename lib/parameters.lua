@@ -73,7 +73,7 @@ function parameters.init()
       -- do something here???
   end}
 
-  -- params:hide("note_offset")
+  params:hide("note_offset")
 
 
   -- latice meter
