@@ -260,7 +260,7 @@ the sequencer is built around the [Lattice](http://norns.local/doc/modules/Latti
 
 
 #### sequencer grid controls
-<img src="images/sequencer_grid.png" width="66%">
+<img src="images/sequencer_grid.png" width="100%">
 <!-- ![](images/sequencer_grid.png) -->
 
 * (1) *filter mode* selector (row 8, col 15): switches the grid to the bandpass filter control mode.
@@ -519,7 +519,7 @@ there are three parameters for each of the filterbanks' 16 channels:
 * center frequency (cf)
 
 ### filterbank grid controls
-<img src="images/filter_grid.png" width="66%">
+<img src="images/filter_grid.png" width="100%">
 
 LEGEND
 *mode selectors*
