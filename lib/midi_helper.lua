@@ -42,9 +42,9 @@ midi_out_device = midi.connect(1)
 --     end
 --   elseif pages.index == 4 then
 --     if active_plant == 1 then
---       if device_16n then set_16n_channel_and_cc_values(plow1_cc_channel) end
+--       if device_16n then set_16n_channel_and_cc_values(env1_cc_channel) end
 --     else
---       if device_16n then set_16n_channel_and_cc_values(plow2_cc_channel) end
+--       if device_16n then set_16n_channel_and_cc_values(env2_cc_channel) end
 --     end
 --   elseif pages.index == 5 then
 --     if device_16n then set_16n_channel_and_cc_values(water_cc_channel) end

@@ -69,7 +69,7 @@ an amplitude and frequency tracking effects processor/sampler/sequencer for mono
 * k1 + k3: show instructions
 
 ##### envelope modulation
-* k1+k3: show/hide plow modulation menu
+* k1+k3: show/hide env modulation menu
 * k1+e1: select active envelope  
 * k2: select control
 * k3: change control value
@@ -211,15 +211,15 @@ screen 7 controls:
 
 the two shapes displayed on page 2 represent envelopes which may be applied to external devices (i.e. crow, jf, midi, w/). the first envelope is also be used to shape the granular envelope if enabled (see *effects* below for details). 
 
-an extension of Mark Eats' [envgraph class](https://github.com/monome/norns/blob/main/lua/lib/envgraph.lua), the two envelopes may be set with a variable number of control points or 'nodes.' 
+an extension of Mark Eats' [envgraph class](https://github.com/monome/norns/blob/main/lua/lib/envgraph.lua), the two envelopes may be set with a variable number of control points or *nodes*.
 
 there are 5 types of controls for each of the two envelopes: 
 
-`env level`: the maximum amplitude of the envelope  
-`env length`: the length of the envelope  
-`node time`: when the node is processed by the envelope  
-`node level`: the amplitude of the envelope at the node time  
-`node angle`: the shape of the ramp from the prior node time to the current node time
+*env level*: the maximum amplitude of the envelope  
+*env length*: the length of the envelope  
+*node time*: when the node is processed by the envelope  
+*node level*: the amplitude of the envelope at the node time  
+*node angle*: the shape of the ramp from the prior node time to the current node time
 
 with a few exceptions, the last of the three control types (node time, node level, and node angle) are adjustable for each of envelopes nodes.
 
@@ -229,18 +229,18 @@ fine grain controls: all of the envelope controls allow for fine grain control u
 <img src="images/pages/page2/page2_envelope_mods.png" width="66%">
 <!-- ![](images/pages/page2/page2_envelope_mods.png) -->
 
-pressing k1+k2 on the plow screen brings up the `plow modulation` menu. once enabled, the menu, which can be navigated using e2 and e3. each envelope has eight modulation parameters:  
+pressing k1+k2 on the env screen brings up the *env modulation* menu. once enabled, the menu can be navigated using e2 and e3. each envelope has eight modulation parameters:  
   
-* `mod prob`: The probability that one of the other modulation parameters will be evaluated. If it is set to 0%, no envelope modulation will occur for the selected envelope.  
-* `time prob`: The probability that the time value for each of the envelope's nodes will be modulated.  
-* `time mod amt`: The amount of modulation that will be applied to the time value of each of the envelope's nodes.  
-* `level prob`: The probability that the level value for each of the envelope's nodes will be modulated.  
-* `level mod amt`: The amount of modulation that will be applied to the level value of each of the envelope's nodes.  
-* `curve prob`: The probability that the curve value for each of the envelope's nodes will be modulated.  
-* `curve mod amt`: The amount of modulation that will be applied to the curve value of each of the envelope's nodes.  
-* `env mod nav`: Selects which of the above seven parameters are selected on when plow modulation is visible (by pressing k1+k3) on the plow screen. This parameter is useful for controlling the plow ui via midi. 
+* *mod prob*: The probability that one of the other modulation parameters will be evaluated. If it is set to 0%, no envelope modulation will occur for the selected envelope.  
+* *time prob*: The probability that the time value for each of the envelope's nodes will be modulated.  
+* *time mod amt*: The amount of modulation that will be applied to the time value of each of the envelope's nodes.  
+* *level prob*: The probability that the level value for each of the envelope's nodes will be modulated.  
+* *level mod amt*: The amount of modulation that will be applied to the level value of each of the envelope's nodes.  
+* *curve prob*: The probability that the curve value for each of the envelope's nodes will be modulated.  
+* *curve mod amt*: The amount of modulation that will be applied to the curve value of each of the envelope's nodes.  
+* *env mod nav*: Selects which of the above seven parameters are selected on when env modulation is visible (by pressing k1+k3) on the env screen. This parameter is useful for controlling the env ui via midi. 
 
-<!-- In addition, the `show env mod params` parameter makes the parameter modulation navigation visible (again, useful for controlling the ui via midi). -->
+<!-- In addition, the *show env mod params* parameter makes the parameter modulation navigation visible (again, useful for controlling the ui via midi). -->
 
 ### page 3: sequencer
 
@@ -417,7 +417,7 @@ the sequencer is built around the [Lattice](http://norns.local/doc/modules/Latti
   * notes about number selection: 
     * number selection occurs by first selecting a place value (ui groups *G* and/or *H*) and then selecting a number (ui group *J*).   
     * if mulitple place values are set, they are added together. For example, if the *ones integer place value* is set to `5` and the *tenths integer place value* is set to `4`  
-    * if a *decimal place* value or *integer place* value is set with a short press with nothing selected in the number row (*J*), the value is set to 0 at that place
+    * if a *decimal place* value or *integer place* value is set with a short press with nothing selected in the number row (*J*), the value is set to `0` at that place
     * if a *decimal place* value or *integer place* value is set with a long press and nothing selected in the number row (*J*), the value for the selected output/mode/param is set to nil and will be skipped
     * if a place value is set with a long press with a number selected in the number row (*J*), only the selected place value is used and other place values are cleared. 
 * (K-L) note selection ui groups: 
@@ -579,12 +579,11 @@ settings for midi, crow, jf, and w/ are avaiable in the params menu.
 after the wet signal is sent to the SuperCollider engine's bandpass filters, pitch and amplitude is tracked and sent back to norns, which passes the info to external devices (midi, crow, jf, w/) depending on their settings.
 
 ## credits
-* first and foremost, i'd like to thank [SPIKE the Percussionist](http://manipulate.net) for tremendous amount of testing, feedback, and encouragement he provided as i was working to get this script ready to publish.
-* this project was inspired by the [lines discussion](https://llllllll.co/t/re-deconstructing-jan-jelineks-zwischen/46577/4) about Jan Jelinek’s album “Zwischen” initiated by [Matt Lowery](https://www.instagram.com/mattlowery/?hl=en). It was a series of discussions I had with Matt at the start of this project that helped form the basic conceptual framework for the script. 
-* splnkr leverages the [stonesoup](https://github.com/schollz/stonesoup) script developed by @infinitedigits/@schollz
+* first and foremost, i'd like to thank [SPIKE the Percussionist](http://manipulate.net) for the tremendous amount of testing, feedback, and encouragement he provided as i was working to get this script ready to publish.
+* this project was inspired by the [lines discussion](https://llllllll.co/t/re-deconstructing-jan-jelineks-zwischen/46577/4) about Jan Jelinek’s album “Zwischen” initiated by [Matt Lowery](https://www.instagram.com/mattlowery/?hl=en). tt was a series of discussions t had with Matt at the start of this project that helped form the basic conceptual framework for the script. 
+* crossfading and audio routing code is based on the [stonesoup](https://github.com/schollz/stonesoup) script and [sampler tutorial](https://schollz.com/blog/sampler/) by @infinitedigits/@schollz
 * additional inspirations and thanks are due to:
-  * @catfact
+  * @catfact 
   * @markeats/@markwheeler Passerby (https://github.com/markwheeler/passersby)
   * @tyleretters Dronecaster (https://llllllll.co/t/34737) and Arcologies (https://llllllll.co/t /35752)
   * @dan_derks Cheat Codes 2 (https://llllllll.co/t/38414)
-
