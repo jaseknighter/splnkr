@@ -134,7 +134,7 @@ there are five play modes that can be set individually (e3) for each of the 6 pl
 on this screen, k1 + e3 sets the play modes for all six playheads at once.
 
 screen 2 controls:
-  * k1 + k2: stop/start sel voice
+  * k1 + k2: stop/start selected voice
   * e3: set the play mode of the selected cutter
   * k1 + e3: set the play mode of all cutters
   <!-- * k2/k3: delete/add cutter -->
@@ -180,7 +180,7 @@ screen 5 controls:
 
 #### screen 6 controls: adjust level
 <img src="images/pages/page1/page1_s6_level.png" width="66%">
-![](images/pages/page1/page1_s6_level.png)
+<!-- ![](images/pages/page1/page1_s6_level.png) -->
 
 the audio level of each playhead may be controlled on this screen.
 
@@ -560,7 +560,7 @@ records the loaded audio sample. how the sample gets recorded depends on the `pl
 set scale mode, root note, meter, and divisions
 
 ### audio routing
-unline most other norn's scripts, the *splnkr* script changes how audio is internally routed. this was done so that softcut audio can be processed by SuperCollider which isn't the case with the default routing configuration. Three routing options are provided in the params menu:
+unlike most other norn's scripts, the *splnkr* script changes how audio is internally routed. this was done so that softcut audio can be processed by SuperCollider which isn't the case with the default routing configuration. three routing options are provided in the params menu:
 * *in+cut->eng*: sends audio in and softcut audio to the supercollider engine 
 * *in->eng*: sends audio in to the supercollider engine 
 * *cut->eng*: sends audio in and softcut audio to the supercollider engine 
@@ -577,9 +577,6 @@ the current state of the grid sequencer may be saved and recalled from the *sequ
 
 ### inputs/outputs 
 settings for midi, crow, jf, and w/ are avaiable in the params menu.
-
-### amp/frequency detection
-after the wet signal is sent to the SuperCollider engine's bandpass filters, pitch and amplitude is tracked and sent back to norns, which passes the info to external devices (midi, crow, jf, w/) depending on their settings.
 
 ## credits
 * first and foremost, i'd like to thank [SPIKE the Percussionist](http://manipulate.net) for the tremendous amount of testing, feedback, and encouragement he provided as i was working to get this script ready to publish.

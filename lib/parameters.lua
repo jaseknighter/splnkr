@@ -770,9 +770,36 @@ function parameters.init()
 
   params:add{
     type = "option", id = "midi_out_device", name = "out device", options = midi_devices,
-    min = 1, max = 16, default = 1,
+    default = 1,
     action = function(value) 
       midi_out_device = midi.connect(value) 
+    end
+  }
+
+  params:add{
+    type = "option", id = "midi_note_1_mode", name = "midi note 1 mode", 
+    options = {"quant","unquant"},
+    default = 1,
+    action = function(value) 
+      sequencer_controller.refresh_output_control_specs_map()
+    end
+  }
+
+  params:add{
+    type = "option", id = "midi_note_2_mode", name = "midi note 2 mode", 
+    options = {"quant","unquant"},
+    default = 1,
+    action = function(value) 
+      sequencer_controller.refresh_output_control_specs_map()
+    end
+  }
+
+  params:add{
+    type = "option", id = "midi_note_3_mode", name = "midi note 3 mode", 
+    options = {"quant","unquant"},
+    default = 1,
+    action = function(value) 
+      sequencer_controller.refresh_output_control_specs_map()
     end
   }
 
