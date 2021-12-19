@@ -209,7 +209,7 @@ NUM_PAGES = (g.cols ~= nil and g.cols >= 16) and 3 or 2
 show_instructions = false
 updating_controls = false
 OUTPUT_DEFAULT = 4
-SCREEN_FRAMERATE = 1/50
+SCREEN_FRAMERATE = 1/10
 menu_status = false
 pages = 0
 
