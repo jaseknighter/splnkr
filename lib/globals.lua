@@ -76,7 +76,7 @@ end
 -- morphing function
 -- note: the last two parameters are "private" to the function and don't need to included in the inital call to the function
 -- example: `morph(my_callback_function,1,10,2,10,"log")`
-function fn.morph(callback,s_val,f_val,duration,steps,shape, steps_remaining, next_val)
+function fn.morph(callback,s_val,f_val,duration,steps,shape, id, steps_remaining, next_val)
   local start_val = s_val < f_val and s_val or f_val
   local finish_val = s_val < f_val and f_val or s_val
   local increment = (finish_val-start_val)/steps
@@ -85,9 +85,9 @@ function fn.morph(callback,s_val,f_val,duration,steps,shape, steps_remaining, ne
     clock.sleep(delay)
     local return_val = next_val
     if s_val ~= f_val then
-      callback(return_val)
+      callback(return_val, id)
     else
-      callback(s_val)
+      callback(s_val, id)
     end
   end
   local steps_remaining = steps_remaining and steps_remaining - 1 or steps 
@@ -110,7 +110,7 @@ function fn.morph(callback,s_val,f_val,duration,steps,shape, steps_remaining, ne
     else
       next_val = util.linlin(start_val,finish_val,start_val,finish_val, value_to_convert)
     end
-    clock.run(fn.morph,callback,s_val,f_val,duration,steps,shape, steps_remaining,next_val)
+    clock.run(fn.morph,callback,s_val,f_val,duration,steps,shape, id, steps_remaining,next_val)
   end
 end
 
@@ -199,7 +199,7 @@ MIN_CUT_SPACING = 1
 OUTPUT_TYPES = {"softcut","devices","effects","time"}
 PPQN_OPTIONS = {12,24,36,48,60,72,84,96,108}
 TIME_OPTIONS = {"1/8","1/4","1/3","1/2","3/4","1","4/3","3/2","2"}
-MORPH_DURATIONS = {"1/4","1/3","1/2","1","3/2","2","3","4","5"}
+MORPH_DURATIONS = {"1/16","1/8","1/4","1/3","1/2","1","3/2","2","3"}
 MORPH_SHAPES = {"lin","exp","log"}
 
 g = grid.connect()
@@ -209,7 +209,7 @@ NUM_PAGES = (g.cols ~= nil and g.cols >= 16) and 3 or 2
 show_instructions = false
 updating_controls = false
 OUTPUT_DEFAULT = 4
-SCREEN_FRAMERATE = 1/30
+SCREEN_FRAMERATE = 1/50
 menu_status = false
 pages = 0
 
@@ -238,9 +238,9 @@ max_sub_seq_repeats = 3
 midi_in_channel1_default = 1
 midi_in_command1 = 144
 midi_devices = nil
-MIDI_DURATIONS = {"0","1","1/2","1/4","1/8","1/16"}
+MIDI_DURATIONS = {"1","1/2","1/4","1/8","1/16"}
 -- NOTE_REPEAT_FREQUENCIES = {'1','1/2','1/4','1/8','1/16','1/3','2/3','3/8','5/8'}
-NOTE_REPEAT_FREQUENCIES = {'0','1','2','3','4','5','6','7','8'}
+NOTE_REPEAT_FREQUENCIES = {'1/2','2/3','1','3/2','2','3','4','5','6'}
 
 
 cs_level = controlspec.AMP:copy()

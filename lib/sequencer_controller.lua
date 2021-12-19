@@ -216,7 +216,7 @@ sc.output_mode_map = {
 sc.output_params_map = {
     {{nil, nil, nil, nil, nil, nil}}, -- 4 softcut output params: sample_cut_num, rate, rade_direction, level
     {
-        {6, 6, 6, 3, 3, 3, nil}, {nil, nil, nil, nil, nil, nil},
+        {6, 6, 6, 7, 7, 7, nil}, {nil, nil, nil, nil, nil, nil},
         {2, 2, 2, 2, 2, 2, 2}, {9, 9, 9, 4, 9}
     }, -- device (midi out (4), crow(6), just_friends(2),w/(2))
     {
@@ -244,7 +244,25 @@ function sc.refresh_output_control_specs_map()
 
     local scale_length = initializing == false and params:get("scale_length") or SCALE_LENGTH_DEFAULT
     local max_note = scale_length - min_note
+    
     for i = 1, num_cutters, 1 do table.insert(cutters, i) end
+    
+    if initializing == true then 
+        midi_note1_mode = {"note", min_note, max_note, nil, "pitch", "pitch"} 
+        midi_note2_mode = {"note", min_note, max_note, nil, "pitch", "pitch"} 
+        midi_note3_mode = {"note", min_note, max_note, nil, "pitch", "pitch"} 
+    else
+        midi_note1_mode = params:get("midi_note1_mode") == 1 and
+            {"note", min_note, max_note, nil, "pitch", "pitch"} or
+            {"number", "0.00", 127, nil, "pitch", "pitch"} 
+        midi_note2_mode = params:get("midi_note2_mode") == 1 and
+            {"note", min_note, max_note, nil, "pitch", "pitch"} or
+            {"number", "0.00", 127, nil, "pitch", "pitch"} 
+        midi_note3_mode = params:get("midi_note3_mode") == 1 and
+            {"note", min_note, max_note, nil, "pitch", "pitch"} or
+            {"number", "0.00", 127, nil, "pitch", "pitch"} 
+    end 
+
     sc.output_control_specs_map = {
         { -- softcut: voices: 1-6
             {
@@ -299,21 +317,23 @@ function sc.refresh_output_control_specs_map()
             }
         }, { -- device (midi(4), crow(2), just_friends(3),w/(2))
             { -- midi note out 1-3 and stop/start
-                {
-                    {"note", min_note, max_note, nil, "pitch", "pitch"}, -- note
+                {  -- midi note out 1
+                    midi_note1_mode,
+                    -- {"note", min_note, max_note, nil, "pitch", "pitch"}, -- note
                     {"number", "0", 16, 0, "rep", "repeats"}, -- note_repeats
                     {
-                        "option", NOTE_REPEAT_FREQUENCIES, nil, nil, "rep_frq",
+                        "option", NOTE_REPEAT_FREQUENCIES, nil, nil, "rpfrq",
                         "repeat frequency"
                     }, -- note repeat frequency
                     {"option", MIDI_DURATIONS, 3, nil, "dur", "dur"}, -- midi stop/start
                     {"number", "0", 127, 80, "vel", "vel"}, -- velocity
                     {"number", "1", 16, 1, "chan", "chan"} -- channel
-                }, {
-                    {"note", min_note, max_note, nil, "pitch", "pitch"},
+                }, {  -- midi note out 2
+                    midi_note2_mode,
+                    -- {"note", min_note, max_note, nil, "pitch", "pitch"}, -- note
                     {"number", "0", 16, 0, "rep", "repeats"},
                     {
-                        "option", NOTE_REPEAT_FREQUENCIES, nil, nil, "rp_frq",
+                        "option", NOTE_REPEAT_FREQUENCIES, nil, nil, "rpfrq",
                         "repeat frequency"
                     },
                     {
@@ -321,11 +341,12 @@ function sc.refresh_output_control_specs_map()
                         "dur", "dur"
                     }, {"number", "0", 127, 80, "vel", "vel"},
                     {"number", "1", 16, 1, "chan", "chan"}
-                }, {
-                    {"note", min_note, max_note, nil, "pitch", "pitch"},
+                }, {  -- midi note out 3
+                    midi_note3_mode,
+                    -- {"note", min_note, max_note, nil, "pitch", "pitch"},
                     {"number", "0", 16, 0, "rep", "repeats"},
                     {
-                        "option", NOTE_REPEAT_FREQUENCIES, nil, nil, "rp_frq",
+                        "option", NOTE_REPEAT_FREQUENCIES, nil, nil, "rpfrq",
                         "repeat frequency"
                     },
                     {
@@ -333,18 +354,45 @@ function sc.refresh_output_control_specs_map()
                         "dur", "dur"
                     }, {"number", "0", 127, 80, "vel", "vel"},
                     {"number", "1", 16, 1, "chan", "chan"}
-                }, {
-                    {"number", "0", 127, 1, "cc", "cc cc"}, -- cc cc
+                }, {  -- midi cc 1
+                    {"number", "0", 127, 1, "cc", "cc"}, -- cc control change #
                     {"number", "0", 127, 1, "val", "cc val"}, -- cc value
-                    {"number", "1", 16, 1, "chan", "chan"} -- cc channel
-                }, {
-                    {"number", "0", 127, 1, "cc", "cc"},
-                    {"number", "0", 127, 1, "val", "val"},
-                    {"number", "1", 16, 1, "chan", "chan"}
-                }, {
-                    {"number", "0", 127, 1, "cc", "cc"},
-                    {"number", "0", 127, 1, "val", "val"},
-                    {"number", "1", 16, 1, "chan", "chan"}
+                    {"number", "0", 127, 1, "t_val", "cc morph target val"}, -- cc morph target value
+                    {
+                        "option", MORPH_DURATIONS, 4, nil, "m_dur",
+                        "cc morph duration"
+                    }, 
+                    {"number", "2", 20, 10, "m_stps", "cc morph steps"},
+                    {
+                        "option", MORPH_SHAPES, 1, nil, "m_shp",
+                        "clock morph shape"
+                    },{"number", "1", 16, 1, "chan", "chan"} -- cc channel
+                }, {  -- midi note out 2
+                    {"number", "0", 127, 1, "cc", "cc"}, -- cc control change #
+                    {"number", "0", 127, 1, "val", "cc val"}, -- cc value
+                    {"number", "0", 127, 1, "t_val", "cc morph target val"}, -- cc morph target value
+                    {
+                        "option", MORPH_DURATIONS, 4, nil, "m_dur",
+                        "cc morph duration"
+                    }, 
+                    {"number", "2", 20, 10, "m_stps", "cc morph steps"},
+                    {
+                        "option", MORPH_SHAPES, 1, nil, "m_shp",
+                        "clock morph shape"
+                    },{"number", "1", 16, 1, "chan", "chan"} -- cc channel
+                }, {  -- midi note out 3
+                    {"number", "0", 127, 1, "cc", "cc"}, -- cc control change #
+                    {"number", "0", 127, 1, "val", "cc val"}, -- cc value
+                    {"number", "0", 127, 1, "t_val", "cc morph target val"}, -- cc morph target value
+                    {
+                        "option", MORPH_DURATIONS, 4, nil, "m_dur",
+                        "cc morph duration"
+                    }, 
+                    {"number", "2", 20, 10, "m_stps", "cc morph steps"},
+                    {
+                        "option", MORPH_SHAPES, 1, nil, "m_shp",
+                        "clock morph shape"
+                    },{"number", "1", 16, 1, "chan", "chan"} -- cc channel
                 }, {"option", {"stop", "start"}, 2, nil, "stp_strt", "stp/strt"} -- midi stop/start
             }, { -- crow
                 {"note", min_note, max_note, nil, "c1_pitch", "c1 pitch"}, -- crow1 pitch
@@ -508,16 +556,16 @@ function sc.refresh_output_control_specs_map()
                     "number", "33", 300, params:get("clock_tempo"), "clock",
                     "clock"
                 }, {
-                    {
+                    { -- target tempo
                         "number", "33", 300, params:get("clock_tempo"), "clock",
                         "clock"
                     },
-                    {
+                    { -- morph duration
                         "option", MORPH_DURATIONS, 4, nil, "c_mdur",
                         "clock morph duration"
-                    }, {"number", "2", 20, 10, "c_msteps", "clock morph steps"},
-                    {
-                        "option", MORPH_SHAPES, 1, nil, "c_mshepe",
+                    }, {"number", "2", 20, 10, "m_steps", "clock morph steps"}, -- morph steps
+                    { -- morph shape
+                        "option", MORPH_SHAPES, 1, nil, "cc_mshape",
                         "clock morph shape"
                     }
                 }, {

@@ -391,7 +391,8 @@ function parameters.init()
   -- cs_level.maxval = 5
   for i=1,16,1 do
     params:add_control("filter_level"..i,"filter level"..i,cs_level)
-    local default_val = i%4==1 and 6 or 0
+    local default_val = i<8 and (i%8) or (i<16 and 9-(i%8) or 0)
+    -- local default_val = i%4==1 and 6 or 0
     default_val = util.linlin(1,9,0,cs_level.maxval,default_val)
     params:set("filter_level"..i,default_val, false)
     params:set_action("filter_level"..i,function(x) 
@@ -520,9 +521,9 @@ function parameters.init()
     min=-0.0,
     max=50.0,
     warp='linear',
-    step=0.01,
+    step=0.1,
     default=5,
-    quantum=0.0001,
+    quantum=0.001,
     wrap=false,
     -- units='khz'
   }
@@ -693,7 +694,7 @@ function parameters.init()
 
   -- midi
 
-  params:add_group("midi",8)
+  params:add_group("midi",11)
 
   -- params:add{type = "option", id = "midi_engine_control", name = "midi engine control",
   --   options = {"off","on"},
@@ -764,7 +765,7 @@ function parameters.init()
   params:add_separator("midi out")
 
   params:add{type = "option", id = "output_midi", name = "midi out",
-    options = {"off","engine", "midi", "engine + midi"},
+    options = {"off","sequencer", "midi", "sequencer + midi"},
     default = 2,
   }
 
@@ -777,29 +778,35 @@ function parameters.init()
   }
 
   params:add{
-    type = "option", id = "midi_note_1_mode", name = "midi note 1 mode", 
+    type = "option", id = "midi_note1_mode", name = "midi note 1 mode", 
     options = {"quant","unquant"},
     default = 1,
     action = function(value) 
-      sequencer_controller.refresh_output_control_specs_map()
+      if initializing == false then
+        sequencer_controller.refresh_output_control_specs_map()
+      end
     end
   }
 
   params:add{
-    type = "option", id = "midi_note_2_mode", name = "midi note 2 mode", 
+    type = "option", id = "midi_note2_mode", name = "midi note 2 mode", 
     options = {"quant","unquant"},
     default = 1,
     action = function(value) 
-      sequencer_controller.refresh_output_control_specs_map()
+      if initializing == false then
+        sequencer_controller.refresh_output_control_specs_map()
+      end
     end
   }
 
   params:add{
-    type = "option", id = "midi_note_3_mode", name = "midi note 3 mode", 
+    type = "option", id = "midi_note3_mode", name = "midi note 3 mode", 
     options = {"quant","unquant"},
     default = 1,
     action = function(value) 
-      sequencer_controller.refresh_output_control_specs_map()
+      if initializing == false then
+        sequencer_controller.refresh_output_control_specs_map()
+      end
     end
   }
 
@@ -1174,7 +1181,7 @@ function parameters.init()
               envelopes[envelope_id].graph:edit_graph(env_nodes)
               local num_envelope_controls = envelope_id == 1 and "num_envelope1_controls" or "num_envelope2_controls"
               local num_env_nodes = #envelopes[envelope_id].graph_nodes
-              reset_envelope_control_params(envelope_id)
+              -- reset_envelope_control_params(envelope_id)
               params:set(num_envelope_controls,num_env_nodes)
             end
             screen_dirty = true

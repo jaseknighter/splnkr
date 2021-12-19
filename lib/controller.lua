@@ -48,7 +48,7 @@ local draw_top_nav = function()
     elseif show_env_mod_params then
       env_nav_text = envelopes[active_envelope].get_control_label()
     else
-      envelopes[active_envelope].update_envelope()
+      -- envelopes[active_envelope].update_envelope()
     end
     screen.text("env " .. env_nav_text)
     -- if show_env_mod_params == true then
@@ -66,7 +66,7 @@ local draw_top_nav = function()
   screen.level(0)
   screen.rect(0,(pages.index-1)/5*10,2,2)
   screen.fill()
-  screen.update()
+  -- screen.update()
 end
 
 local update_pages = function()

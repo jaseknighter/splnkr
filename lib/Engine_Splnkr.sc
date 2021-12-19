@@ -155,34 +155,20 @@ Engine_Splnkr : CroneEngine {
       wet = (bpf0*filterLevel0)+(bpf1*filterLevel1)+(bpf2*filterLevel2)+(bpf3*filterLevel3)+(bpf4*filterLevel4)+(bpf5*filterLevel5)+(bpf6*filterLevel6)+(bpf7*filterLevel7)+(bpf8*filterLevel8)+(bpf9*filterLevel9)+(bpf10*filterLevel10)+(bpf11*filterLevel11)+(bpf12*filterLevel12)+(bpf13*filterLevel13)+(bpf14*filterLevel14)+(bpf15*filterLevel15);
 
       //////////////////////////////////////////
-      // amplitude based onset detection
+      // pitchshift
       //////////////////////////////////////////
-
-      onsetDetect = PinkNoise.ar(
-        Decay.kr(
-          Coyote.kr(
-            wet,
-            fastMul: 0.6,
-            thresh: 0.001
-            ),
-          0.2
-        )
-      );
-
-      onsetDetectAmp = Amplitude.kr(onsetDetect);
-      detectAmp = Amplitude.kr(wet);
-
-      //frequency detector
-
-      # freq, hasFreq = Tartini.kr(wet);
-
-      freq = Clip.ar(freq, 0.midicps, 127.midicps);
-
-      // outputArray to send to polls
-      outArray = Array.fill(numOutValues, 0);
-      SendReply.kr(Impulse.kr(50), '/triggerAmpPoll', detectAmp);
-      SendReply.kr(Impulse.kr(50), '/triggerOnsetDetectAmpPoll', onsetDetectAmp);
-      SendReply.kr(Impulse.kr(50), '/triggerFreqPoll', freq);
+      trigger = Impulse.ar(pitch_shift_trigger_frequency);
+      pitchshift_note = Dseq([pitchshift_note1,pitchshift_note2,pitchshift_note3,pitchshift_note4,pitchshift_note5], inf);
+      pitch_ratio = (
+        (Demand.ar(trigger, 0, pitchshift_note) + (pitch_shift_base_note.cpsmidi + pitchshift_offset)).midicps 
+        / pitch_shift_base_note);
+      wet = (wet*(1-effect_pitchshift))+(effect_pitchshift*PitchShift.ar(
+        wet,
+        grain_size, //0.1, 
+        pitch_ratio,
+        0,
+        time_dispersion //0.01 
+      ));
 
       
       //////////////////////////////////////////
@@ -217,6 +203,40 @@ Engine_Splnkr : CroneEngine {
           ], panType)
       ) * panMax * 0.999;
 
+
+      
+      //////////////////////////////////////////
+      // amplitude based onset detection
+      //////////////////////////////////////////
+
+      onsetDetect = PinkNoise.ar(
+        Decay.kr(
+          Coyote.kr(
+            wet,
+            fastMul: 0.6,
+            thresh: 0.001
+            ),
+          0.2
+        )
+      );
+
+      onsetDetectAmp = Amplitude.kr(onsetDetect);
+      detectAmp = Amplitude.kr(wet);
+
+      //frequency detector
+
+      # freq, hasFreq = Tartini.kr(wet);
+
+      freq = Clip.ar(freq, 0.midicps, 127.midicps);
+
+      // outputArray to send to polls
+      outArray = Array.fill(numOutValues, 0);
+      SendReply.kr(Impulse.kr(50), '/triggerAmpPoll', detectAmp);
+      SendReply.kr(Impulse.kr(50), '/triggerOnsetDetectAmpPoll', onsetDetectAmp);
+      SendReply.kr(Impulse.kr(50), '/triggerFreqPoll', freq);
+
+      
+
       //////////////////////////////////////////
       // other effects
       //////////////////////////////////////////
@@ -231,19 +251,6 @@ Engine_Splnkr : CroneEngine {
       // wet = wet * combined_defects;
       // wet =(effect_flutter_and_wow<1*wet)+(effect_flutter_and_wow>0 * wet *   combined_defects);
 
-      // pitch shift
-      trigger = Impulse.ar(pitch_shift_trigger_frequency);
-      pitchshift_note = Dseq([pitchshift_note1,pitchshift_note2,pitchshift_note3,pitchshift_note4,pitchshift_note5], inf);
-      pitch_ratio = (
-        (Demand.ar(trigger, 0, pitchshift_note) + (pitch_shift_base_note.cpsmidi + pitchshift_offset)).midicps 
-        / pitch_shift_base_note);
-      wet = (wet*(1-effect_pitchshift))+(effect_pitchshift*PitchShift.ar(
-        wet,
-        grain_size, //0.1, 
-        pitch_ratio,
-        0,
-        time_dispersion //0.01 
-      ));
 
       // phaser
       // wet = (wet*(1-effect_phaser))+(effect_phaser*CombC.ar(wet,1,SinOsc.kr(1/7).range(500,1000).reciprocal,0.05*SinOsc.kr(1/7.1).range(-1,1)));
@@ -319,7 +326,7 @@ Engine_Splnkr : CroneEngine {
       endA=Latch.kr(end,aOrB);
       startB=Latch.kr(start,1-aOrB);
       endB=Latch.kr(end,1-aOrB);
-      crossfade=Lag.ar(K2A.ar(aOrB),1);
+      crossfade=Lag.ar(K2A.ar(aOrB),0.01);
 
       out = Mix.new([wet,dry*(2-drywet)]);
       
@@ -439,7 +446,7 @@ Engine_Splnkr : CroneEngine {
       if((voiceList.size > 0), {
         voiceList.do{ arg v,i; 
           v.theSynth.set(\t_trig, 1);
-          if (i > 1){
+          if (i > 5){
             v.theSynth.set(\gate, 0);
             v.theSynth.free;
           }

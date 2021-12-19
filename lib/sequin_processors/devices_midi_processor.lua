@@ -33,16 +33,28 @@ function dmp.init()
   dmp.cc1 = {
     cc = 1,
     value = 1,
+    tval = 1,
+    mdur = 0.2,
+    msteps = 50,
+    mshape = "lin",
     channel = 1
   }
   dmp.cc2 = {
     cc = 1,
     value = 1,
+    tval = 1,
+    mdur = 0.2,
+    msteps = 50,
+    mshape = "lin",
     channel = 1
   }
   dmp.cc3 = {
     cc = 1,
     value = 1,
+    tval = 1,
+    mdur = 0.2,
+    msteps = 50,
+    mshape = "lin",
     channel = 1
   }
   
@@ -76,13 +88,22 @@ function dmp.process(output_table, subsequin_ix)
   elseif output_table.value_heirarchy.mod < 7 then -- cc val
     local mod = output_table.value_heirarchy.mod - 3
     local param = output_table.value_heirarchy.par
-    if param == 1 then -- update channel
+    if param == 1 then -- update control change #
       dmp["cc"..mod].cc = value 
       dmp.set_cc(mod)
-    elseif param == 2 then -- update value
+    elseif param == 2 then -- update cc value
       dmp["cc"..mod].value = value
       dmp.set_cc(mod)
-    elseif param == 3 then -- update channel
+    elseif param == 3 then -- update morph target value
+      dmp["cc"..mod].tval = value 
+      dmp.cc_morph_start(value,mod)
+    elseif param == 4 then -- update morph duration
+      dmp["cc"..mod].mdur = value 
+    elseif param == 5 then -- update morph steps
+      dmp["cc"..mod].msteps = value 
+    elseif param == 6 then -- update morph shape
+      dmp["cc"..mod].mshape = value 
+    elseif param == 7 then -- update channel
       dmp["cc"..mod].channel = value 
       dmp.set_cc(mod)
     end
@@ -158,5 +179,33 @@ function dmp.stop_start(val)
   }
   externals1.note_on(1,fn.deep_copy(value_tab),1,1,"sequencer", "midi")
 end
+
+
+function dmp.cc_morph_start(target_cc_val, mod)
+  clock.sleep(0.0001)
+  if dmp["cc"..mod].morphing ~= true then
+    dmp["cc"..mod].morphing = true
+    -- local cc = dmp[mod].cc
+    local starting_val = dmp["cc"..mod].value
+    local duration = dmp["cc"..mod].mdur or 0.2
+    local steps = dmp["cc"..mod].msteps or 100
+    local shape = dmp["cc"..mod].mshape or "lin"
+    -- print("cc morph: start morph", target_cc_val,starting_val, duration, steps, shape)
+    fn.morph(dmp.cc_morph,starting_val,target_cc_val,duration,steps,shape, mod)
+  end
+end
+
+function dmp.cc_morph(morphed_val, mod)
+  if morphed_val >= dmp["cc"..mod].tval and dmp["cc"..mod].morphing == true then
+    -- print("cc morph done: morphed_val, mod", morphed_val, mod)
+    dmp["cc"..mod].morphing = false
+    dmp["cc"..mod].value = math.floor(morphed_val)
+  else
+    -- print("cc morph in progress: morphed_val, mod", morphed_val, mod)      
+    dmp["cc"..mod].value = math.floor(morphed_val)
+  end
+  dmp.set_cc(mod)
+end
+
 
 return dmp

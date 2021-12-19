@@ -21,21 +21,22 @@ function polling.init()
   onset_amplitude_detect_poll = poll.set("onsetAmplitudeDetect", function(value)
     if initializing == false then
       detected_level = fn.round_decimals(value,5,"up")
-      if (detected_level and last_onset_amplitude and last_onset_frequency) and (last_onset_amplitude < detected_level or math.abs(last_onset_frequency - detected_freq) > 5)
+      if (detected_level and last_onset_amplitude and last_onset_frequency) 
+      --   and 
+      -- (last_onset_amplitude < detected_level or math.abs(last_onset_frequency - detected_freq) > 5)
       then 
         local note_offset = params:get("note_offset") - params:get("root_note")
-        note_num = MusicUtil.freq_to_note_num (detected_freq) + note_offset 
-
-      
+        -- note_num = MusicUtil.freq_to_note_num (detected_freq) + note_offset 
+        note_num = MusicUtil.freq_to_note_num (detected_freq) 
+        
         if params:get("quantize_freq") == 2 then
-          note_num = fn.quantize(note_num)
+          note_num = fn.quantize(math.floor(note_num))
         end
-
         if note_num and params:get("detected_freq_to_midi") == 2 and 
-           note_num >= params:get("min_midi_note_num") and 
-           note_num <= params:get("max_midi_note_num") and 
-           detected_level >= params:get("amp_detect_level_midi_min") and 
-           detected_level <= params:get("amp_detect_level_midi_max") then
+        note_num >= params:get("min_midi_note_num") and 
+        note_num <= params:get("max_midi_note_num") and 
+        detected_level >= params:get("amp_detect_level_midi_min") and 
+        detected_level <= params:get("amp_detect_level_midi_max") then
           local value_tab = {
             pitch     = note_num,
             velocity  = util.linlin(0,0.05,1,127,detected_level),

@@ -75,7 +75,6 @@ function Envelope:new(id, num_envelopes, env_nodes)
       updating_envelope = true
       -- clock.sync(1)
       clock.sync(0.05)
-      -- envelopes[active_envelope].update_envelope()
       updating_envelope = false
     end
   end
@@ -203,7 +202,6 @@ function Envelope:new(id, num_envelopes, env_nodes)
 
     e.graph:set_position_and_size(graph_x, graph_y, graph_width, graph_height)
     e.graph:set_active(false)
-
 
     engine.set_numSegs(#e.graph_nodes)
     local env_arrays = e.get_envelope_arrays()

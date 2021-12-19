@@ -41,9 +41,14 @@ function externals:new(active_notes)
   ext.note_on = function(voice_id, value, beat_frequency, envelope_time_remaining, note_source, note_target)
     -- local note_offset = params:get("note_offset") - params:get("root_note")
     if initializing == false then
-      if value.pitch and source ~= "engine" then
+      -- if value.pitch and source ~= "engine" then
+      if value.pitch then
         value.pitch = util.clamp(value.pitch,1,#notes)
-        value.pitch = notes[value.pitch]
+        if note_source == "sequencer" and (note_target ~= "midi" or params:get("midi_note1_mode") == 1 or  params:get("midi_note2_mode") == 1) then          
+          value.pitch = notes[value.pitch]
+        elseif note_source == "engine" and note_target == "midi" and (params:get("midi_note1_mode") == 1 or  params:get("midi_note2_mode") == 1) then
+          value.pitch = fn.quantize(value.pitch)
+        end
       end  
 
       local value = fn.deep_copy(value)
@@ -75,7 +80,7 @@ function externals:new(active_notes)
           local pitch = value.pitch
           local velocity = value.velocity
           local duration = value.duration 
-          duration = tonumber(duration) and duration or fn.fraction_to_decimal(duration)      
+          duration = tonumber(duration) and duration or fn.fraction_to_decimal(duration)    
           midi_out_device:note_on(pitch, velocity, channel)
           table.insert(active_notes, pitch)
           clock.run(ext.midi_note_off_beats, duration, pitch, channel, 1, #active_notes)
