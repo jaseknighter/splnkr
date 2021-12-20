@@ -1,35 +1,8 @@
 ---splnkr
-
--- <version> @jaseknighter
--- lines: llllllll.co/t/<lines thread id>
+-- v0.1.0 @jaseknighter
+-- https://llllllll.co/t/51191
 --
--- <script description>
-
--- CREDITS: CATFACT, SPIKE, INFINITE, MATTLOWERY, AND OTHERS?!?!?!
--- crossfading from: https://schollz.com/blog/sampler/
--- before running the script, execute this code:
--- ~/norns/stop.sh; sleep 1; ~/norns/start.sh; sleep 9; jack_disconnect crone:output_5 SuperCollider:in_1; jack_disconnect crone:output_6 SuperCollider:in_2; jack_connect softcut:output_1 SuperCollider:in_1; jack_connect softcut:output_2 SuperCollider:in_2
-
-
---[[
-
-[dev note] to start repl see: https://monome.org/docs/norns/maiden/#terminal-repl
-
-ideas:
-* add a cv recorder/splicer: https://discord.com/channels/879560807954911263/879560808575692845/883765421914873877
-* add slew to the sequencer
-* track parameter history 
-  * turn the history into a sequence 
-  * replay according to the time of changes or by meter
-  * delete individual events
-
-issues/todos:
-* consolidate filter and sequencer lattices
-* sound cuts out if env length is too long when enveloper is activated
-* pan_type and pan_max params don't do anything (issue with the `Out` statement in sc I think)
-* sub-sequins are not kept in sync with each other (maybe a feature?)
-]]
-
+-- k1+k3 for basic instructions
 
 include "lib/includes"
 
