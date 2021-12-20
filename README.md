@@ -580,7 +580,7 @@ settings for midi, crow, jf, and w/ are avaiable in the params menu.
 
 ## credits
 * first and foremost, i'd like to thank [SPIKE the Percussionist](http://manipulate.net) for the tremendous amount of testing, feedback, and encouragement he provided as i was working to get this script ready to publish.
-* this project was inspired by the [lines discussion](https://llllllll.co/t/re-deconstructing-jan-jelineks-zwischen/46577/4) about Jan Jelinek’s album “Zwischen” initiated by [Matt Lowery](https://www.instagram.com/mattlowery/?hl=en). tt was a series of discussions t had with Matt at the start of this project that helped form the basic conceptual framework for the script. 
+* this project was inspired by the [lines discussion](https://llllllll.co/t/re-deconstructing-jan-jelineks-zwischen/46577/4) about Jan Jelinek’s album “Zwischen” initiated by [Matt Lowery](https://www.instagram.com/mattlowery/?hl=en). it was a series of discussions i had with Matt at the start of this project that helped form the basic conceptual framework for the script. 
 * crossfading and audio routing code is based on the [stonesoup](https://github.com/schollz/stonesoup) script and [sampler tutorial](https://schollz.com/blog/sampler/) by @infinitedigits/@schollz
 * additional inspirations and thanks are due to:
   * @catfact 
