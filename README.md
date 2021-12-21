@@ -563,7 +563,7 @@ set scale mode, root note, meter, and divisions
 unlike most other norn's scripts, the *splnkr* script changes how audio is internally routed. this was done so that softcut audio can be processed by SuperCollider which isn't the case with the default routing configuration. three routing options are provided in the params menu:
 * *in+cut->eng*: sends audio in and softcut audio to the supercollider engine 
 * *in->eng*: sends audio in to the supercollider engine 
-* *cut->eng*: sends audio in and softcut audio to the supercollider engine 
+* *cut->eng*: sends softcut audio to the supercollider engine 
 
 when the *splnkr* script is unloaded (e.g. when loading a different script or restarting norns), the script will reset the routing to the norns default settings.
 
