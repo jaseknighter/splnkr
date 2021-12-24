@@ -11,10 +11,7 @@ engine.name = 'Splnkr'
 alt_key_active = false
 
 pitchshift = 1
-vinyl = 1
-phaser = 1
 delay = 1
-strobe = 1
 drywet = 1
 
   ----------------------------
@@ -113,11 +110,7 @@ function init()
   -- startup all sc effects  
   engine.bpm(clock.get_tempo())
   engine.pitchshift(1)
-  -- engine.vinyl(1)
-  engine.flutter_and_wow(1)
-  engine.phaser(1)
   engine.delay(1)
-  engine.strobe(1)
   sample_player.init()
 
   polling.init()
