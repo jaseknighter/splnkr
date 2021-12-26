@@ -42,7 +42,7 @@ function externals:new(active_notes)
     -- local note_offset = params:get("note_offset") - params:get("root_note")
     if initializing == false then
       -- if value.pitch and source ~= "engine" then
-      if value.pitch then
+      if type(value) == "table" and value.pitch then
         value.pitch = util.clamp(value.pitch,1,#notes)
         if note_source == "sequencer" and (note_target ~= "midi" or params:get("midi_note1_mode") == 1 or  params:get("midi_note2_mode") == 1) then          
           value.pitch = notes[value.pitch]
