@@ -17,7 +17,7 @@ sequencer_controller = include "lib/sequencer_controller"
 w_slash = include "splnkr/lib/w_slash"
 include "splnkr/lib/midi_helper"
 
-ArbGraph = include "flora/lib/ArbitraryGraph"
+ArbGraph = include "splnkr/lib/ArbitraryGraph"
 
 
 envelope = include "splnkr/lib/envelope"
