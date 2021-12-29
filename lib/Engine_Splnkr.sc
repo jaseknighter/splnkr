@@ -18,7 +18,6 @@ Engine_Splnkr : CroneEngine {
   var ampPollFunc, onsetDetectAmpPollFunc, freqPollFunc;
   var outArray;
   var amplitudeDetectPoll,onsetAmplitudeDetectPoll, frequencyDetectPoll;
-  // var ampMinArray, ampMaxArray, freqMinArray, freqMaxArray;
   var amp=1,bpm=120,drywet=1;
   var effect_phaser=0,effect_distortion=0,effect_delay=0,
       effect_bitcrush,bitcrush_bits=10,bitcrush_rate=12000, // this has parameters
@@ -27,13 +26,7 @@ Engine_Splnkr : CroneEngine {
       pitchshift_note1=1, pitchshift_note2=3, pitchshift_note3=5, pitchshift_note4=1, pitchshift_note5=3;
   var pitch_shift_trigger_frequency=1, pitch_shift_base_note=0;
   var grain_size, time_dispersion;
-
-      // pitchshi
-      // pitchshift_midi_offset=0;
   var effect_delaytime = 0.25, effect_delaydecaytime = 4.0, effect_delaymul = 2.0;
-
-  var wobble_rpm=33, wobble_amp=0.05, wobble_exp=3, flutter_amp=0.0, flutter_fixedfreq=6, flutter_variationfreq=2; 
-  // var bpfLevelsArray, bpfCenterFreqsArray, bpfRQsArray;
   var filterLevel0=1,centerFrequency0=440, reciprocalQuality0=1;
   var filterLevel1=1,centerFrequency1=440, reciprocalQuality1=1;
   var filterLevel2=1,centerFrequency2=440, reciprocalQuality2=1;
@@ -84,12 +77,9 @@ Engine_Splnkr : CroneEngine {
       filterLevel13=1, centerFrequency13=440, reciprocalQuality13=1,
       filterLevel14=1, centerFrequency14=440, reciprocalQuality14=1,
       filterLevel15=1, centerFrequency15=440, reciprocalQuality15=1,
-      // ampMin=ampMinArray, ampMax=ampMaxArray,
-      // freqMin=freqMinArray, freqMax=freqMaxArray,
       effect_phaser=0,effect_distortion=0,effect_delay=0,
       effect_bitcrush,bitcrush_bits=10,bitcrush_rate=12000, 
       effect_strobe=0,effect_vinyl=0, effect_flutter_and_wow=0,
-      // pitchshift_midi_offset=0,
       pitch_shift_trigger_frequency=1, effect_pitchshift=0, pitchshift_offset=0, pitch_shift_base_note=24,
       pitchshift_note1=1, pitchshift_note2=3, pitchshift_note3=5, pitchshift_note4=1, pitchshift_note5=3,
       grain_size=0.1, time_dispersion=0.01,
@@ -98,34 +88,17 @@ Engine_Splnkr : CroneEngine {
       bpfs,
       enveloper = 1, trigRate = 5, overlap = 0.99, panMax = 0.5,
       panType = 0, minGrainDur = 0.001, interpolation = 4,
-      wobble_rpm=33, wobble_amp=0.05, wobble_exp=39, flutter_amp=0.03, flutter_fixedfreq=6, flutter_variationfreq=2,
       start=0, end=1, t_trig=0;
 
       var out;
       var startA,endA,startB,endB,crossfade,aOrB;
-
-
       var envTime1=0, envLevel1=1, envCurve1=0, envTime2=1, envLevel2=1, envCurve2=0, envTime3=1, envLevel3=1, envCurve3=0, envTime4=1, envLevel4=1, envCurve4=0, envTime5=1, envLevel5=1, envCurve5=0, envTime6=1, envLevel6=1, envCurve6=0, envTime7=1, envLevel7=1, envCurve7=0, envTime8=0, envLevel8=0, envCurve8=0;
       var sweptEnv, envctl, inSig, numFrames, startTrig, grainDur;
       var latchedTrigRate, latchedStartTrig, latchedOverlap, pan, sweep;
       var onsetDetect, onsetDetectAmp, detectAmp, detectFreq;
       var in,freq,hasFreq,trig,notes,noteAdder=0; // autotune vars
       var bpf0,bpf1,bpf2,bpf3,bpf4,bpf5,bpf6,bpf7,bpf8,bpf9,bpf10,bpf11,bpf12,bpf13,bpf14,bpf15;
-      var signed_wobble = wobble_amp*(SinOsc.kr(wobble_rpm/60)**wobble_exp);
-      var wow = Select.kr(signed_wobble > 0, signed_wobble, 0);
-      var flutter = flutter_amp*SinOsc.kr(flutter_fixedfreq+LFNoise2.kr(flutter_variationfreq));
-      var combined_defects = 1 + wow + flutter;
       var pitchshift_note, trigger, pitch_ratio;
-      // var sig = In.ar(in, 2), pitch_ratio;
-      
-      // bpfLevels = Array.fill(16,{0.5});
-      // bpfCenterFreqs = Array.fill(16,{440});
-      // bpfRQs = Array.fill(16,{1});
-      
-      // ampMinArray=Array.fill(4,{0.001});
-      // ampMaxArray=Array.fill(4,{0.999});
-      // freqMinArray=Array.fill(4,{40});
-      // freqMaxArray=Array.fill(4,{9600});
 
       wet = SoundIn.ar([0,1]);
       dry = SoundIn.ar([0,1]);
@@ -242,36 +215,16 @@ Engine_Splnkr : CroneEngine {
       //////////////////////////////////////////
 
 
-      // flutter + wow
-      signed_wobble = wobble_amp*(SinOsc.kr(wobble_rpm/60)**wobble_exp);
-      wow = Select.kr(signed_wobble > 0, signed_wobble, 0);
-      flutter = flutter_amp*SinOsc.kr(flutter_fixedfreq+LFNoise2.kr(flutter_variationfreq));
-      combined_defects = 1 + ((wow + flutter)*effect_flutter_and_wow);
-      
-      // wet = wet * combined_defects;
-      // wet =(effect_flutter_and_wow<1*wet)+(effect_flutter_and_wow>0 * wet *   combined_defects);
-
-
       // phaser
       // wet = (wet*(1-effect_phaser))+(effect_phaser*CombC.ar(wet,1,SinOsc.kr(1/7).range(500,1000).reciprocal,0.05*SinOsc.kr(1/7.1).range(-1,1)));
 
-      // combBuf2 = Buffer.alloc(context.server,48000,2);
-      // wet = (wet*(1-effect_phaser))+(effect_phaser*BufCombC.ar(combBuf2,wet,1,SinOsc.kr(1/7).range(500,1000).reciprocal,0.05*SinOsc.kr(1/7.1).range(-1,1),4));
-
       // distortion
-      effect_distortion = Lag.kr(effect_distortion,0.5);
-      wet = (wet*(1-(effect_distortion>0)))+(wet*effect_distortion).tanh;
+      // effect_distortion = Lag.kr(effect_distortion,0.5);
+      // wet = (wet*(1-(effect_distortion>0)))+(wet*effect_distortion).tanh;
 
 
       // bitcrush
       wet = (wet*(1-effect_bitcrush))+(effect_bitcrush*Decimator.ar(wet,Lag.kr(bitcrush_rate,1),Lag.kr(bitcrush_bits,1)));
-
-      // strobe
-      // wet = ((effect_strobe<1)*wet)+((effect_strobe>0)*wet*SinOsc.ar(bpm/60));
-
-      // vinyl wow + compressor
-      // wet=(effect_vinyl<1*wet)+(effect_vinyl>0* Limiter.ar(Compander.ar(wet,wet,0.5,1.0,0.1,0.1,1,2),dur:0.0008));
-      // wet =(effect_vinyl<1*wet)+(effect_vinyl>0* DelayC.ar(wet,0.01,VarLag.kr(LFNoise0.kr(1),1,warp:\sine).range(0,0.01)));
 
 
       wet = (Pan2.ar(wet * sweptEnv * amp, pan) * EnvGate.new * enveloper) + (wet*((enveloper+1)%2));
@@ -285,31 +238,31 @@ Engine_Splnkr : CroneEngine {
       //////////////////////////////////////////
 
       // // amplitude based onset detection
-      // onsetDetect = PinkNoise.ar(
-      //   Decay.kr(
-      //     Coyote.kr(
-      //       wet,
-      //       // fastMul: 0.4,
-      //       thresh: 0.0001
-      //       ),
-      //     0.01
-      //   )
-      // );
+      onsetDetect = PinkNoise.ar(
+        Decay.kr(
+          Coyote.kr(
+            wet,
+            // fastMul: 0.4,
+            thresh: 0.0001
+            ),
+          0.01
+        )
+      );
 
-      // onsetDetectAmp = Amplitude.kr(onsetDetect);
-      // detectAmp = Amplitude.kr(wet);
+      onsetDetectAmp = Amplitude.kr(onsetDetect);
+      detectAmp = Amplitude.kr(wet);
 
-      // //frequency detector
+      //frequency detector
 
-      // # freq, hasFreq = Tartini.kr(wet);
+      # freq, hasFreq = Tartini.kr(wet);
 
-      // freq = Clip.ar(freq, 0.midicps, 127.midicps);
+      freq = Clip.ar(freq, 0.midicps, 127.midicps);
 
-      // // outputArray to send to polls
-      // outArray = Array.fill(numOutValues, 0);
-      // SendReply.kr(Impulse.kr(50), '/triggerAmpPoll', detectAmp);
-      // SendReply.kr(Impulse.kr(50), '/triggerOnsetDetectAmpPoll', onsetDetectAmp);
-      // SendReply.kr(Impulse.kr(50), '/triggerFreqPoll', freq);
+      // outputArray to send to polls
+      outArray = Array.fill(numOutValues, 0);
+      SendReply.kr(Impulse.kr(50), '/triggerAmpPoll', detectAmp);
+      SendReply.kr(Impulse.kr(50), '/triggerOnsetDetectAmpPoll', onsetDetectAmp);
+      SendReply.kr(Impulse.kr(50), '/triggerFreqPoll', freq);
 
 
       //////////////////////////////////////////
@@ -327,15 +280,9 @@ Engine_Splnkr : CroneEngine {
       startB=Latch.kr(start,1-aOrB);
       endB=Latch.kr(end,1-aOrB);
       crossfade=Lag.ar(K2A.ar(aOrB),0.01);
-
       out = Mix.new([wet,dry*(2-drywet)]);
-      
+
       Out.ar(0,(crossfade*out*0.05))
-
-      // Out.ar(0,out);      
-      // Out.ar(0,Balance2.ar(wet, dry, 0));
-
-      // Out.ar(0,Balance2.ar(wet, wet, 0));
     }).add;
 
     //////////////////////////////////////////
@@ -393,25 +340,15 @@ Engine_Splnkr : CroneEngine {
         envSig = Env.xyc(newEnv).asSignal(envLength);
         envBuf = Buffer.loadCollection(context.server, envSig, 1).bufnum;
         
-        // (["wobble_amp, wobble_rpm,wobble_exp,flutter_amp,flutter_fixedfreq,flutter_variationfreq"]).postln;
-        // ([wobble_amp, wobble_rpm,wobble_exp,flutter_amp,flutter_fixedfreq,flutter_variationfreq]).postln;
-        
         newVoice = (id: id, theSynth: Synth("SplnkrSynth",
         [
           \amp, amp,
-          // \env, env,
           \envBuf, envBuf,
           \enveloper,enveloper,
           \trigRate,trigRate,
           \overlap,overlap,
           \panType,panType,
           \panMax,panMax,
-          \wobble_rpm, wobble_rpm,
-          \wobble_amp, wobble_amp,
-          \wobble_exp, wobble_exp, // best an odd power, higher values produce sharper, smaller peak
-          \flutter_amp, flutter_amp,
-          \flutter_fixedfreq, flutter_fixedfreq,
-          \flutter_variationfreq, flutter_variationfreq,
           \effect_phaser,effect_phaser,
           \effect_distortion,effect_distortion,
           \effect_delay,effect_delay,
@@ -533,35 +470,6 @@ Engine_Splnkr : CroneEngine {
           {i==15} {splnkrVoice.theSynth.set(\reciprocalQuality15, reciprocalQuality)};
       };
     });
-    // this.addCommand("set_filter_level", "ff", { arg msg;
-    //   var i = msg[1];
-    //   var filterLevel = msg[2];
-    //   bpfLevelsArray.put(i,filterLevel);
-    //   if(splnkrVoice.theSynth.isNil == false){ 
-    //     splnkrVoice.theSynth.set(\bpfLevels, bpfLevelsArray);
-    //     // (bpfLevels).postln;
-    //   };
-      
-    // });
-
-    // this.addCommand("set_center_frequency", "ff", { arg msg;
-    //   var i = msg[1];
-    //   var centerFrequency = msg[2];
-    //   bpfCenterFreqsArray.put(i,centerFrequency);
-    //   if(splnkrVoice.theSynth.isNil == false){ 
-    //     splnkrVoice.theSynth.set(\bpfCenterFreqs, bpfCenterFreqsArray)
-    //   };
-      
-    // });
-
-    // this.addCommand("set_reciprocal_quality", "ff", { arg msg;
-    //   var i = msg[1];
-    //   var reciprocalQuality = msg[2];
-    //   bpfRQsArray.put(i,reciprocalQuality);
-    //   if(splnkrVoice.theSynth.isNil == false){ 
-    //     splnkrVoice.theSynth.set(\bpfRQs, bpfRQsArray)
-    //   };
-    // });
 
     //////////////////////////////////////////
     // granular enveloping commands
@@ -705,11 +613,6 @@ Engine_Splnkr : CroneEngine {
       };
     });
 
-    // this.addCommand("vinyl", "f", { arg msg;
-    //   if (voiceList.size > 0){ 
-    //     splnkrVoice.theSynth.set(\effect_vinyl, msg[1]);
-    //   };
-    // });
 
     this.addCommand("flutter_and_wow", "f", { arg msg;
       if (voiceList.size > 0){ 
@@ -793,33 +696,6 @@ Engine_Splnkr : CroneEngine {
         );
       };
     });
-
-    //////////////////////////////////////////
-    // wow and flutter commands
-    this.addCommand("wobble_rpm", "f", { arg msg;
-      wobble_rpm = msg[1];
-    });
-    
-    this.addCommand("wobble_amp", "f", { arg msg;
-      wobble_amp = msg[1];
-    });
-    
-    this.addCommand("wobble_exp", "f", { arg msg;
-      wobble_exp = msg[1];
-    });
-    
-    this.addCommand("flutter_amp", "f", { arg msg;
-      flutter_amp = msg[1];
-    });
-    
-    this.addCommand("flutter_fixedfreq", "f", { arg msg;
-      flutter_fixedfreq = msg[1];
-    });
-    
-    this.addCommand("flutter_variationfreq", "f", { arg msg;
-      flutter_variationfreq = msg[1];
-    });
-    
 
 
   }
