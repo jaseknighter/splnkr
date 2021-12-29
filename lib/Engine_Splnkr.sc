@@ -234,38 +234,6 @@ Engine_Splnkr : CroneEngine {
       wet = (wet*(1-effect_delay))+(effect_delay*BufCombC.ar(combBuf1,wet,effect_delaytime,effect_delaydecaytime,effect_delaymul));
 
       //////////////////////////////////////////
-      // amplitude based onset and frequency detection
-      //////////////////////////////////////////
-
-      // // amplitude based onset detection
-      onsetDetect = PinkNoise.ar(
-        Decay.kr(
-          Coyote.kr(
-            wet,
-            // fastMul: 0.4,
-            thresh: 0.0001
-            ),
-          0.01
-        )
-      );
-
-      onsetDetectAmp = Amplitude.kr(onsetDetect);
-      detectAmp = Amplitude.kr(wet);
-
-      //frequency detector
-
-      # freq, hasFreq = Tartini.kr(wet);
-
-      freq = Clip.ar(freq, 0.midicps, 127.midicps);
-
-      // outputArray to send to polls
-      outArray = Array.fill(numOutValues, 0);
-      SendReply.kr(Impulse.kr(50), '/triggerAmpPoll', detectAmp);
-      SendReply.kr(Impulse.kr(50), '/triggerOnsetDetectAmpPoll', onsetDetectAmp);
-      SendReply.kr(Impulse.kr(50), '/triggerFreqPoll', freq);
-
-
-      //////////////////////////////////////////
       // apply drywet, lag, remove DC bias, and send the signal out
       //////////////////////////////////////////
 
