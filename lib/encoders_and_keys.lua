@@ -218,16 +218,16 @@ local enc = function (n, d)
           softcut.level(sample_player.selected_voice,sample_player.levels[sample_player.selected_voice])
           end
         elseif sample_player.nav_active_control == 7 then -- autogenerate cutters
-          if alt_key_active == true then
+          -- if alt_key_active == true then
             sample_player.num_cutters = util.clamp(sample_player.num_cutters+d,1,MAX_CUTTERS)
             sample_player.autogenerate_cutters(sample_player.num_cutters)
-          else
-            local sorted_cut_indices = cut_detector.get_sorted_cut_indices()
-            local num_cutters = util.clamp(sample_player.num_cutters+d,1,MAX_CUTTERS)
-            num_cutters = num_cutters <= #sorted_cut_indices and num_cutters or #sorted_cut_indices
-            sample_player.num_cutters = num_cutters
-            sample_player.autogenerate_cutters(sample_player.num_cutters)
-          end
+          -- else
+          --   local sorted_cut_indices = cut_detector.get_sorted_cut_indices()
+          --   local num_cutters = util.clamp(sample_player.num_cutters+d,1,MAX_CUTTERS)
+          --   num_cutters = num_cutters <= #sorted_cut_indices and num_cutters or #sorted_cut_indices
+          --   sample_player.num_cutters = num_cutters
+          --   sample_player.autogenerate_cutters(sample_player.num_cutters)
+          -- end
         end
       end
     end

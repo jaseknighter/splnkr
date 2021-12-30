@@ -1,32 +1,22 @@
-//TODOs:
-//      cleanup
-//      move envBuf from an arg to a var????
-//      why isn't flutter and wow working
-//      for freq detector add min/max params for clipping (see: freq = Clip.ar(freq, 40.midicps, 70.midicps);)
+// Engine_Splnkr
 
 Engine_Splnkr : CroneEngine {
   classvar maxNumVoices = 1;
-  var wet,dry;
+
+  var mainBus, effectsBus;
+
   var voiceGroup;
   var voiceList;
-  var numOutValues = 2;
-  var maxsegments = 20;
-  var numSegs=3, envLevels, envTimes, envCurves;
-  var splnkrDef, splnkrVoice;
-  var enveloper = 1, trigRate = 5, overlap = 0.99, panMax = 0.5, panType=0;
+  var splnkrVoice;
+  var effectsSynth;
   var id=0;
+  
+
+  var numSegs=3, envLevels, envTimes, envCurves;
   var ampPollFunc, onsetDetectAmpPollFunc, freqPollFunc;
-  var outArray;
   var amplitudeDetectPoll,onsetAmplitudeDetectPoll, frequencyDetectPoll;
-  var amp=1,bpm=120,drywet=1;
-  var effect_phaser=0,effect_distortion=0,effect_delay=0,
-      effect_bitcrush,bitcrush_bits=10,bitcrush_rate=12000, // this has parameters
-      effect_strobe=0,effect_vinyl=0, effect_flutter_and_wow=0,
-      effect_pitchshift=0, pitchshift_offset=0, 
-      pitchshift_note1=1, pitchshift_note2=3, pitchshift_note3=5, pitchshift_note4=1, pitchshift_note5=3;
-  var pitch_shift_trigger_frequency=1, pitch_shift_base_note=0;
-  var grain_size, time_dispersion;
-  var effect_delaytime = 0.25, effect_delaydecaytime = 4.0, effect_delaymul = 2.0;
+  // var wet,dry;
+  var amp=1;
   var filterLevel0=1,centerFrequency0=440, reciprocalQuality0=1;
   var filterLevel1=1,centerFrequency1=440, reciprocalQuality1=1;
   var filterLevel2=1,centerFrequency2=440, reciprocalQuality2=1;
@@ -44,22 +34,29 @@ Engine_Splnkr : CroneEngine {
   var filterLevel4=1,centerFrequency14=440, reciprocalQuality14=1;
   var filterLevel5=1,centerFrequency15=440, reciprocalQuality15=1;
   var combBuf1, combBuf2;
+  var sweptEnv, envctl, inSig, numFrames, startTrig, grainDur;
+  var enveloper = 0, trigRate = 5, overlap = 0.99, panMax = 0.5, panType=0;
+  var latchedTrigRate, latchedStartTrig, latchedOverlap, pan, sweep;
+  var enveloper=0;
 
   *new { arg context, doneCallback;
     ^super.new(context, doneCallback);
   }
 
   alloc {
+
     voiceGroup = Group.new(context.xg);
     voiceList = List.new();
 
-    
+    // mainBus = Bus.audio(context.server, 1);
+    effectsBus = Bus.audio(context.server, 1);
+
 
     // envSig = Signal.hanningWindow(1000);
     // envBuf = Buffer.loadCollection(context.server, envSig, 1).bufnum;
     
-    splnkrDef = SynthDef(\SplnkrSynth, {
-      arg amp=1,bpm=120,drywet=1,
+    SynthDef(\SplnkrSynth, {
+      arg out, amp=1,drywet=1,
       // bpfLevels=bpfLevelsArray, bpfCenterFreqs=bpfCenterFreqsArray, bpfRQs=bpfRQsArray,
       filterLevel0=1,centerFrequency0=440, reciprocalQuality0=1,
       filterLevel1=1, centerFrequency1=440, reciprocalQuality1=1,
@@ -77,31 +74,16 @@ Engine_Splnkr : CroneEngine {
       filterLevel13=1, centerFrequency13=440, reciprocalQuality13=1,
       filterLevel14=1, centerFrequency14=440, reciprocalQuality14=1,
       filterLevel15=1, centerFrequency15=440, reciprocalQuality15=1,
-      effect_phaser=0,effect_distortion=0,effect_delay=0,
-      effect_bitcrush,bitcrush_bits=10,bitcrush_rate=12000, 
-      effect_strobe=0,effect_vinyl=0, effect_flutter_and_wow=0,
-      pitch_shift_trigger_frequency=1, effect_pitchshift=0, pitchshift_offset=0, pitch_shift_base_note=24,
-      pitchshift_note1=1, pitchshift_note2=3, pitchshift_note3=5, pitchshift_note4=1, pitchshift_note5=3,
-      grain_size=0.1, time_dispersion=0.01,
-      effect_delaytime = 0.25, effect_delaydecaytime = 4.0, effect_delaymul = 2.0,
-      envBuf,
-      bpfs,
-      enveloper = 1, trigRate = 5, overlap = 0.99, panMax = 0.5,
-      panType = 0, minGrainDur = 0.001, interpolation = 4,
-      start=0, end=1, t_trig=0;
-
-      var out;
-      var startA,endA,startB,endB,crossfade,aOrB;
-      var envTime1=0, envLevel1=1, envCurve1=0, envTime2=1, envLevel2=1, envCurve2=0, envTime3=1, envLevel3=1, envCurve3=0, envTime4=1, envLevel4=1, envCurve4=0, envTime5=1, envLevel5=1, envCurve5=0, envTime6=1, envLevel6=1, envCurve6=0, envTime7=1, envLevel7=1, envCurve7=0, envTime8=0, envLevel8=0, envCurve8=0;
-      var sweptEnv, envctl, inSig, numFrames, startTrig, grainDur;
-      var latchedTrigRate, latchedStartTrig, latchedOverlap, pan, sweep;
+      envBuf, enveloper,
+      trigRate = 5, overlap = 0.99, panMax = 0.5,
+      panType = 0, minGrainDur = 0.001, interpolation = 4;
+      
       var onsetDetect, onsetDetectAmp, detectAmp, detectFreq;
-      var in,freq,hasFreq,trig,notes,noteAdder=0; // autotune vars
+      var wet,freq,hasFreq,trig; // autotune vars
       var bpf0,bpf1,bpf2,bpf3,bpf4,bpf5,bpf6,bpf7,bpf8,bpf9,bpf10,bpf11,bpf12,bpf13,bpf14,bpf15;
-      var pitchshift_note, trigger, pitch_ratio;
+
 
       wet = SoundIn.ar([0,1]);
-      dry = SoundIn.ar([0,1]);
 
       //////////////////////////////////////////
       // bandpass filters
@@ -127,26 +109,43 @@ Engine_Splnkr : CroneEngine {
       
       wet = (bpf0*filterLevel0)+(bpf1*filterLevel1)+(bpf2*filterLevel2)+(bpf3*filterLevel3)+(bpf4*filterLevel4)+(bpf5*filterLevel5)+(bpf6*filterLevel6)+(bpf7*filterLevel7)+(bpf8*filterLevel8)+(bpf9*filterLevel9)+(bpf10*filterLevel10)+(bpf11*filterLevel11)+(bpf12*filterLevel12)+(bpf13*filterLevel13)+(bpf14*filterLevel14)+(bpf15*filterLevel15);
 
-      //////////////////////////////////////////
-      // pitchshift
-      //////////////////////////////////////////
-      trigger = Impulse.ar(pitch_shift_trigger_frequency);
-      pitchshift_note = Dseq([pitchshift_note1,pitchshift_note2,pitchshift_note3,pitchshift_note4,pitchshift_note5], inf);
-      pitch_ratio = (
-        (Demand.ar(trigger, 0, pitchshift_note) + (pitch_shift_base_note.cpsmidi + pitchshift_offset)).midicps 
-        / pitch_shift_base_note);
-      wet = (wet*(1-effect_pitchshift))+(effect_pitchshift*PitchShift.ar(
-        wet,
-        grain_size, //0.1, 
-        pitch_ratio,
-        0,
-        time_dispersion //0.01 
-      ));
 
+
+      //////////////////////////////////////////
+      // amplitude based onset detection
+      //////////////////////////////////////////
+
+      onsetDetect = PinkNoise.ar(
+        Decay.kr(
+          Coyote.kr(
+            wet,
+            fastMul: 0.6,
+            thresh: 0.001
+            ),
+          0.2
+        )
+      );
+
+      onsetDetectAmp = Amplitude.kr(onsetDetect);
+      detectAmp = 0;
+      // detectAmp = Amplitude.kr(wet);
+
+      //frequency detector
+
+      # freq, hasFreq = Tartini.kr(wet);
+
+      freq = Clip.ar(freq, 0.midicps, 127.midicps);
+
+      // outputArray to send to polls
+      // SendReply.kr(Impulse.kr(1), '/triggerAmpPoll', detectAmp);
+      SendReply.kr(Impulse.kr(1), '/triggerOnsetDetectAmpPoll', onsetDetectAmp);
+      SendReply.kr(Impulse.kr(1), '/triggerFreqPoll', freq);
       
+
       //////////////////////////////////////////
       // granular enveloping
       //////////////////////////////////////////
+      
       
 
       // inSig = DelayC.ar(LPF.ar(inSig.tanh, 2000), 0.1, 0.01);
@@ -176,39 +175,51 @@ Engine_Splnkr : CroneEngine {
           ], panType)
       ) * panMax * 0.999;
 
+      wet = (Pan2.ar(wet * sweptEnv * amp, pan) * EnvGate.new * enveloper) + (wet*((enveloper+1)%2));
 
-      
+      Out.ar(out, wet);
+    }).add;
+
+
+    effectsSynth = SynthDef(\effects, {
+      arg in, out, drywet=1, 
+      // amp=1,
+      effect_phaser=0,effect_distortion=0,effect_delay=0,
+      effect_bitcrush,bitcrush_bits=10,bitcrush_rate=12000, 
+      effect_strobe=0,effect_vinyl=0, effect_flutter_and_wow=0,
+      pitch_shift_trigger_frequency=1, effect_pitchshift=0, pitchshift_offset=0, pitch_shift_base_note=24,
+      pitchshift_note1=1, pitchshift_note2=3, pitchshift_note3=5, pitchshift_note4=1, pitchshift_note5=3,
+      grain_size=0.1, time_dispersion=0.01,
+      effect_delaytime = 0.25, effect_delaydecaytime = 4.0, effect_delaymul = 2.0,
+      start=0, end=1, t_trig=0;
+
+      var startA,endA,startB,endB,crossfade,aOrB;
+      var envTime1=0, envLevel1=1, envCurve1=0, envTime2=1, envLevel2=1, envCurve2=0, envTime3=1, envLevel3=1, envCurve3=0, envTime4=1, envLevel4=1, envCurve4=0, envTime5=1, envLevel5=1, envCurve5=0, envTime6=1, envLevel6=1, envCurve6=0, envTime7=1, envLevel7=1, envCurve7=0, envTime8=0, envLevel8=0, envCurve8=0;
+      var pitchshift_note, trigger, pitch_ratio;
+
+      var dry, sigOut;
+      var wet = In.ar(in, 2);
+
+
       //////////////////////////////////////////
-      // amplitude based onset detection
+      // pitchshift 
       //////////////////////////////////////////
-
-      onsetDetect = PinkNoise.ar(
-        Decay.kr(
-          Coyote.kr(
-            wet,
-            fastMul: 0.6,
-            thresh: 0.001
-            ),
-          0.2
-        )
-      );
-
-      onsetDetectAmp = Amplitude.kr(onsetDetect);
-      detectAmp = Amplitude.kr(wet);
-
-      //frequency detector
-
-      # freq, hasFreq = Tartini.kr(wet);
-
-      freq = Clip.ar(freq, 0.midicps, 127.midicps);
-
-      // outputArray to send to polls
-      outArray = Array.fill(numOutValues, 0);
-      SendReply.kr(Impulse.kr(50), '/triggerAmpPoll', detectAmp);
-      SendReply.kr(Impulse.kr(50), '/triggerOnsetDetectAmpPoll', onsetDetectAmp);
-      SendReply.kr(Impulse.kr(50), '/triggerFreqPoll', freq);
-
+      trigger = Impulse.ar(pitch_shift_trigger_frequency);
+      pitchshift_note = Dseq([pitchshift_note1,pitchshift_note2,pitchshift_note3,pitchshift_note4,pitchshift_note5], inf);
       
+      pitch_ratio = (
+        (Demand.ar(trigger, 0, pitchshift_note) + (pitch_shift_base_note.cpsmidi + pitchshift_offset)).midicps 
+        / pitch_shift_base_note);
+
+      wet = (wet*(1-effect_pitchshift))+(effect_pitchshift*PitchShift.ar(
+        wet,
+        grain_size, //0.1, 
+        pitch_ratio,
+        0,
+        time_dispersion //0.01 
+      ));
+
+
 
       //////////////////////////////////////////
       // other effects
@@ -227,7 +238,6 @@ Engine_Splnkr : CroneEngine {
       wet = (wet*(1-effect_bitcrush))+(effect_bitcrush*Decimator.ar(wet,Lag.kr(bitcrush_rate,1),Lag.kr(bitcrush_bits,1)));
 
 
-      wet = (Pan2.ar(wet * sweptEnv * amp, pan) * EnvGate.new * enveloper) + (wet*((enveloper+1)%2));
 
       // delay
       combBuf1 = Buffer.alloc(context.server,48000,2);
@@ -239,19 +249,31 @@ Engine_Splnkr : CroneEngine {
 
       wet = wet*Lag.kr(amp*drywet,1);
       wet = LeakDC.ar(wet, 0.995);
+
+      dry = SoundIn.ar([0,1]);
       dry = dry*Lag.kr(amp*(1-drywet),1);
 
-      // latch to change trigger between the two
-      aOrB=ToggleFF.kr(t_trig);
-      startA=Latch.kr(start,aOrB);
-      endA=Latch.kr(end,aOrB);
-      startB=Latch.kr(start,1-aOrB);
-      endB=Latch.kr(end,1-aOrB);
-      crossfade=Lag.ar(K2A.ar(aOrB),0.01);
-      out = Mix.new([wet,dry*(2-drywet)]);
+      // // latch to change trigger between the two
+      // aOrB=ToggleFF.kr(t_trig);
+      // startA=Latch.kr(start,aOrB);
+      // endA=Latch.kr(end,aOrB);
+      // startB=Latch.kr(start,1-aOrB);
+      // endB=Latch.kr(end,1-aOrB);
+      // crossfade=Lag.ar(K2A.ar(aOrB),0.01);
+      
+      // sigOut = drywet*wet;
+      // sigOut = Mix.new([drywet*wet,dry*(2-drywet)]*0.1);
+      sigOut = Mix.new([wet,dry])*0.1;
 
-      Out.ar(0,(crossfade*out*0.05))
-    }).add;
+      // Out.ar(0,(crossfade*out*0.05))
+      // Out.ar(out,(crossfade*sigOut*0.05))
+      Out.ar(out,sigOut)
+    }).play(target: context.xg, args: [\in, effectsBus, \out, context.out_b], addAction: \addToTail);
+
+
+
+    context.server.sync;
+
 
     //////////////////////////////////////////
     // polling
@@ -306,34 +328,17 @@ Engine_Splnkr : CroneEngine {
           newEnv.insert(i,xycSegment);
         });
         envSig = Env.xyc(newEnv).asSignal(envLength);
+        envBuf.free;
         envBuf = Buffer.loadCollection(context.server, envSig, 1).bufnum;
-        
+        ("newVoice").postln;
         newVoice = (id: id, theSynth: Synth("SplnkrSynth",
         [
+          \out, effectsBus,
           \amp, amp,
           \envBuf, envBuf,
-          \enveloper,enveloper,
+          \enveloper, enveloper,
           \trigRate,trigRate,
           \overlap,overlap,
-          \panType,panType,
-          \panMax,panMax,
-          \effect_phaser,effect_phaser,
-          \effect_distortion,effect_distortion,
-          \effect_delay,effect_delay,
-          \effect_delaytime, effect_delaytime, 
-          \effect_delaydecaytime, effect_delaydecaytime,
-          \effect_delaymul, effect_delaymul,
-          \effect_pitchshift,effect_pitchshift, 
-          \pitchshift_note1,pitchshift_note1,
-          \pitchshift_note2,pitchshift_note2,
-          \pitchshift_note3,pitchshift_note3,
-          \pitchshift_note4,pitchshift_note4,
-          \pitchshift_note5,pitchshift_note5,
-          \pitch_shift_trigger_frequency,pitch_shift_trigger_frequency,
-          \grain_size,grain_size,
-          \time_dispersion,time_dispersion,
-          \effect_flutter_and_wow,effect_flutter_and_wow,
-          // \pitchshift_midi_offset,pitchshift_midi_offset,
         ],
         target: voiceGroup).onFree({ 
             voiceList.remove(newVoice); 
@@ -345,25 +350,21 @@ Engine_Splnkr : CroneEngine {
         // set splnkrVoice to the most recent voice instantiated
         splnkrVoice = voiceList.detect({ arg item, i; item.id == id; });
         id = id+1;
+
+        // effectsSynth.set(\envBuf, envBuf);
       });
 
       // Free the existing voice if it exists
-      if((voiceList.size > 0), {
+      if((voiceList.size > 0 && splnkrVoice.theSynth.isNil == false), {
         voiceList.do{ arg v,i; 
           v.theSynth.set(\t_trig, 1);
-          if (i > 5){
-            v.theSynth.set(\gate, 0);
+          if (i >= maxNumVoices){
+            // v.theSynth.set(\gate, 0);
             v.theSynth.free;
           }
         };
       });
 
-    });
-
-    this.addCommand("crossfade", "f", { arg msg;
-      if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\t_trig, msg[1]);
-      };
     });
 
     this.addCommand("set_filter_level", "ff", { arg msg;
@@ -439,6 +440,13 @@ Engine_Splnkr : CroneEngine {
       };
     });
 
+    this.addCommand("crossfade", "f", { arg msg;
+      if (voiceList.size > 0){ 
+        effectsSynth.set(\t_trig, msg[1]);
+      };
+    });
+
+
     //////////////////////////////////////////
     // granular enveloping commands
     this.addCommand("set_numSegs", "f", { arg msg;
@@ -475,181 +483,150 @@ Engine_Splnkr : CroneEngine {
     });
 
     this.addCommand("enveloper", "i", { arg msg;
-      if (voiceList.size > 0){ 
+      if (voiceList.size > 0 && splnkrVoice.theSynth.isNil == false){ 
         splnkrVoice.theSynth.set(\enveloper, msg[1]);
+        // effectsSynth.set(\enveloper, msg[1]);
         enveloper = msg[1];
       };
     });
 
     this.addCommand("trig_rate", "f", { arg msg;
       if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\trigRate, msg[1]);
         trigRate = msg[1];
+        splnkrVoice.theSynth.set(\trigRate, msg[1]);
+        // effectsSynth.set(\trigRate, msg[1]);
       };
     });
 
     this.addCommand("overlap", "f", { arg msg;
       if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\overlap, msg[1]);
         overlap = msg[1];
+        splnkrVoice.theSynth.set(\overlap, msg[1]);
+        // effectsSynth.set(\overlap, msg[1]);
+
       };
     });
-    this.addCommand("pan_type", "f", { arg msg;
-      if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\panType, msg[1]);
-        panType = msg[1];
-      };
-    });
-    this.addCommand("pan_max", "f", { arg msg;
-      if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\panMax, msg[1]);
-        panMax = msg[1];
-      };
-    });
+
+    // this.addCommand("pan_type", "f", { arg msg;
+    //   if (voiceList.size > 0){ 
+    //     effectsSynth.set(\panType, msg[1]);
+    //   };
+    // });
+    // this.addCommand("pan_max", "f", { arg msg;
+    //   if (voiceList.size > 0){ 
+    //     effectsSynth.set(\panMax, msg[1]);
+    //   };
+    // });
 
     //////////////////////////////////////////
     // other effect commands
     this.addCommand("amp", "f", { arg msg;
-      if (voiceList.size > 0){ 
+      if (voiceList.size > 0 && splnkrVoice.theSynth.isNil == false){ 
         splnkrVoice.theSynth.set(\amp, msg[1]);
-        amp = msg[1];
+        effectsSynth.set(\amp, msg[1]);
       };
     });
     
-    this.addCommand("bpm", "f", { arg msg;
-      if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\bpm, msg[1]);
-        bpm = msg[1]
-      };
-    });
-
     this.addCommand("drywet", "f", { arg msg;
       if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\drywet, msg[1]);
-        drywet = msg[1];
+        effectsSynth.set(\drywet, msg[1]);
       };
     });
 
     this.addCommand("phaser", "f", { arg msg;
       if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\effect_phaser, msg[1]);
-        effect_phaser = msg[1];    
+        effectsSynth.set(\effect_phaser, msg[1]);
       };
     });
 
     this.addCommand("distortion", "f", { arg msg;
       if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\effect_distortion, msg[1]);
-        effect_distortion = msg[1];    
+        effectsSynth.set(\effect_distortion, msg[1]);
       };
     });
 
     this.addCommand("delay", "f", { arg msg;
       if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\effect_delay, msg[1]);
-        effect_delay = msg[1];    
+        effectsSynth.set(\effect_delay, msg[1]);
       };
     });
 
     this.addCommand("delaytime", "f", { arg msg;
       if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\effect_delaytime, msg[1]);
-        effect_delaytime = msg[1];    
+        effectsSynth.set(\effect_delaytime, msg[1]);
       };
     });
 
     this.addCommand("delaydecaytime", "f", { arg msg;
       if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\effect_delaydecaytime, msg[1]);
-        effect_delaydecaytime = msg[1];    
+        effectsSynth.set(\effect_delaydecaytime, msg[1]);
       };
     });
 
     this.addCommand("delaymul", "f", { arg msg;
       if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\effect_delaymul, msg[1]);
-        effect_delaymul = msg[1];    
-      };
-    });
-
-
-
-    this.addCommand("strobe", "f", { arg msg;
-      if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\effect_strobe, msg[1]);
-        effect_strobe = msg[1];    
-      };
-    });
-
-
-    this.addCommand("flutter_and_wow", "f", { arg msg;
-      if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\flutter_and_wow, msg[1]);
+        effectsSynth.set(\effect_delaymul, msg[1]);
       };
     });
 
     this.addCommand("pitchshift", "f", { arg msg;
       if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\effect_pitchshift, msg[1]);
-        effect_pitchshift = msg[1];    
+        effectsSynth.set(\effect_pitchshift, msg[1]);
       };
     });
 
     this.addCommand("pitch_shift_trigger_frequency", "f", { arg msg;
       if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\pitch_shift_trigger_frequency, msg[1]);
-        pitch_shift_trigger_frequency = msg[1];    
+        effectsSynth.set(\pitch_shift_trigger_frequency, msg[1]);
       };
     });
 
     this.addCommand("pitchshift_note1", "f", { arg msg;
       if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\pitchshift_note1, msg[1]);
+        effectsSynth.set(\pitchshift_note1, msg[1]);
       };
     });
 
     this.addCommand("pitchshift_note2", "f", { arg msg;
       if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\pitchshift_note2, msg[1]);
+        effectsSynth.set(\pitchshift_note2, msg[1]);
       };
     });
 
     this.addCommand("pitchshift_note3", "f", { arg msg;
       if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\pitchshift_note3, msg[1]);
+        effectsSynth.set(\pitchshift_note3, msg[1]);
       };
     });
 
     this.addCommand("pitchshift_note4", "f", { arg msg;
       if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\pitchshift_note4, msg[1]);
+        effectsSynth.set(\pitchshift_note4, msg[1]);
       };
     });
 
     this.addCommand("pitchshift_note5", "f", { arg msg;
       if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(\pitchshift_note5, msg[1]);
+        effectsSynth.set(\pitchshift_note5, msg[1]);
       };
     });
 
     this.addCommand("grain_size", "f", { arg msg;
       if (voiceList.size > 0){ 
-        // splnkrVoice.theSynth.set(\grain_size, msg[1]);
-        grain_size = msg[1];
+        effectsSynth.set(\grain_size, msg[1]);
       };
     });
 
     this.addCommand("time_dispersion", "f", { arg msg;
       if (voiceList.size > 0){ 
-        // splnkrVoice.theSynth.set(\time_dispersion, msg[1]);
-        time_dispersion = msg[1];
+        effectsSynth.set(\time_dispersion, msg[1]);
       };
     });
 
 
     // this.addCommand("pitchshift_midi_offset", "f", { arg msg;
     //   if (voiceList.size > 0){ 
-    //     splnkrVoice.theSynth.set(\pitchshift_midi_offset, msg[1]);
+    //     effectsSynth.set(\pitchshift_midi_offset, msg[1]);
     //     pitchshift_midi_offset = msg[1];
     //   };
     // });
@@ -657,7 +634,7 @@ Engine_Splnkr : CroneEngine {
 
     this.addCommand("bitcrush", "fff", { arg msg;
       if (voiceList.size > 0){ 
-        splnkrVoice.theSynth.set(
+        effectsSynth.set(
           \effect_bitcrush, msg[1],
           \bitcrush_bits, msg[2],
           \bitcrush_rate, msg[3],
@@ -672,7 +649,10 @@ Engine_Splnkr : CroneEngine {
     splnkrVoice.free;
     voiceGroup.free;
     voiceList.free;
-    wet.free;
+    effectsSynth.free;
+    effectsBus.free;
+    // dry.free;
+    // wet.free;
     ampPollFunc.free;
     onsetDetectAmpPollFunc.free;
   }

@@ -111,13 +111,9 @@ function init()
 
 
   -- startup all sc effects  
-  engine.bpm(clock.get_tempo())
+  -- engine.bpm(clock.get_tempo())
   engine.pitchshift(1)
-  -- engine.vinyl(1)
-  engine.flutter_and_wow(1)
-  engine.phaser(1)
   engine.delay(1)
-  engine.strobe(1)
   sample_player.init()
 
   polling.init()
@@ -145,7 +141,7 @@ function finish_init()
   clock.sleep(0.5)
   -- params:set("reverb",1)
 
-  amplitude_detect_poll:start()
+  -- amplitude_detect_poll:start()
   onset_amplitude_detect_poll:start()
   frequency_detect_poll:start()
   

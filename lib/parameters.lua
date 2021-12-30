@@ -1181,7 +1181,7 @@ function parameters.init()
               envelopes[envelope_id].graph:edit_graph(env_nodes)
               local num_envelope_controls = envelope_id == 1 and "num_envelope1_controls" or "num_envelope2_controls"
               local num_env_nodes = #envelopes[envelope_id].graph_nodes
-              -- reset_envelope_control_params(envelope_id)
+              reset_envelope_control_params(envelope_id)
               params:set(num_envelope_controls,num_env_nodes)
             end
             screen_dirty = true
