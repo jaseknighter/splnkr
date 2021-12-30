@@ -141,7 +141,7 @@ function finish_init()
   clock.sleep(0.5)
   -- params:set("reverb",1)
 
-  -- amplitude_detect_poll:start()
+  amplitude_detect_poll:start()
   onset_amplitude_detect_poll:start()
   frequency_detect_poll:start()
   

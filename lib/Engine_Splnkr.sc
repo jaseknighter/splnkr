@@ -137,9 +137,9 @@ Engine_Splnkr : CroneEngine {
       freq = Clip.ar(freq, 0.midicps, 127.midicps);
 
       // outputArray to send to polls
-      // SendReply.kr(Impulse.kr(1), '/triggerAmpPoll', detectAmp);
-      SendReply.kr(Impulse.kr(1), '/triggerOnsetDetectAmpPoll', onsetDetectAmp);
-      SendReply.kr(Impulse.kr(1), '/triggerFreqPoll', freq);
+      SendReply.kr(Impulse.kr(50), '/triggerAmpPoll', detectAmp);
+      SendReply.kr(Impulse.kr(50), '/triggerOnsetDetectAmpPoll', onsetDetectAmp);
+      SendReply.kr(Impulse.kr(50), '/triggerFreqPoll', freq);
       
 
       //////////////////////////////////////////
