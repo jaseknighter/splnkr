@@ -33,19 +33,14 @@ sample_player.voices_start_finish[6] = {}
 sample_player.selecting = false
 sample_player.file_selected = false
 -- playing = 0
-cutters = {}
+sample_player.cutters = {}
 sample_player.voice_rates = {1,1}
 sample_player.active_cutter = 1
 sample_player.num_cutters = 1
 sample_player.selected_cutter_group = 1
-record_mode = 2
 
-elipsis_counter = 0
-saved = "..."
 sample_player.levels = {1,1,1,1,1,1}
-rec = 1.0
-pre = 1.0
-length = 1
+sample_player.length = 1
 sample_player.last_sample_positions = {}
 waveform_loaded = false
 subnav_title = ""
@@ -126,7 +121,7 @@ end
 
 function sample_player.load_file(file)
   sample_player.selecting = false
-  cutters = {}
+  sample_player.cutters = {}
   sample_player.num_cutters = 1
   if file ~= "cancel" then
     sample_player.file_selected = true
@@ -134,7 +129,7 @@ function sample_player.load_file(file)
 
     softcut.buffer_clear_region(1,-1)
     local ch, samples = audio.file_info(file)
-    length = samples/48000
+    sample_player.length = samples/48000
     softcut.buffer_read_mono(file,0,0,-1,1,1)
     -- softcut.buffer_read_mono(file,0,1,-1,1,2)
     -- softcut.buffer_read_stereo(file,0,0,-1)
@@ -193,13 +188,13 @@ function sample_player.select_next_voice(direction)
   sample_player.active_cutter = sample_player.cutter_assignments[sample_player.selected_voice]
   sample_player.selected_cutter_group = sample_player.active_cutter
   sample_player_nav_labels[1] = "select/scrub voice: " .. sample_player.selected_voice
-  for i=1,#cutters,1
+  for i=1,#sample_player.cutters,1
   do
-    cutters[i]:set_display_mode(0)
+    sample_player.cutters[i]:set_display_mode(0)
   end 
   if sample_player.active_cutter > 0 then
     local display_mode = sample_player.nav_active_control == 3 and 1 or 2  
-    cutters[sample_player.active_cutter]:set_display_mode(display_mode)
+    sample_player.cutters[sample_player.active_cutter]:set_display_mode(display_mode)
   end
 end
 
@@ -207,13 +202,13 @@ function sample_player.reset(voice, set_position_at_start)
   softcut.buffer(voice,1)
   softcut.loop(voice,1)
   
-  if cutters[1] then
+  if sample_player.cutters[1] then
     if sample_player.play_modes[voice] > 1 and sample_player.cutter_assignments[voice] > 0 then
-       sample_player.voices_start_finish[voice][1] = util.linlin(10,120,0,length,cutters[sample_player.cutter_assignments[voice]]:get_start_x_updated())
-      sample_player.voices_start_finish[voice][2] = util.linlin(10,120,0,length,cutters[sample_player.cutter_assignments[voice]]:get_finish_x_updated())      
+       sample_player.voices_start_finish[voice][1] = util.linlin(10,120,0,sample_player.length,sample_player.cutters[sample_player.cutter_assignments[voice]]:get_start_x_updated())
+      sample_player.voices_start_finish[voice][2] = util.linlin(10,120,0,sample_player.length,sample_player.cutters[sample_player.cutter_assignments[voice]]:get_finish_x_updated())      
     else 
       sample_player.voices_start_finish[voice][1] = 0
-      sample_player.voices_start_finish[voice][2] = 0+length
+      sample_player.voices_start_finish[voice][2] = 0+sample_player.length
     end 
     softcut.loop_start(voice,sample_player.voices_start_finish[voice][1])
     softcut.loop_end(voice,sample_player.voices_start_finish[voice][2])
@@ -238,12 +233,12 @@ function sample_player.reset(voice, set_position_at_start)
   else
     softcut.play(voice,0)
   end
-  sample_player.update_content(1,0,length,128)
+  sample_player.update_content(1,0,sample_player.length,128)
 end
 
 -- mode 0: stop
 -- mode 1: play entire sample
--- mode 2: play cutters in sequence
+-- mode 2: play sample_player.cutters in sequence
 -- mode 3: play selected cutter
 function sample_player.set_play_mode(voice, mode)
   sample_player.play_modes[voice] = mode
@@ -283,14 +278,14 @@ function sample_player.on_render(ch, start, i, s)
 end
 
 function sample_player.cutters_start_finish_update()
-  for i=1,#cutters,1
+  for i=1,#sample_player.cutters,1
   do
-    if cutters[i] then
-      local start_x = cutters[i]:get_start_x()
-      local finish_x = cutters[i]:get_finish_x()
-      start_x = util.linlin(0,128,10,120,cutters[i]:get_start_x())
-      finish_x = util.linlin(0,128,10,120,cutters[i]:get_finish_x())
-      cutters[i]:cutters_start_finish_update(
+    if sample_player.cutters[i] then
+      local start_x = sample_player.cutters[i]:get_start_x()
+      local finish_x = sample_player.cutters[i]:get_finish_x()
+      start_x = util.linlin(0,128,10,120,sample_player.cutters[i]:get_start_x())
+      finish_x = util.linlin(0,128,10,120,sample_player.cutters[i]:get_finish_x())
+      sample_player.cutters[i]:cutters_start_finish_update(
         start_x, finish_x
       )
     end
@@ -298,9 +293,9 @@ function sample_player.cutters_start_finish_update()
 end
 
 function sample_player.playhead_position_update(voice,pos)
-  sample_player.sample_positions[voice] = (pos) / length
+  sample_player.sample_positions[voice] = (pos) / sample_player.length
   if waveform_loaded then
-    local next_cutter_to_play = util.wrap(sample_player.cutter_assignments[voice]+1,1,#cutters)
+    local next_cutter_to_play = util.wrap(sample_player.cutter_assignments[voice]+1,1,#sample_player.cutters)
     local rate = tonumber(sample_player.voice_rates[voice])
     if (next_cutter_to_play and (sample_player.sample_positions[voice] and sample_player.last_sample_positions[voice]) and (rate > 0 and sample_player.sample_positions[voice] < sample_player.last_sample_positions[voice]) or 
     (rate < 0 and sample_player.sample_positions[voice] > sample_player.last_sample_positions[voice])) then
@@ -311,8 +306,8 @@ function sample_player.playhead_position_update(voice,pos)
           sample_player.sample_positions[voice] = sample_player.last_sample_positions[voice] + 1
         end
         sample_player.cutter_assignments[voice] = next_cutter_to_play
-        sample_player.voices_start_finish[voice][1] = util.linlin(10,120,0,length,cutters[sample_player.cutter_assignments[voice]]:get_start_x_updated())
-        sample_player.voices_start_finish[voice][2] = util.linlin(10,120,0,length,cutters[sample_player.cutter_assignments[voice]]:get_finish_x_updated()) 
+        sample_player.voices_start_finish[voice][1] = util.linlin(10,120,0,sample_player.length,sample_player.cutters[sample_player.cutter_assignments[voice]]:get_start_x_updated())
+        sample_player.voices_start_finish[voice][2] = util.linlin(10,120,0,sample_player.length,sample_player.cutters[sample_player.cutter_assignments[voice]]:get_finish_x_updated()) 
         sample_player.reset(voice)
       elseif sample_player.play_modes[voice] > 2 then -- selected cut/repeat/1shot
         if sample_player.play_modes[voice] < 4 then
@@ -327,8 +322,8 @@ function sample_player.playhead_position_update(voice,pos)
       if sample_player.cutter_assignments[voice] < 1 then
         sample_player.cutter_assignments[voice] = 1
       end
-      local start = cutters[sample_player.cutter_assignments[voice]]:get_start_x_updated()
-      local finish = cutters[sample_player.cutter_assignments[voice]]:get_finish_x_updated()
+      local start = sample_player.cutters[sample_player.cutter_assignments[voice]]:get_start_x_updated()
+      local finish = sample_player.cutters[sample_player.cutter_assignments[voice]]:get_finish_x_updated()
       local active_cutter_sample_position = (pos - sample_player.voices_start_finish[voice][1])/(sample_player.voices_start_finish[voice][2]-sample_player.voices_start_finish[voice][1])
       sample_player.playhead_positions[voice] = util.linlin(0,1,start,finish,active_cutter_sample_position)
     else 
@@ -353,11 +348,11 @@ function sample_player.autogenerate_cutters(num_cutters)
 
     -- make evenly spaced cuts
     -- if  alt_key_active then
-      cutters = {}
+      sample_player.cutters = {}
       cutter_rates = {}
       local cutter1_start_x = 0
       local cutter1_finish_x = 128/num_cutters
-      cutters[1] = Cutter:new(1,cutter1_start_x,cutter1_finish_x)
+      -- sample_player.cutters[1] = Cutter:new(1,cutter1_start_x,cutter1_finish_x)
       cutter_rates[1] = 1
 
       local cutter_spacing = 128/num_cutters
@@ -366,19 +361,19 @@ function sample_player.autogenerate_cutters(num_cutters)
         local new_cutter_start_x, new_cutter_finish_x
         new_cutter_start_x = cutter_spacing*(i-1)
         new_cutter_finish_x = cutter_spacing*(i)
-        table.insert(cutters, i, Cutter:new(i, new_cutter_start_x, new_cutter_finish_x))
+        table.insert(sample_player.cutters, i, Cutter:new(i, new_cutter_start_x, new_cutter_finish_x))
         table.insert(cutter_rates, i,1)
       end
     -- else
     --   -- make cuts according to sample levels
-    --   cutters = cutters and cutters or {}
+    --   sample_player.cutters = sample_player.cutters and sample_player.cutters or {}
     --   cutter_rates = cutter_rates and cutter_rates or {}
       
     --   -- get the cut indices and resort them lowest to highest
     --   local sorted_cut_indices = cut_detector.get_sorted_cut_indices()
     --   local autogen_cut_indices = {}
     --   -- for i=1,num_cutters-1,1
-    --   for i=1,MAX_CUTTERS-1,1
+    --   for i=1,MAX_sample_player.cutters-1,1
     --   do
     --     local new_cutter = sorted_cut_indices[i] and sorted_cut_indices[i] or 0
     --     table.insert(autogen_cut_indices,new_cutter)
@@ -386,18 +381,18 @@ function sample_player.autogenerate_cutters(num_cutters)
       
     --   table.sort(autogen_cut_indices)
     --   -- tab.print(autogen_cut_indices)
-    --   local start_index =  num_cutters > #cutters and #cutters + 1 or num_cutters + 1
-    --   for i=start_index,MAX_CUTTERS,1
+    --   local start_index =  num_cutters > #sample_player.cutters and #sample_player.cutters + 1 or num_cutters + 1
+    --   for i=start_index,MAX_sample_player.cutters,1
     --   do
-    --     if cutters[i] then
-    --       table.remove(cutters, i)
+    --     if sample_player.cutters[i] then
+    --       table.remove(sample_player.cutters, i)
     --       table.remove(cutter_rates, i)
     --     end
     --     if i<=num_cutters then
     --       local new_cutter_start_x = autogen_cut_indices[i]
     --       local new_cutter_finish_x = autogen_cut_indices[i+1] and autogen_cut_indices[i+1] or 128
     --       -- print(i,new_cutter_finish_x,new_cutter_start_x)
-    --       table.insert(cutters, i, Cutter:new(i, new_cutter_start_x, new_cutter_finish_x))
+    --       table.insert(sample_player.cutters, i, Cutter:new(i, new_cutter_start_x, new_cutter_finish_x))
     --       table.insert(cutter_rates, i,1)
     --     end
       -- end
@@ -407,7 +402,7 @@ function sample_player.autogenerate_cutters(num_cutters)
     sample_player.selected_cutter_group = 1
     cutter_to_play = 1
     local display_mode = sample_player.nav_active_control == 3 and 1 or 2
-    cutters[1]:set_display_mode(display_mode)
+    sample_player.cutters[1]:set_display_mode(display_mode)
     sample_player.update()     
   end
 end
@@ -456,24 +451,24 @@ function sample_player.draw_top_nav (msg)
   if msg == nil then
     if sample_player.nav_active_control == 2 then
       subnav_title = subnav_title .. ": " .. play_mode_text[sample_player.play_modes[sample_player.selected_voice]+1]
-    elseif sample_player.nav_active_control == 3 and cutters[sample_player.active_cutter] then
+    elseif sample_player.nav_active_control == 3 and sample_player.cutters[sample_player.active_cutter] then
       local cut_loc
-      local active_edge = cutters[sample_player.active_cutter]:get_active_edge()
+      local active_edge = sample_player.cutters[sample_player.active_cutter]:get_active_edge()
       if active_edge == 1 then -- adjust start cuttter
-        cut_loc = cutters[sample_player.active_cutter]:get_start_x()/128*length
+        cut_loc = sample_player.cutters[sample_player.active_cutter]:get_start_x()/128*sample_player.length
         cut_loc = math.floor(cut_loc * 10^3 + 0.5) / 10^3 -- round to nearest 1000th
         subnav_title = subnav_title .. ": " .. cut_loc
       else
-        cut_loc = cutters[sample_player.active_cutter]:get_finish_x()/128*length
+        cut_loc = sample_player.cutters[sample_player.active_cutter]:get_finish_x()/128*sample_player.length
         cut_loc = math.floor(cut_loc * 10^3 + 0.5) / 10^3 -- round to nearest 1000th
         subnav_title = subnav_title .. ": " .. cut_loc
       end
-    elseif sample_player.nav_active_control == 4 and cutters[sample_player.active_cutter] then
-      local start = cutters[sample_player.active_cutter]:get_start_x()
+    elseif sample_player.nav_active_control == 4 and sample_player.cutters[sample_player.active_cutter] then
+      local start = sample_player.cutters[sample_player.active_cutter]:get_start_x()
       start = start and start or 0
-      local finish = cutters[sample_player.active_cutter]:get_finish_x()
+      local finish = sample_player.cutters[sample_player.active_cutter]:get_finish_x()
       finish = finish and finish or 1
-      local clip_loc = (start + (finish-start)/2)/128*length
+      local clip_loc = (start + (finish-start)/2)/128*sample_player.length
       clip_loc = math.floor(clip_loc * 10^3 + 0.5) / 10^3 -- round to nearest 1000th
       subnav_title = subnav_title .. ": " .. clip_loc
     elseif sample_player.nav_active_control == 5 then
@@ -542,14 +537,14 @@ function sample_player.update()
           screen.stroke()
           x_pos = x_pos + 1
         end
-        end
+      end
       if cut_detector.bright_checked == false then
         cut_detector.set_bright_completed()
       end
-      -- draw the cutters
-      for i=1,#cutters,1
+      -- draw the sample_player.cutters
+      for i=1,#sample_player.cutters,1
       do
-        cutters[i]:update()
+        sample_player.cutters[i]:update()
       end
       -- draw the playhead positions for each voice
       for i=1,6,1 do

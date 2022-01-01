@@ -44,27 +44,27 @@ local enc = function (n, d)
         d = util.clamp(d,-1,1) * 0.01
         if sample_player.nav_active_control == 3 then
           if alt_key_active == true then
-            local active_edge = cutters[sample_player.active_cutter]:get_active_edge()
-            local cutter = cutters[sample_player.active_cutter]
+            local active_edge = sample_player.cutters[sample_player.active_cutter]:get_active_edge()
+            local cutter = sample_player.cutters[sample_player.active_cutter]
             if active_edge == 1 then -- adjust start cuttter
-              cutter:set_start_x(util.clamp(cutters[sample_player.active_cutter]:get_start_x()+(d*1),0,cutters[sample_player.active_cutter]:get_finish_x()))
+              cutter:set_start_x(util.clamp(sample_player.cutters[sample_player.active_cutter]:get_start_x()+(d*1),0,sample_player.cutters[sample_player.active_cutter]:get_finish_x()))
             else
-              cutter:set_finish_x(util.clamp(cutters[sample_player.active_cutter]:get_finish_x()+(d*1),cutters[sample_player.active_cutter]:get_start_x(), 128))
+              cutter:set_finish_x(util.clamp(sample_player.cutters[sample_player.active_cutter]:get_finish_x()+(d*1),sample_player.cutters[sample_player.active_cutter]:get_start_x(), 128))
             end
             sample_player.cutters_start_finish_update()
             if sample_player.play_modes[sample_player.selected_voice] > 1 and sample_player.cutter_assignments[sample_player.selected_voice] == sample_player.active_cutter then sample_player.reset() end 
           else
-            cutters[sample_player.active_cutter]:rotate_cutter_edge(d)
+            sample_player.cutters[sample_player.active_cutter]:rotate_cutter_edge(d)
           end
         elseif sample_player.nav_active_control == 4 then
           if alt_key_active == true then
-            for i=1,#cutters,1
+            for i=1,#sample_player.cutters,1
             do  
-              if i == sample_player.selected_cutter_group and (d<0 and cutters[i]:get_start_x() == 0) or (d>0 and cutters[i]:get_finish_x() == 128) then
+              if i == sample_player.selected_cutter_group and (d<0 and sample_player.cutters[i]:get_start_x() == 0) or (d>0 and sample_player.cutters[i]:get_finish_x() == 128) then
                 break
               elseif i == sample_player.selected_cutter_group then
-                cutters[i]:set_start_x(util.clamp(cutters[i]:get_start_x()+(d*1),0,cutters[i]:get_finish_x()))
-                cutters[i]:set_finish_x(util.clamp(cutters[i]:get_finish_x()+(d*1),cutters[i]:get_start_x(), 128))
+                sample_player.cutters[i]:set_start_x(util.clamp(sample_player.cutters[i]:get_start_x()+(d*1),0,sample_player.cutters[i]:get_finish_x()))
+                sample_player.cutters[i]:set_finish_x(util.clamp(sample_player.cutters[i]:get_finish_x()+(d*1),sample_player.cutters[i]:get_start_x(), 128))
                 sample_player.cutters_start_finish_update()
                 if sample_player.play_modes[sample_player.selected_voice] > 1 and sample_player.cutter_assignments[sample_player.selected_voice] == sample_player.active_cutter then 
                   sample_player.reset(sample_player.selected_voice) 
@@ -87,14 +87,14 @@ local enc = function (n, d)
         d = util.clamp(d,-1,1)
         if alt_key_active == true then
           -- select prev/next cutter
-          local new_active_cutter = util.clamp(sample_player.active_cutter+d,1,#cutters)
+          local new_active_cutter = util.clamp(sample_player.active_cutter+d,1,#sample_player.cutters)
           if new_active_cutter ~= sample_player.active_cutter then
-            for i=1,#cutters,1
+            for i=1,#sample_player.cutters,1
             do
-              cutters[i]:set_display_mode(0)
+              sample_player.cutters[i]:set_display_mode(0)
             end 
             local display_mode = sample_player.nav_active_control == 3 and 1 or 2  
-            cutters[new_active_cutter]:set_display_mode(display_mode)
+            sample_player.cutters[new_active_cutter]:set_display_mode(display_mode)
             sample_player.active_cutter = new_active_cutter
             sample_player.cutter_assignments[sample_player.selected_voice] = sample_player.active_cutter 
             sample_player.selected_cutter_group = sample_player.active_cutter
@@ -102,7 +102,7 @@ local enc = function (n, d)
           end
         else
           sample_player.nav_active_control = util.clamp(sample_player.nav_active_control+d,1,#sample_player_nav_labels)
-          if waveform_loaded and cutters[sample_player.active_cutter] then 
+          if waveform_loaded and sample_player.cutters[sample_player.active_cutter] then 
             if sample_player.nav_active_control > 2 and sample_player.active_cutter == 0 then
               sample_player.active_cutter = 1
               if sample_player.cutter_assignments[sample_player.active_cutter] < 1 then 
@@ -112,17 +112,17 @@ local enc = function (n, d)
             end
     
             if sample_player.nav_active_control == 3 then 
-              for i=1,#cutters,1
+              for i=1,#sample_player.cutters,1
               do
-                cutters[i]:set_display_mode(0)
+                sample_player.cutters[i]:set_display_mode(0)
               end 
-              cutters[sample_player.active_cutter]:set_display_mode(1)
+              sample_player.cutters[sample_player.active_cutter]:set_display_mode(1)
             elseif sample_player.nav_active_control == 4 then 
-              for i=1,#cutters,1
+              for i=1,#sample_player.cutters,1
               do
-                cutters[i]:set_display_mode(0)
+                sample_player.cutters[i]:set_display_mode(0)
               end 
-              cutters[sample_player.active_cutter]:set_display_mode(2)
+              sample_player.cutters[sample_player.active_cutter]:set_display_mode(2)
             end
           end
         end 
@@ -137,7 +137,7 @@ local enc = function (n, d)
             (r>0 and (0.001 + (r*0.005)) or (-0.001 - (-r*0.005))) or
             (r>0 and (-0.001 - (-r*0.005)) or (-0.001 - (-r*0.005)))
             sample_player.sample_positions[sample_player.selected_voice] = util.clamp(sample_player.sample_positions[sample_player.selected_voice] + (d*adj_amt),0, 1)
-            softcut.position(sample_player.selected_voice,sample_player.sample_positions[sample_player.selected_voice]*length)
+            softcut.position(sample_player.selected_voice,sample_player.sample_positions[sample_player.selected_voice]*sample_player.length)
             
           else -- select active voice
             sample_player.select_next_voice(d)
@@ -151,32 +151,32 @@ local enc = function (n, d)
           else -- update play mode for the selected voice
             sample_player.set_play_mode(sample_player.selected_voice,new_play_mode)
           end
-        elseif sample_player.nav_active_control == 3 and cutters[sample_player.active_cutter] then -- move cutter edge
+        elseif sample_player.nav_active_control == 3 and sample_player.cutters[sample_player.active_cutter] then -- move cutter edge
           if alt_key_active == true then
-            local active_edge = cutters[sample_player.active_cutter]:get_active_edge()
-            local cutter = cutters[sample_player.active_cutter]
+            local active_edge = sample_player.cutters[sample_player.active_cutter]:get_active_edge()
+            local cutter = sample_player.cutters[sample_player.active_cutter]
             if active_edge == 1 then -- adjust start cuttter
-              cutter:set_start_x(util.clamp(cutters[sample_player.active_cutter]:get_start_x()+(d*1),0,cutters[sample_player.active_cutter]:get_finish_x()))
+              cutter:set_start_x(util.clamp(sample_player.cutters[sample_player.active_cutter]:get_start_x()+(d*1),0,sample_player.cutters[sample_player.active_cutter]:get_finish_x()))
             else
-              cutter:set_finish_x(util.clamp(cutters[sample_player.active_cutter]:get_finish_x()+(d*1),cutters[sample_player.active_cutter]:get_start_x(), 128))
+              cutter:set_finish_x(util.clamp(sample_player.cutters[sample_player.active_cutter]:get_finish_x()+(d*1),sample_player.cutters[sample_player.active_cutter]:get_start_x(), 128))
             end
             sample_player.cutters_start_finish_update()
             if sample_player.play_modes[sample_player.selected_voice] > 1 and 
               sample_player.cutter_assignments[sample_player.selected_voice] == sample_player.active_cutter then 
                 for i=1,6,1 do sample_player.reset(i) end
               end 
-            elseif cutters[sample_player.active_cutter] then
-            cutters[sample_player.active_cutter]:rotate_cutter_edge(d)
+            elseif sample_player.cutters[sample_player.active_cutter] then
+            sample_player.cutters[sample_player.active_cutter]:rotate_cutter_edge(d)
           end
         elseif sample_player.nav_active_control == 4 then -- move cutter
           if alt_key_active == true then
-            for i=1,#cutters,1
+            for i=1,#sample_player.cutters,1
             do  
-              if i == sample_player.selected_cutter_group  and (d<0 and cutters[i]:get_start_x() == 0) or (d>0 and cutters[i]:get_finish_x() == 128) then
+              if i == sample_player.selected_cutter_group  and (d<0 and sample_player.cutters[i]:get_start_x() == 0) or (d>0 and sample_player.cutters[i]:get_finish_x() == 128) then
                 break
               elseif i == sample_player.selected_cutter_group then
-                cutters[i]:set_start_x(util.clamp(cutters[i]:get_start_x()+(d*1),0,cutters[i]:get_finish_x()))
-                cutters[i]:set_finish_x(util.clamp(cutters[i]:get_finish_x()+(d*1),cutters[i]:get_start_x(), 128))
+                sample_player.cutters[i]:set_start_x(util.clamp(sample_player.cutters[i]:get_start_x()+(d*1),0,sample_player.cutters[i]:get_finish_x()))
+                sample_player.cutters[i]:set_finish_x(util.clamp(sample_player.cutters[i]:get_finish_x()+(d*1),sample_player.cutters[i]:get_start_x(), 128))
                 sample_player.cutters_start_finish_update()
                 if sample_player.play_modes[sample_player.selected_voice] > 1 and sample_player.cutter_assignments[sample_player.selected_voice] == sample_player.active_cutter then 
                   for i=1,6,1 do sample_player.reset(i) end
@@ -339,7 +339,7 @@ local key = function (n,z)
             sample_player.set_play_mode(sample_player.selected_voice,last_play_mode)
           end
         else
-          if #cutters > 1 and sample_player.nav_active_control > 1 then
+          if #sample_player.cutters > 1 and sample_player.nav_active_control > 1 then
             sample_player.num_cutters = util.clamp(sample_player.num_cutters-1,1,MAX_CUTTERS)
             sample_player.autogenerate_cutters(sample_player.num_cutters)          
           end
