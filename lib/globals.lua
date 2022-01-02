@@ -205,7 +205,7 @@ MORPH_SHAPES = {"lin","exp","log"}
 g = grid.connect()
 grid_mode = "filter"
 grid_long_press_length = 0.5
-NUM_PAGES = (g.cols ~= nil and g.cols >= 16) and 3 or 2
+NUM_PAGES = (g.cols ~= nil and g.cols >= 16) and 4 or 3
 show_instructions = false
 updating_controls = false
 OUTPUT_DEFAULT = 4

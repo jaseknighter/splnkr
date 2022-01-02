@@ -114,7 +114,10 @@ function init()
   -- engine.bpm(clock.get_tempo())
   engine.pitchshift(1)
   engine.delay(1)
+
+  audio.level_adc_cut(1)
   sample_player.init()
+  spl.init()
 
   polling.init()
 
@@ -146,6 +149,7 @@ function finish_init()
   frequency_detect_poll:start()
   
   sample_player.set_play_mode(1,0)
+  spl.set_play_mode(1,0)
   lattice_grid:start()
   params:bang()
 

@@ -78,7 +78,7 @@ function Cutter:rotate_cutter_edge(d)
 end
 
 function Cutter:update()
-  if menu_status == false and waveform_loaded  then
+  if menu_status == false then
     -- draw cutters
     for i=1,2,1
     do

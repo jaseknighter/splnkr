@@ -15,13 +15,7 @@ local draw_top_nav = function()
   -- end
   screen.move(4,7)
   
-  -- if (pages.index ~= 3 or show_instructions == true) and observe_screen == true then 
-  --   observe_screen = false 
-  --   nav_off = false
-  -- end
-
-  if pages.index == 1 then
-  elseif pages.index == 2 then
+  if pages.index == 3 then
     local graph_active_node = envelopes[active_envelope].active_node
     local env_nav_text = ''
     if graph_active_node == -1 then 
@@ -53,18 +47,18 @@ local draw_top_nav = function()
     screen.text("env " .. env_nav_text)
     -- if show_env_mod_params == true then
     -- end
-  elseif pages.index == 3 then
+  elseif pages.index == 4 then
     local bcrumbs = sequencer_screen.get_control_bcrumbs() 
     local sequencer_screen_label = "sqncr "
     sequencer_screen_label = bcrumbs and sequencer_screen_label .. bcrumbs or sequencer_screen_label
     screen.text(sequencer_screen_label)
-  elseif pages.index == 4 then
   elseif pages.index == 5 then
   end
 
   -- navigation marks
   screen.level(0)
-  screen.rect(0,(pages.index-1)/5*10,2,2)
+  -- screen.rect(0,(pages.index-1)/NUM_PAGES*12,3,3)
+  screen.rect(0,(pages.index-1)/NUM_PAGES*10,2,math.floor(10/NUM_PAGES))
   screen.fill()
   -- screen.update()
 end
@@ -75,19 +69,20 @@ local update_pages = function()
     if pages.index == 1 then
       sample_player.update()
     elseif pages.index == 2 then
+      spl.update()
+    elseif pages.index == 3 then
       if screen_dirty == true then
         screen.clear()
-        draw_top_nav()
         envelopes[1].redraw()
         envelopes[2].redraw()
-      end
-    elseif pages.index == 3 then
-        screen.clear()
         draw_top_nav()
-        sequencer_screen.update()
+      end
     elseif pages.index == 4 then
-
-    elseif pages.index == 5 then
+        screen.clear()
+        sequencer_screen.update()
+        draw_top_nav()
+      elseif pages.index == 5 then
+      draw_top_nav()
 
     end
   end
