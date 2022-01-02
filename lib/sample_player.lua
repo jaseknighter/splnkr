@@ -102,7 +102,7 @@ function sample_player.play_live()
   
   sample_player_nav_labels[1] = "select/scrub voice: " .. 1
 
-  softcut.buffer_clear_region(1,-1)
+  softcut.buffer_clear_region_channel(1,1,-1)
     
   sample_player.waveform_loaded = true
 
@@ -123,7 +123,7 @@ function sample_player.load_file(file)
     sample_player.file_selected = true
     sample_player_nav_labels[1] = "select/scrub voice: " .. 1
 
-    softcut.buffer_clear_region(1,-1)
+    softcut.buffer_clear_region(1,0,-1)
     local ch, samples = audio.file_info(file)
     sample_player.length = samples/48000
     softcut.buffer_read_mono(file,0,0,-1,1,1)

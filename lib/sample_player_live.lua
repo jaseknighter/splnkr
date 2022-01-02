@@ -124,7 +124,7 @@ function spl.load_file(file)
     spl.file_selected = true
     spl_nav_labels[1] = "select/scrub voice: " .. 4
 
-    softcut.buffer_clear_region(1,-1)
+    softcut.buffer_clear_region_channel(2,0,-1)
     local ch, samples = audio.file_info(file)
     spl.length = samples/48000
     softcut.buffer_read_mono(file,0,0,-1,1,2)
