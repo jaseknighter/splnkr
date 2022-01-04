@@ -1,16 +1,5 @@
--- softcut.position(2,3000)
-
 --------------------------
 -- play samples
-
--- todo: move variables into local scope
--- todo: address softcut params set to 1 in the reset function:
---      softcut.enable(voice,1)
---      softcut.buffer(voice,1)
---      softcut.loop(voice,1)
--- todo: in sample_player.reset set softcut.play according to currently playing voices
--- todo: is playing variable used for anything
-
 --------------------------
 sample_player = {}
 sample_player.waveform_samples = {}
@@ -355,10 +344,6 @@ function sample_player.autogenerate_cutters(num_cutters)
     -- if  alt_key_active then
       cutters = {}
       cutter_rates = {}
-      local cutter1_start_x = 0
-      local cutter1_finish_x = 128/num_cutters
-      cutters[1] = Cutter:new(1,cutter1_start_x,cutter1_finish_x)
-      cutter_rates[1] = 1
 
       local cutter_spacing = 128/num_cutters
       for i=1,num_cutters,1
