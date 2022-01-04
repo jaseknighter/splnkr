@@ -340,7 +340,7 @@ function sample_player.playhead_position_update(voice,pos)
     end
   else
     spl.sample_positions[voice] = (pos) / spl.length
-    if spl.waveform_loaded then
+    if spl.waveform_loaded  or spl.mode == "live" then
         local next_cutter_to_play = util.wrap(spl.cutter_assignments[voice]+1,1,#spl.cutters)
         local rate = tonumber(spl.voice_rates[voice])
         if (next_cutter_to_play and (spl.sample_positions[voice] and spl.last_sample_positions[voice]) and (rate > 0 and spl.sample_positions[voice] < spl.last_sample_positions[voice]) or 

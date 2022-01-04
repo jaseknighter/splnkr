@@ -13,6 +13,8 @@
 --------------------------
 sample_player_live = {}
 spl = sample_player_live
+
+spl.mode = "live"
 spl.waveform_samples = {}
 spl.selected_voice = 4
 spl.enabled_voices = {}
@@ -40,9 +42,11 @@ spl.num_cutters = 1
 spl.selected_cutter_group = 1
 
 spl.levels = {1,1,1,1,1,1}
-spl.length = 1
+spl.length = 10
 spl.last_sample_positions = {}
 spl.waveform_loaded = false
+
+spl.live_voices = {}
 
 local subnav_title = ""
 
@@ -91,8 +95,28 @@ function spl.init()
   softcut.event_render(sample_player.on_render)
 
   spl.cut_detector = CutDetector:new()
+
+  if spl.mode == "live" then
+    -- spl.waveform_loaded = true
+    for i=4,6,1 do
+      spl.live_voices[i] = {} 
+      spl.live_voices[i].rec = 0.50
+      spl.live_voices[i].pre = 0.50
+      -- set voice record level 
+      softcut.rec_level(i,spl.live_voices[i].rec)
+      -- set voice pre level
+      softcut.pre_level(i,spl.live_voices[i].pre)
+      -- set record state of voice 1 to 1
+      softcut.rec(i,1)
+    end
+    spl.cut_detector.set_bright_start()
+    spl.update()
+    spl.autogenerate_cutters(spl.num_cutters)
+    spl.set_play_mode(4,1)
+  end
 end
 
+--[[
 function spl.play_live()
 
   spl.selecting = false
@@ -112,9 +136,8 @@ function spl.play_live()
   -- spl.autogenerate_cutters(spl.num_cutters)
   -- softcut.play(1,1)
   
-
-
 end
+]]
 
 function spl.load_file(file)
   spl.selecting = false
@@ -220,15 +243,24 @@ function spl.reset(voice, set_position_at_start)
     softcut.play(voice,1)
     if set_position_at_start then 
       local pos
-      if spl.voice_rates[voice] > 0 then
-        pos = spl.voices_start_finish[1][1]
-      else
-        pos = spl.voices_start_finish[1][2]
-      end
+
+
+      -- if spl.voice_rates[voice] > 0 then
+      --   pos = spl.sample_positions[voice] * spl.length
+      --   -- pos = spl.voices_start_finish[voice][1]
+      --   softcut.position(voice, pos)
+      -- else
+      --   pos = spl.voices_start_finish[voice][2]
+      -- end
+      
+      
+      pos = spl.sample_positions[voice] * spl.length
       softcut.position(voice, pos)
+      softcut.enable(voice,1)
     end
   else
     softcut.play(voice,0)
+    softcut.enable(voice,0)
   end
   spl.update_content(2,0,spl.length,128)
 end
@@ -252,7 +284,7 @@ function spl.set_play_mode(voice, mode)
     end
     softcut.enable(voice, 1)
   end
-  spl.reset(voice)
+  spl.reset(voice, true)
 end
 
 function spl.get_play_mode(voice)
@@ -343,7 +375,7 @@ end
 
 
 function spl.autogenerate_cutters(num_cutters)
-  if spl.waveform_loaded then
+  if spl.waveform_loaded or spl.mode == "live" then
 
     -- make evenly spaced cuts
     -- if  alt_key_active then
@@ -441,7 +473,7 @@ end
 function spl.draw_top_nav (msg)
   if show_instructions == true then
     subnav_title = "sampler instructions"
-  elseif (spl.waveform_loaded == false) or spl.nav_active_control == 1 or spl.nav_active_control == 7 then
+  elseif (spl.waveform_loaded == false or spl.mode == "live") or spl.nav_active_control == 1 or spl.nav_active_control == 7 then
     subnav_title = spl_nav_labels[spl.nav_active_control] 
   else
     subnav_title = spl_nav_labels[spl.nav_active_control] .. "["..spl.selected_voice.."]"
@@ -485,7 +517,7 @@ function spl.draw_top_nav (msg)
     screen.level(0)
     screen.move(4,7)
     screen.text(subnav_title)
-    if spl.file_selected == true or play_live == true then
+    if spl.file_selected == true or spl.mode == "live" then
       spl.draw_sub_nav()
     end
   elseif show_instructions == false then 
@@ -519,7 +551,7 @@ function spl.update()
         -- spl.cut_detector.set_bright_completed()
       end
       
-      if (spl.waveform_loaded == true) then
+      if (spl.waveform_loaded == true or spl.mode == "live") then
         for i,s in ipairs(spl.waveform_samples) do
           local brightness = util.round(math.abs(s) * (scale*spl.levels[spl.selected_voice]))
           brightness = util.round(util.linlin(0,30,0,15, brightness))

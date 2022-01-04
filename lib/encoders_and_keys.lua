@@ -231,7 +231,7 @@ local enc = function (n, d)
     end
     sample_player.update()
   elseif pages.index == 2 then
-    if saving == false and show_instructions == false and spl.file_selected == true then    
+    if saving == false and show_instructions == false and (spl.file_selected == true or spl.mode == "live") then    
       if n==1 then
         d = util.clamp(d,-1,1) * 0.01
         if spl.nav_active_control == 3 then
@@ -293,7 +293,7 @@ local enc = function (n, d)
           end
         else
           spl.nav_active_control = util.clamp(spl.nav_active_control+d,1,#spl_nav_labels)
-          if spl.waveform_loaded and spl.cutters[spl.active_cutter] then 
+          if (spl.waveform_loaded or spl.mode == "live") and spl.cutters[spl.active_cutter] then 
             if spl.nav_active_control > 2 and spl.active_cutter == 0 then
               spl.active_cutter = 1
               if spl.cutter_assignments[spl.active_cutter] < 1 then 
@@ -555,7 +555,7 @@ local key = function (n,z)
       show_instructions = true
     end
   
-    if saving == false and show_instructions == false and spl.waveform_loaded then
+    if saving == false and show_instructions == false and (spl.waveform_loaded or spl.mode == "live") then
       if n==1 and z==1 then
         -- do something 
       elseif n==2 and z==1 then
@@ -589,7 +589,7 @@ local key = function (n,z)
         -- end
       end
     end
-    if ((not spl.waveform_loaded or spl.nav_active_control == 1) and alt_key_active == false) and n==2 and z==1 then
+    if spl.mode ~= "live" and ((not spl.waveform_loaded or spl.nav_active_control == 1) and alt_key_active == false) and n==2 and z==1 then
       screen.clear()
       spl.selecting = true
       fileselect.enter(_path.dust,spl.load_file)
