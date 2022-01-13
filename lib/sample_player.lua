@@ -34,7 +34,8 @@ sample_player.selecting = false
 sample_player.file_selected = false
 -- playing = 0
 sample_player.cutters = {}
-sample_player.voice_rates = {1,1}
+sample_player.voice_rates = {1,0}
+-- sample_player.voice_rates = {1,1}
 sample_player.active_cutter = 1
 sample_player.num_cutters = 1
 sample_player.selected_cutter_group = 1
@@ -84,7 +85,8 @@ function sample_player.init()
     -- sample_player.play_modes[i] = i == 1 and 1 or 0
     sample_player.play_modes[i] = 0
 
-    sample_player.voice_rates[i] = i == 1 and 1 or 0
+    sample_player.voice_rates[i] = 1
+    -- sample_player.voice_rates[i] = i == 1 and 1 or 0
   end
   softcut.event_phase(sample_player.playhead_position_update)
   softcut.poll_start_phase()
@@ -238,19 +240,21 @@ end
 -- mode 3: play selected cutter
 function sample_player.set_play_mode(voice, mode)
   sample_player.play_modes[voice] = mode
-  if sample_player.enabled_voices[voice] ~= 1 then
+  -- if sample_player.enabled_voices[voice] ~= 1 then
     sample_player.enabled_voices[voice] = 1
     softcut.position(voice,1)
-    if sample_player.voice_rates[voice] == 0 then
+    -- if sample_player.voice_rates[voice] == 0 then
       for i=1,#sample_player.voice_rates,1 do
         if sample_player.voice_rates[i] ~= 0 then
+          print("voice", voice)
           sample_player.voice_rates[voice] = sample_player.voice_rates[i]
           break
         end
       end
-    end
+    -- end
     softcut.enable(voice, 1)
-  end
+    softcut.enable(voice, 1)
+  -- end
   sample_player.reset(voice)
 end
 

@@ -186,8 +186,7 @@ local enc = function (n, d)
           local rate = sample_player.voice_rates[sample_player.selected_voice]
           -- if sample_player.play_modes[sample_player.selected_voice] < 2 then sample_player.voice_rates[1] = rate else sample_player.voice_rates[sample_player.selected_voice] = rate end
           if alt_key_active == false then
-            rate = rate + d
-            rate = rate ~= 0 and rate or rate + d
+            rate = (rate + d > -0.01 and rate + d < 0.01) and rate * -1 or rate + d
             sample_player.voice_rates[sample_player.selected_voice] = rate 
           else
             rate = rate + d/100
@@ -201,7 +200,7 @@ local enc = function (n, d)
           end
           
           for i=1,3,1 do sample_player.reset(i) end
-        elseif sample_player.nav_active_control == 6 then -- set level
+        elseif sample_player.nav_active_control == 8 then -- set level
           if alt_key_active == true then -- update play mode for all voices
             for i=1,3,1 do
               local new_level = util.clamp(sample_player.levels[i]+(d)/100,0,1)
@@ -215,7 +214,7 @@ local enc = function (n, d)
             sample_player.levels[sample_player.selected_voice] = new_level
           softcut.level(sample_player.selected_voice,sample_player.levels[sample_player.selected_voice])
           end
-        elseif sample_player.nav_active_control == 7 then -- autogenerate cutters
+        elseif sample_player.nav_active_control == 9 then -- autogenerate cutters
           -- if alt_key_active == true then
             sample_player.num_cutters = util.clamp(sample_player.num_cutters+d,1,MAX_CUTTERS)
             sample_player.autogenerate_cutters(sample_player.num_cutters)
@@ -379,8 +378,7 @@ local enc = function (n, d)
           local rate = spl.voice_rates[spl.selected_voice]
           -- if spl.play_modes[spl.selected_voice] < 2 then spl.voice_rates[1] = rate else spl.voice_rates[spl.selected_voice] = rate end
           if alt_key_active == false then
-            rate = rate + d
-            rate = rate ~= 0 and rate or rate + d
+            rate = (rate + d > -0.01 and rate + d < 0.01) and rate * -1 or rate + d
             spl.voice_rates[spl.selected_voice] = rate 
           else
             rate = rate + d/100
@@ -394,7 +392,20 @@ local enc = function (n, d)
           end
           
           for i=4,6,1 do spl.reset(i) end
-        elseif spl.nav_active_control == 6 then -- set level
+        elseif spl.nav_active_control == 6 then -- set buf length
+          if alt_key_active == false then
+            spl.length = util.clamp(spl.length+d,1,300)
+          else
+            spl.length = util.clamp(spl.length+d*0.01,0.1,300)
+          end 
+          spl.reset(spl.selected_voice)
+        elseif spl.nav_active_control == 7 then -- set voice pre/rec
+          if alt_key_active == false then
+            spl.set_pre(spl.selected_voice, util.clamp(spl.live_voices[spl.selected_voice].pre+(d*0.1),0,1))
+          else
+            spl.set_rec(spl.selected_voice, util.clamp(spl.live_voices[spl.selected_voice].rec+(d*0.1),0,1))
+          end 
+        elseif spl.nav_active_control == 8 then -- set level
           if alt_key_active == true then -- update play mode for all voices
             for i=4,6,1 do
               local new_level = util.clamp(spl.levels[i]+(d)/100,0,1)
@@ -408,7 +419,7 @@ local enc = function (n, d)
             spl.levels[spl.selected_voice] = new_level
           softcut.level(spl.selected_voice,spl.levels[spl.selected_voice])
           end
-        elseif spl.nav_active_control == 7 then -- autogenerate cutters
+        elseif spl.nav_active_control == 9 then -- autogenerate cutters
           -- if alt_key_active == true then
             spl.num_cutters = util.clamp(spl.num_cutters+d,1,MAX_CUTTERS)
             spl.autogenerate_cutters(spl.num_cutters)
@@ -589,11 +600,11 @@ local key = function (n,z)
         -- end
       end
     end
-    if spl.mode ~= "live" and ((not spl.waveform_loaded or spl.nav_active_control == 1) and alt_key_active == false) and n==2 and z==1 then
-      screen.clear()
-      spl.selecting = true
-      fileselect.enter(_path.dust,spl.load_file)
-    end
+    -- if spl.mode ~= "live" and ((not spl.waveform_loaded or spl.nav_active_control == 1) and alt_key_active == false) and n==2 and z==1 then
+    --   screen.clear()
+    --   spl.selecting = true
+    --   fileselect.enter(_path.dust,spl.load_file)
+    -- end
   elseif pages.index == 3 then
     
     if n == 3 and alt_key_active and z == 1 then

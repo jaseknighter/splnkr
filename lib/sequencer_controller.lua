@@ -228,7 +228,7 @@ sc.output_params_map = {
     -- clock/lattice/pattern: tempo, meter, pattern division
 }
 
-function sc.get_num_cutters() return #cutters > 0 and #cutters or 1 end
+function sc.get_num_cutters() return cutters and #cutters > 0 and #cutters or 1 end
 
 function sc.get_output_control_specs_map()
     local map = sc.output_control_specs_map and sc.output_control_specs_map or
