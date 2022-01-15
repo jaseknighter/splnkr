@@ -232,8 +232,8 @@ local enc = function (n, d)
   elseif pages.index == 2 then
     if saving == false and show_instructions == false and (spl.file_selected == true or spl.mode == "live") then    
       if n==1 then
-        d = util.clamp(d,-1,1) * 0.01
         if spl.nav_active_control == 3 then
+          d = util.clamp(d,-1,1) * 0.01
           if alt_key_active == true then
             local active_edge = spl.cutters[spl.active_cutter]:get_active_edge()
             local cutter = spl.cutters[spl.active_cutter]
@@ -248,6 +248,7 @@ local enc = function (n, d)
             spl.cutters[spl.active_cutter]:rotate_cutter_edge(d)
           end
         elseif spl.nav_active_control == 4 then
+          d = util.clamp(d,-1,1) * 0.01
           if alt_key_active == true then
             for i=1,#spl.cutters,1
             do  
@@ -264,6 +265,7 @@ local enc = function (n, d)
             end
           end
         elseif spl.nav_active_control == 5 then
+          d = util.clamp(d,-1,1) * 0.01
           if alt_key_active == true then
             local rate = spl.voice_rates[spl.selected_voice]
             rate = rate + d
@@ -399,7 +401,7 @@ local enc = function (n, d)
             spl.length = util.clamp(spl.length+d*0.01,0.1,300)
           end 
           spl.reset(spl.selected_voice)
-        elseif spl.nav_active_control == 7 then -- set voice pre/rec
+        elseif spl.nav_active_control == 7 then -- set voice pre/rec/input levels
           if alt_key_active == false then
             spl.set_pre(spl.selected_voice, util.clamp(spl.live_voices[spl.selected_voice].pre+(d*0.1),0,1))
           else
@@ -587,6 +589,13 @@ local key = function (n,z)
           end
         end
       elseif n==3 and z==1 then
+        if spl.nav_active_control == 7 then -- set voice input levels
+          if params:get("input_level") ~= -inf then
+            params:set("input_level", -inf)
+          else
+            params:set("input_level", 1)
+          end
+        end
         -- if spl.nav_active_control == 1 then
         --   spl.playing = spl.playing == 1 and 0 or 1
         --   softcut.play(spl.selected_voice, spl.playing)

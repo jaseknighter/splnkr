@@ -60,7 +60,7 @@ function time_processor.clock_morph_start(target_tempo)
   local duration = time_processor.duration or 2
   local steps = time_processor.steps or 10
   local shape = time_processor.shape or "lin"
-  print("par1: start time morph", starting_val, duration, steps, shape)
+  -- print("par1: start time morph", starting_val, duration, steps, shape)
   fn.morph(time_processor.clock_morph,starting_val,target_tempo,duration,steps,shape)
 end
 

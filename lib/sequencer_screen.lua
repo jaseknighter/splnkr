@@ -30,43 +30,40 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
     control_bcrumbs = control_bcrumbs .. "-" .. sequencer_controller.selected_sequin .. " "
   end
   if selected_sequin and output_type == nil then
-    control_labels[1] = "softcut devices effects"
-    control_labels[2] = "time"
-  elseif output_type == 1 then -- softcut titles and labels
-    control_bcrumbs =  control_bcrumbs .. "sc voice "
+    control_labels[1] = "recsamp livsamp devices"
+    control_labels[2] = "effects time"
+  elseif output_type == 1 then -- recorded sampling titles and labels
+    control_bcrumbs =  control_bcrumbs .. "recsamp "
     if output_index then
       control_bcrumbs = control_bcrumbs .. output_index .. " "
       local label_pos = 1
-      for i=1,#specs_map[1][1],1 do
-        control_labels[label_pos] = control_labels[label_pos] .. specs_map[1][1][i][5] .. " "
+      for i=1,#specs_map[output_type][output_index],1 do
+        local val = specs_map[output_type][output_index][i][5]
+        control_labels[label_pos] = control_labels[label_pos] .. val .. " "
         label_pos = i%3 == 0 and label_pos + 1 or label_pos
       end  
       if output_mode then
         control_bcrumbs = control_bcrumbs .. specs_map[output_type][output_index][output_mode][5]
-        -- if specs_map[output_type][output_index][output_param][1] == "option" then
-        --   local label_pos = 1
-        --   control_labels = {"","",""}
-        --   for i=1,#specs_map[output_type][output_index][output_param][2],1 do
-        --     local param = specs_map[output_type][output_index][output_param][2][i]
-        --     control_labels[label_pos] = control_labels[label_pos] .. param .. " "
-        --     label_pos = i%3 == 0 and label_pos + 1 or label_pos
-        --   end
-        -- end
       end
     end
-  elseif output_type == 2 then
+  elseif output_type == 2 then -- live sampling titles and labels
+    control_bcrumbs =  control_bcrumbs .. "livsamp "
+    if output_index then
+      control_bcrumbs = control_bcrumbs .. output_index + 3 .. " "
+      local label_pos = 1
+      for i=1,#specs_map[output_type][output_index],1 do
+        local val = specs_map[output_type][output_index][i][5]
+        control_labels[label_pos] = control_labels[label_pos] .. val .. " "
+        label_pos = i%3 == 0 and label_pos + 1 or label_pos
+      end  
+      if output_mode then
+        control_bcrumbs = control_bcrumbs .. specs_map[output_type][output_index][output_mode][5]
+      end
+    end
+  elseif output_type == 3 then
     control_bcrumbs =  control_bcrumbs .. "dev "
     if output_index then 
       if output_index == 1 then -- midi
-        -- control_bcrumbs = control_bcrumbs .. "midi "
-        -- local label_pos = 1
-        -- for i=1,#specs_map[2][1],1 do
-        --   control_labels[label_pos] = control_labels[label_pos] .. specs_map[output_type][output_index][i][5] .. " "
-        --   label_pos = i%3 == 0 and label_pos + 1 or label_pos
-        -- end
-        -- if output_mode then
-        --   control_bcrumbs = control_bcrumbs .. specs_map[output_type][output_index][output_mode][5] .. " "
-        -- end        
         control_bcrumbs =  control_bcrumbs .. "midi "
         if output_mode == nil then
           control_labels[1] = "v1 v2 v3"
@@ -155,7 +152,7 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
         end
       end
     end
-  elseif output_type == 3 then -- effects
+  elseif output_type == 4 then -- effects
     control_bcrumbs =  control_bcrumbs .. "eff "
     if output_index then 
       if output_index == 1 then -- amp
@@ -182,7 +179,7 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
         end
       end
     end
-  elseif output_type == 4 then -- lattice and patterns  
+  elseif output_type == 5 then -- lattice and patterns  
     local orig_bcrumbs = fn.deep_copy(control_bcrumbs) .. "time "
     control_bcrumbs =  orig_bcrumbs
 
@@ -223,43 +220,30 @@ function sequencer_screen.update_screen_instructions(selected_control_indices)
   end
 
   -- set more control labels
-  -- if active_ui_group_name == "sequin groups" then
-  --   control_labels = {"group 1-5"}
-  -- elseif active_ui_group_name == "sequin selector" then
-  --   control_labels = {"sequin 1-" .. params:get("num_steps")}
-  -- elseif active_ui_group_name == "sequin output types" then
-  --   control_labels = {"seq", "subseq", "lat/pat"}
-  -- elseif active_ui_group_name == "sequin outputs" then
-  -- print("active_ui_group_name",active_ui_group_name)
   if active_ui_group_name == "sequin outputs" then
     if output_type == 1 then
-      -- control_bcrumbs =  control_bcrumbs .. "softcut"
-      control_labels[1] = "softcut:"
-      control_labels[2] = "voices 1-6"
+      control_labels[1] = "recsamp:"
+      control_labels[2] = "voices 1-3"
     elseif output_type == 2 then
+      control_labels[1] = "livsamp:"
+      control_labels[2] = "voices 4-6"
+    elseif output_type == 3 then
       control_labels[1] = "devices:"
       control_labels[2] = "midi_note crow jf w/"
-      -- control_bcrumbs =  control_bcrumbs .. "dev"
-    elseif output_type == 3 then
+    elseif output_type == 4 then
       control_labels[1] = "effects:"
       control_labels[2] = "amp drywet delay"
       control_labels[3] = "bitcrush env pshift"
       -- control_bcrumbs =  control_bcrumbs .. "eff"
-    elseif output_type == 4 then
+    elseif output_type == 5 then
       control_labels[1] = "time:"
       control_labels[2] = "sequence sub-sequence"
       control_labels[3] = "clock/lat/pat (clp)"
     end
   elseif active_ui_group_name == "sequin output modes" then
-    if output_type == 2 then -- devices
-    elseif output_type == 3 then
-      -- if output_index ~=5 then
-
-    end
+    -- do something here?
   elseif active_ui_group_name == "sequin output params" then
-    if output_type == 1 then --softcut params (cutter mode direction level)
-    elseif output_type == 2 then
-    end
+    -- do something here?
   elseif active_ui_group_name == "value place integers" then
     control_labels = {}
   elseif active_ui_group_name == "value place decimals" then
@@ -305,7 +289,7 @@ end
 
 function sequencer_screen.update()
   -- if grid_mode == "sequencer" then
-  if g.cols ~= nil and g.cols >= 16 and pages.index == 3 and show_instructions == false then
+  if g.cols ~= nil and g.cols >= 16 and pages.index == 4 and show_instructions == false then
 
     sequencer_screen.active_control = sequencer_controller:get_active_ui_group_name()
     sequencer_screen.active_control = ((string.sub(sequencer_screen.active_control,1,13) == "sequin groups") and "sequence groups" or sequencer_screen.active_control)
@@ -533,11 +517,11 @@ function sequencer_screen.update()
     end
 
 
-  elseif pages.index == 3 and show_instructions == true then 
+  elseif pages.index == 4 and show_instructions == true then 
     screen_dirty = true
     instructions.display() 
   else 
-    pages.index = 2
+    pages.index = 3
   end
 end
 

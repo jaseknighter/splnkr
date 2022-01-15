@@ -36,7 +36,7 @@ spl.selecting = false
 spl.file_selected = false
 -- playing = 0
 spl.cutters = {}
-spl.voice_rates = {1,1}
+spl.voice_rates = {1,1,1}
 spl.active_cutter = 1
 spl.num_cutters = 1
 spl.selected_cutter_group = 1
@@ -59,7 +59,7 @@ spl_nav_labels = {
   "move cutter",
   "rate",
   "buffer length",
-  "pre/rec/input level",
+  "pre/rec/in lvl",
   "sample level",
   "autogenerate clips"
 }
@@ -114,40 +114,10 @@ function spl.init()
     spl.cut_detector.set_bright_start()
     spl.update()
     spl.autogenerate_cutters(spl.num_cutters)
-    spl.set_play_mode(4,1)
-    spl.reset(4, true)
+    -- spl.set_play_mode(4,1)
+    -- spl.reset(4, true)
   end
 end
-
--- function spl.load_file(file)
---   spl.selecting = false
---   spl.cutters = {}
---   spl.num_cutters = 1
---   if file ~= "cancel" then
---     spl.file_selected = true
---     spl_nav_labels[1] = "select/scrub voice: " .. 4
-
---     softcut.buffer_clear_region_channel(2,0,-1)
---     local ch, samples = audio.file_info(file)
---     spl.length = samples/48000
---     softcut.buffer_read_mono(file,0,0,-1,1,2)
---     -- softcut.buffer_read_mono(file,0,1,-1,1,2)
---     -- softcut.buffer_read_stereo(file,0,0,-1)
---     for i=4,6,1 do
---       spl.reset(i)
---     end
---     clock.run(spl.finish_file_load)
---   end
--- end
-
--- function spl.finish_file_load()
---   clock.sleep(1)
---   spl.waveform_loaded = true
---   spl.cut_detector.set_bright_start()
---   spl.update()
---   spl.autogenerate_cutters(spl.num_cutters)
---   spl.set_play_mode(4,1)
--- end
 
 function spl.play_check(voice)
   if spl.get_play_mode(voice) < 1 then
@@ -311,70 +281,15 @@ function spl.cutters_start_finish_update()
   end
 end
 
--- function spl.playhead_position_update(voice,pos)
---   spl.sample_positions[voice] = (pos) / spl.length
---   if spl.waveform_loaded then
---     print(spl.cutter_assignments[voice])
---     local next_cutter_to_play = util.wrap(spl.cutter_assignments[voice]+1,1,#spl.cutters)
---     local rate = tonumber(spl.voice_rates[voice])
---     if (next_cutter_to_play and (spl.sample_positions[voice] and spl.last_sample_positions[voice]) and (rate > 0 and spl.sample_positions[voice] < spl.last_sample_positions[voice]) or 
---     (rate < 0 and spl.sample_positions[voice] > spl.last_sample_positions[voice])) then
---       if spl.play_modes[voice] == 2 then -- all cuts
---         if  (rate > 0 and spl.sample_positions[voice] < spl.last_sample_positions[voice]) then 
---           spl.sample_positions[voice] = spl.last_sample_positions[voice] - 1
---         else
---           spl.sample_positions[voice] = spl.last_sample_positions[voice] + 1
---         end
---         spl.cutter_assignments[voice] = next_cutter_to_play
---         spl.voices_start_finish[voice][1] = util.linlin(10,120,0,spl.length,spl.cutters[spl.cutter_assignments[voice]]:get_start_x_updated())
---         spl.voices_start_finish[voice][2] = util.linlin(10,120,0,spl.length,spl.cutters[spl.cutter_assignments[voice]]:get_finish_x_updated()) 
---         spl.reset(voice)
---       elseif spl.play_modes[voice] > 2 then -- selected cut/repeat/1shot
---         if spl.play_modes[voice] < 4 then
---           spl.reset(voice)
---         else -- stop 1-shot
---           spl.set_play_mode(voice,0)
---         end
---       end
---     end
-
---     if spl.play_modes[voice] > 1 then
---       if spl.cutter_assignments[voice] < 1 then
---         spl.cutter_assignments[voice] = 1
---       end
---       local start = spl.cutters[spl.cutter_assignments[voice]]:get_start_x_updated()
---       local finish = spl.cutters[spl.cutter_assignments[voice]]:get_finish_x_updated()
---       local active_cutter_sample_position = (pos - spl.voices_start_finish[voice][1])/(spl.voices_start_finish[voice][2]-spl.voices_start_finish[voice][1])
---       spl.playhead_positions[voice] = util.linlin(0,1,start,finish,active_cutter_sample_position)
---     else 
---       spl.playhead_positions[voice] = util.linlin(0,1,10,120,spl.sample_positions[voice])
---     end
---     if spl.selecting == false and menu_status == false then 
---       spl.update() 
---     end  
---   end
-
---   spl.last_sample_positions[voice] = spl.sample_positions[voice]
--- end
-
 function spl.update_content(buffer,winstart,winend,samples)
   softcut.render_buffer(buffer, winstart, winend - winstart, 128)
 end
---/ WAVEFORMS
-
 
 function spl.autogenerate_cutters(num_cutters)
   if spl.waveform_loaded or spl.mode == "live" then
-
     -- make evenly spaced cuts
     -- if  alt_key_active then
       spl.cutters = {}
-      cutter_rates = {}
-      local cutter1_start_x = 0
-      local cutter1_finish_x = 128/num_cutters
-      -- spl.cutters[1] = Cutter:new(1,cutter1_start_x,cutter1_finish_x)
-      cutter_rates[1] = 1
-
       local cutter_spacing = 128/num_cutters
       for i=1,num_cutters,1
       do
@@ -382,47 +297,65 @@ function spl.autogenerate_cutters(num_cutters)
         new_cutter_start_x = cutter_spacing*(i-1)
         new_cutter_finish_x = cutter_spacing*(i)
         table.insert(spl.cutters, i, Cutter:new(i, new_cutter_start_x, new_cutter_finish_x))
-        table.insert(cutter_rates, i,1)
+        -- table.insert(cutter_rates, i,1)
       end
+      for i=4,6,1 do
+        if spl.cutter_assignments[i] > num_cutters then
+          spl.cutter_assignments[i] = num_cutters
+        end
+      end
+      
     -- else
     --   -- make cuts according to sample levels
     --   spl.cutters = spl.cutters and spl.cutters or {}
-    --   cutter_rates = cutter_rates and cutter_rates or {}
+    --   -- cutter_rates = cutter_rates and cutter_rates or {}
       
     --   -- get the cut indices and resort them lowest to highest
     --   local sorted_cut_indices = spl.cut_detector.get_sorted_cut_indices()
     --   local autogen_cut_indices = {}
-    --   -- for i=1,num_cutters-1,1
-    --   for i=1,MAX_spl.cutters-1,1
+    --   -- for i=1,MAX_spl.cutters-1,1
+    --   for i=1,#sorted_cut_indices-1,1
     --   do
     --     local new_cutter = sorted_cut_indices[i] and sorted_cut_indices[i] or 0
     --     table.insert(autogen_cut_indices,new_cutter)
     --   end
       
     --   table.sort(autogen_cut_indices)
-    --   -- tab.print(autogen_cut_indices)
+    --   tab.print(autogen_cut_indices)
     --   local start_index =  num_cutters > #spl.cutters and #spl.cutters + 1 or num_cutters + 1
-    --   for i=start_index,MAX_spl.cutters,1
-    --   do
+    --   -- for i=start_index,MAX_spl.cutters,1
+    --   for i=start_index,#spl.cutters,1 do
     --     if spl.cutters[i] then
     --       table.remove(spl.cutters, i)
-    --       table.remove(cutter_rates, i)
+    --       -- table.remove(cutter_rates, i)
     --     end
+    --   end  
+        
+        
+    --   for i=start_index,num_cutters,1 do
     --     if i<=num_cutters then
     --       local new_cutter_start_x = autogen_cut_indices[i]
     --       local new_cutter_finish_x = autogen_cut_indices[i+1] and autogen_cut_indices[i+1] or 128
     --       -- print(i,new_cutter_finish_x,new_cutter_start_x)
     --       table.insert(spl.cutters, i, Cutter:new(i, new_cutter_start_x, new_cutter_finish_x))
-    --       table.insert(cutter_rates, i,1)
+    --       -- table.insert(cutter_rates, i,1)
     --     end
       -- end
     -- end
+    
     spl.cutters_start_finish_update()
     spl.active_cutter = 1
     spl.selected_cutter_group = 1
     local display_mode = spl.nav_active_control == 3 and 1 or 2
     spl.cutters[1]:set_display_mode(display_mode)
+
+    for i=4,6,1 do
+      if spl.cutter_assignments[i] > num_cutters then
+        spl.cutter_assignments[i] = num_cutters
+      end
+    end
     spl.update()     
+
   end
 end
 
@@ -498,7 +431,8 @@ function spl.draw_top_nav (msg)
     elseif spl.nav_active_control == 7 then
       local pre = spl.live_voices[spl.selected_voice].pre
       local rec = spl.live_voices[spl.selected_voice].rec
-      subnav_title = subnav_title .. ": " .. pre .. "/" .. rec
+      local input = params:get("input_level")
+      subnav_title = subnav_title .. ": " .. pre .. "/" .. rec .. "/" .. input
     elseif spl.nav_active_control == 8 then
       subnav_title = subnav_title .. ": " .. spl.levels[spl.selected_voice]
     elseif spl.nav_active_control == 9 then
@@ -542,9 +476,6 @@ function spl.update()
     else
       -- draw the waveform
       local x_pos = 0
-      if spl.cut_detector.bright_checked == false then
-        -- spl.cut_detector.set_bright_completed()
-      end
       
       if (spl.waveform_loaded == true or spl.mode == "live") then
         for i,s in ipairs(spl.waveform_samples) do
@@ -587,8 +518,8 @@ function spl.update()
           screen.text(i)
           screen.stroke()
         end 
-        spl.update_content(2,0,spl.length,128)
       end
+      spl.update_content(2,0,spl.length,128)
     end
     if saving == false then
       spl.draw_top_nav()

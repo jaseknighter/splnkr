@@ -4,7 +4,7 @@ local instructions = {}
 
 instructions.display = function ()
   screen.level(15)
-  if pages.index == 1 then
+  if pages.index == 1 or pages.index == 2 then
     screen.move(5,20)
     if waveform_loaded == true then
       screen.text("e2: next/prev control")
@@ -12,7 +12,7 @@ instructions.display = function ()
     end
     if (sample_player.nav_active_control == 1) then
       screen.text("k2: select sample")
-      if waveform_loaded == true then
+      if waveform_loaded == true or pages.index == 21 then
         screen.move(5, 36)
         screen.text("e1 + k3: scrub playhead")
         screen.move(5, 44)
@@ -59,26 +59,52 @@ instructions.display = function ()
       screen.move(5, 52)
       screen.text("k1 + e3: adj selected rate")
       screen.move(5, 60)
-    elseif (sample_player.nav_active_control == 6) then
-      screen.text("k1 + k2: stop/start sel voice")
-      screen.move(5, 36)
-      --screen.text("k2/k3: delete/add cutter")
-      screen.text("e3: adj sel level")
-      screen.move(5, 44)
-      screen.text("k1+e3: adj all levels")
-      screen.move(5, 52)
-    elseif (sample_player.nav_active_control == 7) then
-      screen.text("k1 + k2: stop/start sel voice")
-      screen.move(5, 36)
-      screen.text("e3: autogen by level")
-      screen.move(5, 44)
-      screen.text("k1 + e3: autogen evenly")
-      screen.move(5, 52)
-      -- screen.text("PARAMS>EDIT: save clips")
-      -- screen.move(5, 60)
-      -- screen.text("to dust/audio/clipper/")
+    elseif pages.index == 1 then
+      if (sample_player.nav_active_control == 6) then
+        screen.text("k1 + k2: stop/start sel voice")
+        screen.move(5, 36)
+        screen.text("e3: adj sel level")
+        screen.move(5, 44)
+        screen.text("k1+e3: adj all levels")
+        screen.move(5, 52)
+      elseif (sample_player.nav_active_control == 7) then
+        screen.text("k1 + k2: stop/start sel voice")
+        screen.move(5, 36)
+        screen.text("e3: autogen by level")
+        screen.move(5, 44)
+        screen.text("k1 + e3: autogen evenly")
+        screen.move(5, 52)
+      end
+    elseif pages.index == 2 then
+      if (sample_player.nav_active_control == 6) then
+        screen.text("k1 + k2: stop/start sel voice")
+        screen.move(5, 36)
+        screen.text("e3: adj buf length")
+      elseif (sample_player.nav_active_control == 7) then
+        screen.text("k1 + k2: stop/start sel voice")
+        screen.move(5, 36)
+        screen.text("e3: set pre level")
+        screen.move(5, 44)
+        screen.text("k1 + e3: set rec level")
+        screen.move(5, 52)
+        screen.text("k3: input level on/off")
+      elseif (sample_player.nav_active_control == 8) then
+        screen.text("k1 + k2: stop/start sel voice")
+        screen.move(5, 36)
+        screen.text("e3: adj sel level")
+        screen.move(5, 44)
+        screen.text("k1+e3: adj all levels")
+        screen.move(5, 52)
+      elseif (sample_player.nav_active_control == 9) then
+        screen.text("k1 + k2: stop/start sel voice")
+        screen.move(5, 36)
+        screen.text("e3: autogen by level")
+        screen.move(5, 44)
+        screen.text("k1 + e3: autogen evenly")
+        screen.move(5, 52)
+      end
     end
-  elseif pages.index == 2 then
+  elseif pages.index == 3 then
     screen.move(5,20)
     screen.text("e2: select control")
     screen.move(5, 28)
@@ -89,7 +115,7 @@ instructions.display = function ()
     screen.move(5, 52)
     screen.text("k1 + k3: show mod controls")
     screen.move(5, 60)
-  elseif pages.index == 3 then
+  elseif pages.index == 4 then
     screen.move(5,20)
     screen.text("k2: select seq group")
     screen.move(5, 28)

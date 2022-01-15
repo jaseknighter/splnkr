@@ -34,7 +34,7 @@ sample_player.selecting = false
 sample_player.file_selected = false
 -- playing = 0
 sample_player.cutters = {}
-sample_player.voice_rates = {1,0}
+sample_player.voice_rates = {1,1,1}
 -- sample_player.voice_rates = {1,1}
 sample_player.active_cutter = 1
 sample_player.num_cutters = 1
@@ -76,7 +76,6 @@ function sample_player.init()
     softcut.level(i,0.8)
     softcut.buffer(i,1)
     softcut.loop(i,1)
-    
     softcut.enable(1,1)
     softcut.phase_quant(i,0.1)
     sample_player.sample_positions[i] = 0
@@ -133,6 +132,7 @@ function sample_player.load_file(file)
     -- softcut.buffer_read_stereo(file,0,0,-1)
     for i=1,3,1 do
       sample_player.reset(i)
+      softcut.position(i,1)
     end
     clock.run(sample_player.finish_file_load)
   end
@@ -145,6 +145,8 @@ function sample_player.finish_file_load()
   sample_player.update()
   sample_player.autogenerate_cutters(sample_player.num_cutters)
   sample_player.set_play_mode(1,1)
+  
+    
 end
 
 function sample_player.play_check(voice)
@@ -242,11 +244,10 @@ function sample_player.set_play_mode(voice, mode)
   sample_player.play_modes[voice] = mode
   -- if sample_player.enabled_voices[voice] ~= 1 then
     sample_player.enabled_voices[voice] = 1
-    softcut.position(voice,1)
+    -- softcut.position(voice,1)
     -- if sample_player.voice_rates[voice] == 0 then
       for i=1,#sample_player.voice_rates,1 do
         if sample_player.voice_rates[i] ~= 0 then
-          print("voice", voice)
           sample_player.voice_rates[voice] = sample_player.voice_rates[i]
           break
         end
@@ -343,6 +344,7 @@ function sample_player.playhead_position_update(voice,pos)
 
     end
   else
+    -- spl.update_content(2,0,spl.length,128)
     spl.sample_positions[voice] = (pos) / spl.length
     if spl.waveform_loaded  or spl.mode == "live" then
         local next_cutter_to_play = util.wrap(spl.cutter_assignments[voice]+1,1,#spl.cutters)
@@ -402,9 +404,9 @@ function sample_player.autogenerate_cutters(num_cutters)
     -- make evenly spaced cuts
     -- if  alt_key_active then
       sample_player.cutters = {}
-      cutter_rates = {}
-      local cutter1_start_x = 0
-      local cutter1_finish_x = 128/num_cutters
+      -- cutter_rates = {}
+      -- local cutter1_start_x = 0
+      -- local cutter1_finish_x = 128/num_cutters
       -- sample_player.cutters[1] = Cutter:new(1,cutter1_start_x,cutter1_finish_x)
       cutter_rates[1] = 1
 
@@ -416,6 +418,12 @@ function sample_player.autogenerate_cutters(num_cutters)
         new_cutter_finish_x = cutter_spacing*(i)
         table.insert(sample_player.cutters, i, Cutter:new(i, new_cutter_start_x, new_cutter_finish_x))
         table.insert(cutter_rates, i,1)
+      end
+
+      for i=1,3,1 do
+        if spl.cutter_assignments[i] > num_cutters then
+          spl.cutter_assignments[i] = num_cutters
+        end
       end
     -- else
     --   -- make cuts according to sample levels
@@ -569,9 +577,6 @@ function sample_player.update()
     else
       -- draw the waveform
       local x_pos = 0
-      if sample_player.cut_detector.bright_checked == false then
-        -- sample_player.cut_detector.set_bright_completed()
-      end
       
       if (sample_player.waveform_loaded == true) then
         

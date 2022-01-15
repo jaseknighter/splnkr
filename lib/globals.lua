@@ -196,7 +196,7 @@ end
 
 MAX_CUTTERS = 10
 MIN_CUT_SPACING = 1
-OUTPUT_TYPES = {"softcut","devices","effects","time"}
+OUTPUT_TYPES = {"recsamp","devices","effects","time"}
 PPQN_OPTIONS = {12,24,36,48,60,72,84,96,108}
 TIME_OPTIONS = {"1/8","1/4","1/3","1/2","3/4","1","4/3","3/2","2"}
 MORPH_DURATIONS = {"1/16","1/8","1/4","1/3","1/2","1","3/2","2","3"}

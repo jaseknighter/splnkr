@@ -1,10 +1,7 @@
 -- TODO: add a parameter to the number 'controlspec' to indicate the number of decimal places
 -- TODO: implement subgroups
--- TODO: figure out how to implement conditional/probabilisticx controls
--- TODO: save sequencer settings
--- TODO: setup midi stop/start
--- TODO: implement 4 levels of sequins sub  groups
--- TODO: move ui_groups table and associated getters/setters from grid_sequencer.lua to here
+-- TODO: figure out how to implement conditional/probabilistic controls
+
 -- ui groups heirarchy
 --  sequins group[1-5]:     each group defines contains a pattern and a sequins sequence
 --  sequins subgroup[a-d]:  details TBD (general idea: each sub group is a copy of group above it)
@@ -15,6 +12,7 @@
 --  output params:          some outputs/output modes have more than 1 param  
 --                            (e.g. just friends-play_note has 2 params: pitch and level)
 --  value controlspec:      a "controlspec" for each output/output mode param
+
 local sequencer_controller = {}
 sc = sequencer_controller
 
@@ -196,7 +194,8 @@ end
 -- maps
 -- output map: the values represent the number of different outputs for each output type
 sc.outputs_map = {
-    6, -- softcut voices NOTE: the sequencer will only allow 6 voices to play at once
+    3, -- recorded samples voices NOTE: the sequencer will only allow 3 voices to play at once
+    3, -- live samples voices NOTE: the sequencer will only allow 3 voices to play at once
     4, -- devices (midi, crow, just friends, w/)
     6, -- effects (amp, drywet, delay, bitcrush, enveloper, pitchshift
     3 -- sequins, subsequins, clock/lattice/pattern
@@ -204,7 +203,8 @@ sc.outputs_map = {
 
 -- note: '(nil)' means the output mode takes just 1 param) 
 sc.output_mode_map = {
-    {5, 5, 5, 5, 5, 5}, -- softcut 
+    {5, 5, 5, 5, 5, 5}, -- recorded samples 
+    {5, 5, 5, 5, 5, 5}, -- live samples 
     {7, 6, 7, 5}, -- devices midi out (7), crow(2), just_friends(7),w/(5)
     {nil, nil, 4, 3, 3, 7}, -- effects: amp(nil), drywet(nil), delay(4),bitcrush(3),enveloper(3),pitchshift(7)
     {3, 3, 4} -- sequins: step, num steps, starting step
@@ -214,7 +214,8 @@ sc.output_mode_map = {
 
 -- note: '(nil)' means just 1 output param' 
 sc.output_params_map = {
-    {{nil, nil, nil, nil, nil, nil}}, -- 4 softcut output params: sample_cut_num, rate, rade_direction, level
+    {{nil, nil, nil, nil, nil, nil}}, -- recorded samples output params: sample_cut_num, rate, rade_direction, level
+    {{nil, nil, nil, nil, nil, nil}}, -- live samples output params: sample_cut_num, rate, rade_direction, level
     {
         {6, 6, 6, 7, 7, 7, nil}, {nil, nil, nil, nil, nil, nil},
         {2, 2, 2, 2, 2, 2, 2}, {9, 9, 9, 4, 9}
@@ -264,7 +265,59 @@ function sc.refresh_output_control_specs_map()
     end 
 
     sc.output_control_specs_map = {
-        { -- softcut: voices: 1-6
+        { -- recorded samples: voices: 1-3
+            {
+                {
+                    "option", {"stp", "la", "ac", "sc", "1sh"}, nil, nil,
+                    "v_mode", "v_mode"
+                }, -- play mode
+                {"option", cutters, nil, "cutter", "cutter"}, -- cutter
+                {"number", "0.00", 20, 1, "rate", "rate"}, -- rate
+                {"option", {-1, 1}, 2, nil, "direction", "direction"}, -- direction
+                {"number", '0.00', 10, 0.20, "level", "level"} -- level (amp)
+            }, {
+                {
+                    "option", {"stp", "lp", "ac", "sc", "1sh"}, nil, nil,
+                    "v_mode", "v_mode"
+                }, {"option", cutters, nil, "cutter", "cutter"},
+                {"number", "0.00", 20.00, 1, "rate", "rate"},
+                {"option", {-1, 1}, 2, nil, "direction", "direction"},
+                {"number", '0.00', 10, "level", "level"}
+            }, {
+                {
+                    "option", {"stp", "lp", "ac", "sc", "1sh"}, nil, nil,
+                    "v_mode", "v_mode"
+                }, {"option", cutters, nil, "cutter", "cutter"},
+                {"number", "0.00", 20.00, 1, "rate", "rate"},
+                {"option", {-1, 1}, 2, nil, "direction", "direction"},
+                {"number", '0.00', 10, "level", "level"}
+            }, {
+                {
+                    "option", {"stp", "lp", "ac", "sc", "1sh"}, nil, nil,
+                    "v_mode", "v_mode"
+                }, {"option", cutters, nil, "cutter", "cutter"},
+                {"number", "0.00", 20.00, 1, "rate", "rate"},
+                {"option", {-1, 1}, 2, nil, "direction", "direction"},
+                {"number", '0.00', 10, "level", "level"}
+            }, {
+                {
+                    "option", {"stp", "lp", "ac", "sc", "1sh"}, nil, nil,
+                    "v_mode", "v_mode"
+                }, {"option", cutters, nil, "cutter", "cutter"},
+                {"number", "0.00", 20.00, 1, "rate", "rate"},
+                {"option", {-1, 1}, 2, nil, "direction", "direction"},
+                {"number", '0.00', 10, "level", "level"}
+            }, {
+                {
+                    "option", {"stp", "lp", "ac", "sc", "1sh"}, nil, nil,
+                    "v_mode", "v_mode"
+                }, {"option", cutters, nil, "cutter", "cutter"},
+                {"number", "0.00", 20.00, 1, "rate", "rate"},
+                {"option", {-1, 1}, 2, nil, "direction", "direction"},
+                {"number", '0.00', 10, "level", "level"}
+            }
+        },
+        { -- live samples: voices: 4-6
             {
                 {
                     "option", {"stp", "la", "ac", "sc", "1sh"}, nil, nil,
