@@ -146,7 +146,7 @@ sample controls available on all page 1 screens:
   * k1 + k2: stop/start selected voice
   * k1 + k3: show instructions
 
-#### screen 1 controls: select/scrub sample/voice
+#### screen 1: select/scrub sample/voice
 
 with no sample loaded:<br>
 <img src="images/pages/page1/page1_s1_start.png" width="66%">
@@ -165,7 +165,7 @@ screen 1 controls:
   * k1 + e3: scrub the playhead 
   * e3: select the active voice
 
-#### screen 2 controls: play mode
+#### screen 2: play mode
 <img src="images/pages/page1/page1_s2_play_mode.png" width="66%">
 <!-- ![](images/pages/page1/page1_s2_play_mode.png) -->
 
@@ -185,7 +185,7 @@ screen 2 controls:
   * k1 + e3: set the play mode of all cutters
   <!-- * k2/k3: delete/add cutter -->
 
-#### screen 3 controls: adjust cut ends
+#### screen 3: adjust cut ends
 <img src="images/pages/page1/page1_s3_adj_cut_ends.png" width="66%">
 <!-- ![](images/pages/page1/page1_s3_adj_cut_ends.png) -->
 
@@ -199,7 +199,7 @@ screen 3 controls:
   * k1 + e3: adjust selected cutter end
   * k1 + e1: fine adjust selected cutter end
 
-#### screen 4 controls: move cutter
+#### screen 4: move cutter
 <img src="images/pages/page1/page1_s4_move_cutter.png" width="66%">
 <!-- ![](images/pages/page1/page1_s4_move_cutter.png) -->
 
@@ -212,7 +212,7 @@ screen 4 controls:
   * k1 + e3: adjust selected cutter location
   * k1 + e1: fine adjust selected cutter location
 
-#### screen 5 controls: adjust rate
+#### screen 5: adjust rate
 <img src="images/pages/page1/page1_s5_rate.png" width="66%">
 <!-- ![](images/pages/page1/page1_s5_rate.png) -->
 
@@ -224,7 +224,7 @@ screen 5 controls:
   * e3: adjust selected voice rate
   * k1 + e3: fine adjust selected voice rate
 
-#### screen 6 controls: adjust level
+#### screen 6: adjust level
 <img src="images/pages/page1/page1_s6_level.png" width="66%">
 <!-- ![](images/pages/page1/page1_s6_level.png) -->
 
@@ -236,7 +236,7 @@ screen 6 controls:
   * e3: adjust selected voice level
   * k1 + e3: adjust all voice levels
 
-#### screen 7 controls: autogenerate cutters
+#### screen 7: autogenerate cutters
 <img src="images/pages/page1/page1_s7_autogenerate.png" width="66%">
 <!-- ![](images/pages/page1/page1_s7_autogenerate.png) -->
 
@@ -263,7 +263,7 @@ sample controls available on all page 1 screens:
   * e2: next/prev control screen
   * k1 + k3: show instructions
 
-#### screen 1 controls: select/scrub sample/voice
+#### screen 1: select/scrub sample/voice
 <img src="images/pages/page1/page1_s1_sample.png" width="66%">
 <!-- ![](images/pages/page1/page1_s1_sample.png) -->
 
@@ -274,7 +274,7 @@ screen 1 controls:
   * k1 + e3: scrub the playhead 
   * e3: select the active voice
 
-#### screen 2 controls: play mode
+#### screen 2: play mode
 <img src="images/pages/page1/page1_s2_play_mode.png" width="66%">
 <!-- ![](images/pages/page1/page1_s2_play_mode.png) -->
 
@@ -294,7 +294,7 @@ screen 2 controls:
   * k1 + e3: set the play mode of all cutters
   <!-- * k2/k3: delete/add cutter -->
 
-#### screen 3 controls: adjust cut ends
+#### screen 3: adjust cut ends
 <img src="images/pages/page1/page1_s3_adj_cut_ends.png" width="66%">
 <!-- ![](images/pages/page1/page1_s3_adj_cut_ends.png) -->
 
@@ -308,7 +308,7 @@ screen 3 controls:
   * k1 + e3: adjust selected cutter end
   * k1 + e1: fine adjust selected cutter end
 
-#### screen 4 controls: move cutter
+#### screen 4: move cutter
 <img src="images/pages/page1/page1_s4_move_cutter.png" width="66%">
 <!-- ![](images/pages/page1/page1_s4_move_cutter.png) -->
 
@@ -321,7 +321,7 @@ screen 4 controls:
   * k1 + e3: adjust selected cutter location
   * k1 + e1: fine adjust selected cutter location
 
-#### screen 5 controls: adjust rate
+#### screen 5: adjust rate
 <img src="images/pages/page1/page1_s5_rate.png" width="66%">
 <!-- ![](images/pages/page1/page1_s5_rate.png) -->
 
@@ -333,7 +333,7 @@ screen 5 controls:
   * e3: adjust selected voice rate
   * k1 + e3: fine adjust selected voice rate
 
-#### screen 6 controls: buffer length
+#### screen 6: buffer length
 <img src="images/pages/new_page2/new_page2_s6_buf_len.png" width="66%">
 
 the rate of each playhead may be controlled on this screen.
@@ -344,7 +344,7 @@ screen 6 controls:
   * e3: adjust selected voice's buffer rate
   * k1 + e3: fine adjust selected voice's buffer rate
 
-#### screen 7 controls: adjust levels: preservation/recording/input
+#### screen 7: adjust levels: preservation/recording/input
 <img src="images/pages/new_page2/new_page2_s6_pre_rec_in.png" width="66%">
 
 three controls may be modified on this screen:
@@ -358,7 +358,7 @@ screen 7 controls:
   * k1 + e3: adjust recording level
   * k3: toggle the input levels between on (1db) and off (-infinity db)
 
-#### screen 8 controls: adjust level
+#### screen 8: adjust level
 <img src="images/pages/page1/page1_s6_level.png" width="66%">
 <!-- ![](images/pages/page1/page1_s6_level.png) -->
 
@@ -370,7 +370,7 @@ screen 8 controls:
   * e3: adjust selected voice level
   * k1 + e3: adjust all voice levels
 
-#### screen 9 controls: autogenerate cutters
+#### screen 9: autogenerate cutters
 <img src="images/pages/page1/page1_s7_autogenerate.png" width="66%">
 <!-- ![](images/pages/page1/page1_s7_autogenerate.png) -->
 

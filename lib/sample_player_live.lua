@@ -59,7 +59,7 @@ spl_nav_labels = {
   "move cutter",
   "rate",
   "buffer length",
-  "pre/rec/in lvl",
+  "pre/rec/in",
   "sample level",
   "autogenerate clips"
 }
@@ -396,7 +396,7 @@ end
 function spl.draw_top_nav (msg)
   if show_instructions == true then
     subnav_title = "sampler instructions"
-  elseif (spl.waveform_loaded == false or spl.mode == "live") or spl.nav_active_control == 1 or spl.nav_active_control == 9 then
+  elseif spl.nav_active_control == 1 or spl.nav_active_control == 9 then
     subnav_title = spl_nav_labels[spl.nav_active_control] 
   else
     subnav_title = spl_nav_labels[spl.nav_active_control] .. "["..spl.selected_voice.."]"
