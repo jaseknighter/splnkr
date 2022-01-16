@@ -104,6 +104,7 @@ function spl.init()
       spl.live_voices[i] = {} 
       spl.live_voices[i].rec = 0.50
       spl.live_voices[i].pre = 0.50
+
       -- set voice record level 
       softcut.rec_level(i,spl.live_voices[i].rec)
       -- set voice pre level

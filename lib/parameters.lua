@@ -67,13 +67,14 @@ function parameters.init()
       parameters.update_note_offset()
   end}
 
-  params:add{type = "option", id = "note_offset", name = "note offset",
-    options={"A","B","C"}, default = 1,
-    action = function(value) 
-      -- do something here???
-  end}
+  params:add{type = "number", id = "note_offset", name = "note offset",
+  min = -24, max = 24, default = 0, 
+  action = function() 
+    fn.build_scale() 
+    parameters.update_note_offset()
+end}
 
-  params:hide("note_offset")
+params:hide("note_offset")
 
 
   -- latice meter
