@@ -11,10 +11,7 @@ engine.name = 'Splnkr'
 alt_key_active = false
 
 pitchshift = 1
-vinyl = 1
-phaser = 1
 delay = 1
-strobe = 1
 drywet = 1
 
   ----------------------------

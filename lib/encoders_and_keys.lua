@@ -400,7 +400,7 @@ local enc = function (n, d)
           else
             spl.length = util.clamp(spl.length+d*0.01,0.1,300)
           end 
-          spl.reset(spl.selected_voice)
+          for i=4,6,1 do spl.reset(i) end
         elseif spl.nav_active_control == 7 then -- set voice pre/rec/input levels
           if alt_key_active == false then
             spl.set_pre(spl.selected_voice, util.clamp(spl.live_voices[spl.selected_voice].pre+(d*0.1),0,1))

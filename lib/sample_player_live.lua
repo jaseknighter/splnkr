@@ -82,7 +82,7 @@ function spl.init()
     softcut.buffer(i,2)
     softcut.loop(i,1)
     
-    softcut.enable(4,1)
+    softcut.enable(i,1)
     softcut.phase_quant(i,0.1)
     spl.sample_positions[i] = 0
     spl.playhead_positions[i] = 1
@@ -242,7 +242,7 @@ function spl.set_play_mode(voice, mode)
         end
       end
     end
-    softcut.enable(voice, 1)
+    -- softcut.enable(voice, 1)
   end
   spl.reset(voice, true)
 end
@@ -396,7 +396,7 @@ end
 function spl.draw_top_nav (msg)
   if show_instructions == true then
     subnav_title = "sampler instructions"
-  elseif spl.nav_active_control == 1 or spl.nav_active_control == 9 then
+  elseif spl.nav_active_control == 1 or spl.nav_active_control == 6 or spl.nav_active_control == 9 then
     subnav_title = spl_nav_labels[spl.nav_active_control] 
   else
     subnav_title = spl_nav_labels[spl.nav_active_control] .. "["..spl.selected_voice.."]"

@@ -70,13 +70,14 @@ play_mode_text = {
 function sample_player.init()
   -- softcut.buffer_clear()
   softcut.buffer_clear_channel(1)	
+  softcut.enable(1,1)
   for i=1,3,1 do
     softcut.level_input_cut(1,i,1.0)
     softcut.level_input_cut(2,i,1.0)
     softcut.level(i,0.8)
     softcut.buffer(i,1)
     softcut.loop(i,1)
-    softcut.enable(1,1)
+    softcut.rec(i,0)
     softcut.phase_quant(i,0.1)
     sample_player.sample_positions[i] = 0
     sample_player.playhead_positions[i] = 1
