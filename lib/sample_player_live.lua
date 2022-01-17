@@ -180,8 +180,8 @@ function spl.select_next_voice(direction)
 end
 
 function spl.reset(voice, set_position_at_start)
-  softcut.buffer(voice,2)
-  softcut.loop(voice,1)
+  -- softcut.buffer(voice,2)
+  -- softcut.loop(voice,1)
   
   if spl.cutters[1] then
     if spl.play_modes[voice] > 1 and spl.cutter_assignments[voice] > 0 then
@@ -196,7 +196,7 @@ function spl.reset(voice, set_position_at_start)
   end 
   local rate = spl.voice_rates[voice]
   softcut.rate(voice,rate)
-  softcut.fade_time(voice,0)
+  softcut.fade_time(voice,0.1)
   spl.cutters_start_finish_update()
   
   if spl.play_modes[voice] > 0 then
