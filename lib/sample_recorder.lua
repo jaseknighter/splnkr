@@ -2,7 +2,8 @@
 -- record samples to tape 
 -- todo: set pre_save_play_mode per voice
 --------------------------
-sample_recorder = {}
+local sample_recorder = {}
+local saving 
 
 function sample_recorder.save_samples(dir_name, incr)
   if incr == nil then incr = 1 end
@@ -27,7 +28,7 @@ function sample_recorder.save_samples(dir_name, incr)
   sample_player.set_play_mode(0)
   
   local starting_clip = pre_save_play_mode == 3 and sample_player.active_cutter or 1
-  local ending_cutter = pre_save_play_mode == 3 and sample_player.active_cutter or #cutters
+  local ending_cutter = pre_save_play_mode == 3 and sample_player.active_cutter or #sample_player.cutters
   sample_recorder.record_to_tape_start(starting_clip, ending_cutter, dir_name, pathname2)
 end
 
@@ -37,8 +38,8 @@ function sample_recorder.record_to_tape_start(cutter_to_record,ending_cutter,dir
   if pre_save_play_mode > 1 and cutter_to_record <= ending_cutter then
     audio.tape_record_open (file)
     local rate = sample_player.voice_rates[cutter_to_record]
-    local start = (cutters[cutter_to_record]:get_start_x()/128) * length
-    local finish = (cutters[cutter_to_record]:get_finish_x()/128) * length
+    local start = (sample_player.cutters[cutter_to_record]:get_start_x()/128) * sample_player.length
+    local finish = (sample_player.cutters[cutter_to_record]:get_finish_x()/128) * sample_player.length
     for i=1,2,1
     do
       softcut.rate(i,rate)
@@ -56,7 +57,7 @@ function sample_recorder.record_to_tape_start(cutter_to_record,ending_cutter,dir
     audio.tape_record_open (file)
     local rate = sample_player.voice_rates[1]
     local start = 0
-    local finish = length
+    local finish = sample_player.length
   for i=1,2,1
     do
       softcut.rate(i,rate)

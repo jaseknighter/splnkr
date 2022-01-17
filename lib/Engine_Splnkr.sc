@@ -33,7 +33,7 @@ Engine_Splnkr : CroneEngine {
   var filterLevel3=1,centerFrequency13=440, reciprocalQuality13=1;
   var filterLevel4=1,centerFrequency14=440, reciprocalQuality14=1;
   var filterLevel5=1,centerFrequency15=440, reciprocalQuality15=1;
-  var combBuf1, combBuf2;
+  var combBuf;
   var sweptEnv, envctl, inSig, numFrames, startTrig, grainDur;
   var enveloper = 0, trigRate = 5, overlap = 0.99, panMax = 0.5, panType=0;
   var latchedTrigRate, latchedStartTrig, latchedOverlap, pan, sweep;
@@ -137,9 +137,9 @@ Engine_Splnkr : CroneEngine {
       freq = Clip.ar(freq, 0.midicps, 127.midicps);
 
       // outputArray to send to polls
-      SendReply.kr(Impulse.kr(50), '/triggerAmpPoll', detectAmp);
-      SendReply.kr(Impulse.kr(50), '/triggerOnsetDetectAmpPoll', onsetDetectAmp);
-      SendReply.kr(Impulse.kr(50), '/triggerFreqPoll', freq);
+      SendReply.kr(Impulse.kr(10), '/triggerAmpPoll', detectAmp);
+      SendReply.kr(Impulse.kr(10), '/triggerOnsetDetectAmpPoll', onsetDetectAmp);
+      SendReply.kr(Impulse.kr(10), '/triggerFreqPoll', freq);
       
 
       //////////////////////////////////////////
@@ -175,15 +175,15 @@ Engine_Splnkr : CroneEngine {
           ], panType)
       ) * panMax * 0.999;
 
-      wet = (Pan2.ar(wet * sweptEnv * amp, pan) * EnvGate.new * enveloper) + (wet*((enveloper+1)%2));
+      wet = (Pan2.ar(wet * sweptEnv, pan) * EnvGate.new * enveloper) + (wet*((enveloper+1)%2));
 
-      Out.ar(out, wet);
+      Out.ar(out, wet * amp);
     }).add;
 
 
     effectsSynth = SynthDef(\effects, {
       arg in, out, drywet=1, 
-      // amp=1,
+      amp=1,
       effect_phaser=0,effect_distortion=0,effect_delay=0,
       effect_bitcrush,bitcrush_bits=10,bitcrush_rate=12000, 
       effect_strobe=0,effect_vinyl=0, effect_flutter_and_wow=0,
@@ -240,18 +240,18 @@ Engine_Splnkr : CroneEngine {
 
 
       // delay
-      combBuf1 = Buffer.alloc(context.server,48000,2);
-      wet = (wet*(1-effect_delay))+(effect_delay*BufCombC.ar(combBuf1,wet,effect_delaytime,effect_delaydecaytime,effect_delaymul));
+      combBuf = Buffer.alloc(context.server,48000,2);
+      wet = (wet*(1-effect_delay))+(effect_delay*BufCombL.ar(combBuf,wet,effect_delaytime,effect_delaydecaytime,effect_delaymul));
 
       //////////////////////////////////////////
       // apply drywet, lag, remove DC bias, and send the signal out
       //////////////////////////////////////////
 
-      wet = wet*Lag.kr(amp*drywet,1);
-      wet = LeakDC.ar(wet, 0.995);
+      // wet = wet*Lag.kr(amp*drywet,1);
+      // wet = LeakDC.ar(wet, 0.995);
 
       dry = SoundIn.ar([0,1]);
-      dry = dry*Lag.kr(amp*(1-drywet),1);
+      dry = dry*Lag.kr(amp*(2-drywet),1);
 
       // // latch to change trigger between the two
       // aOrB=ToggleFF.kr(t_trig);
@@ -524,6 +524,7 @@ Engine_Splnkr : CroneEngine {
       if (voiceList.size > 0 && splnkrVoice.theSynth.isNil == false){ 
         splnkrVoice.theSynth.set(\amp, msg[1]);
         effectsSynth.set(\amp, msg[1]);
+        amp = msg[1];
       };
     });
     

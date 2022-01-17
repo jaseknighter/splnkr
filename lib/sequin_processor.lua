@@ -3,13 +3,15 @@ local sequin_processor = {}
 
 -- sc.sequencers[5].seq:step(2)
 sequin_processor.processors = {
-  softcut_processor,
+  recsamp_processor,
+  livsamp_processor,
   devices_processor, 
   effects_processor,
   time_processor,
 }
 function sequin_processor.init()
-  softcut_processor.init()
+  recsamp_processor.init()
+  livsamp_processor.init()
   devices_midi_processor.init()
   sequin_processor.active_sub_sequins = {}
 end

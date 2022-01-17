@@ -67,13 +67,14 @@ function parameters.init()
       parameters.update_note_offset()
   end}
 
-  params:add{type = "option", id = "note_offset", name = "note offset",
-    options={"A","B","C"}, default = 1,
-    action = function(value) 
-      -- do something here???
-  end}
+  params:add{type = "number", id = "note_offset", name = "note offset",
+  min = -24, max = 24, default = 0, 
+  action = function() 
+    fn.build_scale() 
+    parameters.update_note_offset()
+end}
 
-  params:hide("note_offset")
+params:hide("note_offset")
 
 
   -- latice meter
@@ -136,7 +137,7 @@ function parameters.init()
     type = "option", id = "audio_routing", name = "audio routing", 
     options = {"in+cut->eng","in->eng","cut->eng"},
     -- min = 1, max = 3, 
-    default = 1,
+    default = 2,
     action = function(value) 
       rerouting_audio = true
       clock.run(route_audio)
@@ -391,8 +392,8 @@ function parameters.init()
   -- cs_level.maxval = 5
   for i=1,16,1 do
     params:add_control("filter_level"..i,"filter level"..i,cs_level)
-    local default_val = i<8 and (i%8) or (i<16 and 9-(i%8) or 0)
-    -- local default_val = i%4==1 and 6 or 0
+    -- local default_val = i<8 and (i%8) or (i<16 and 9-(i%8) or 0)
+    local default_val = 0
     default_val = util.linlin(1,9,0,cs_level.maxval,default_val)
     params:set("filter_level"..i,default_val, false)
     params:set_action("filter_level"..i,function(x) 

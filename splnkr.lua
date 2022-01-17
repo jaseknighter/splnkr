@@ -1,5 +1,5 @@
 ---splnkr
--- v0.1.0 @jaseknighter
+-- v0.2.0 @jaseknighter
 -- https://llllllll.co/t/51191
 --
 -- k1+k3 for basic instructions
@@ -11,10 +11,7 @@ engine.name = 'Splnkr'
 alt_key_active = false
 
 pitchshift = 1
-vinyl = 1
-phaser = 1
 delay = 1
-strobe = 1
 drywet = 1
 
   ----------------------------
@@ -114,7 +111,10 @@ function init()
   -- engine.bpm(clock.get_tempo())
   engine.pitchshift(1)
   engine.delay(1)
+
+  audio.level_adc_cut(1)
   sample_player.init()
+  spl.init()
 
   polling.init()
 
@@ -146,6 +146,7 @@ function finish_init()
   frequency_detect_poll:start()
   
   sample_player.set_play_mode(1,0)
+  spl.set_play_mode(1,0)
   lattice_grid:start()
   params:bang()
 

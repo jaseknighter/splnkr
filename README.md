@@ -34,33 +34,79 @@ an amplitude and frequency tracking effects processor/sampler/sequencer for mono
   * e3: select playhead
   * k1 + e3: scrub playhead
 * screen 2: play mode
-  <!-- * k2/k3: delete/add cutter -->
+  * k2: delete cutter
   * e3: set play mode selected cutter
   * k1 + e3: set play mode all cutters
 * screen 3: adjust cut ends
-  <!-- * k2/k3: delete/add cutter -->
+  * k2: delete cutter
   * k1 + e2: select end
   * k1 + e3: adjust end
   * k1 + e1: fine adjust end
   * e3: select cutter end
 * screen 4: move cutter
-  <!-- * k2/k3: delete/add cutter -->
+  * k2: delete cutter
   * k1 + e2: select cutter
   * k1 + e3: move cutter
   * k1 + e1: fine move cutter
 * screen 5: adjust rate
-  <!-- * k2/k3: delete/add cutter -->
+  * k2: delete cutter
   * e3: adjust selected playhead rate
   * k1 + e3: fine adjust selected playhead rate
 * screen 6: adjust level
-  <!-- * k2/k3: delete/add cutter -->
+  * k2: delete cutter
   * e3: adjust selected playhead level
   * e3: adjust all playhead levels
 * screen 7: autogenerate cutters
   * e3: autogenerate clips by level (up to 20)
   * k1 + e3: autogenerate clips with even spacing (up to 20)
 
-### page 2: envelopes
+### page 2: live sample selector/cutter
+* all screens
+  * e1: previous page 
+  * e2: next/prev control screen
+  * k1 + k2: stop/start selected voice
+  * k1 + k3: show instructions
+* screen 1: select/scrub sample/voice
+  * k2: select audio sample
+  * e3: select playhead
+  * k1 + e3: scrub playhead
+* screen 2: play mode
+  * k2: delete cutter
+  * e3: set play mode selected cutter
+  * k1 + e3: set play mode all cutters
+* screen 3: adjust cut ends
+  * k2: delete cutter
+  * k1 + e2: select end
+  * k1 + e3: adjust end
+  * k1 + e1: fine adjust end
+  * e3: select cutter end
+* screen 4: move cutter
+  * k2: delete cutter
+  * k1 + e2: select cutter
+  * k1 + e3: move cutter
+  * k1 + e1: fine move cutter
+* screen 5: adjust rate
+  * k2: delete cutter
+  * e3: adjust selected playhead rate
+  * k1 + e3: fine adjust selected playhead rate
+* screen 6: adjust buffer length
+  * k2: delete cutter
+  * e3: adjust buffer length
+  * k1 + e3: fine adjust selected buffer length
+* screen 7: adjust levels: preservation/recording/input
+  * k2: delete cutter
+  * e3: adjust amount of recording to preserve with each pass of the playhead
+  * k1 + e3: adjust recording level
+  * k3: toggle the input levels between on (1db) and off (-infinity db)
+* screen 8: adjust level
+  * k2: delete cutter
+  * e3: adjust selected playhead level
+  * e3: adjust all playhead levels
+* screen 9: autogenerate cutters
+  * e3: autogenerate clips by level (up to 20)
+  * k1 + e3: autogenerate clips with even spacing (up to 20)
+
+### page 3: envelopes
 * e1: previous/next page 
 * k1 + e1: select active envelope  
 * e2: select envelope control  
@@ -74,7 +120,7 @@ an amplitude and frequency tracking effects processor/sampler/sequencer for mono
 * k2: select control
 * k3: change control value
 
-### page 3: sequencer
+### page 4: sequencer
 * e1: previous/next page 
 * k2: select sequence group
 * k3: add/remove control item
@@ -87,12 +133,12 @@ on all pages the first encoder (e1) switches between the script's 3 pages.
 
 note: if a 16-column grid is not connected, the script's 3rd (sequencer) screen is disabled.
 
-### page 1: sample selector/cutter
-the sample selector/cutter page controls a simple sample player/cutter with 1-6 voices. 
+### page 1: recorded sample selector/cutter
+the sample selector/cutter page controls a simple sample player/cutter with 1-3 voices. 
 
 key terms: 
 
-* *playhead*: there are 6 playheads that may be set independently to play through a loaded sample
+* *playhead*: there are 3 playheads that may be set independently to play through a loaded sample
 * *cutter*: a slice of a loaded sample
 
 sample controls available on all page 1 screens:
@@ -100,7 +146,7 @@ sample controls available on all page 1 screens:
   * k1 + k2: stop/start selected voice
   * k1 + k3: show instructions
 
-#### screen 1 controls: select/scrub sample/voice
+#### screen 1: select/scrub sample/voice
 
 with no sample loaded:<br>
 <img src="images/pages/page1/page1_s1_start.png" width="66%">
@@ -119,11 +165,11 @@ screen 1 controls:
   * k1 + e3: scrub the playhead 
   * e3: select the active voice
 
-#### screen 2 controls: play mode
+#### screen 2: play mode
 <img src="images/pages/page1/page1_s2_play_mode.png" width="66%">
 <!-- ![](images/pages/page1/page1_s2_play_mode.png) -->
 
-there are five play modes that can be set individually (e3) for each of the 6 playheads:
+there are five play modes that can be set individually (e3) for each of the 3 playheads:
 
 * *stop*: stops the selected playhead
 * *loop all*: the selected playhead plays through the entire sequence
@@ -139,7 +185,7 @@ screen 2 controls:
   * k1 + e3: set the play mode of all cutters
   <!-- * k2/k3: delete/add cutter -->
 
-#### screen 3 controls: adjust cut ends
+#### screen 3: adjust cut ends
 <img src="images/pages/page1/page1_s3_adj_cut_ends.png" width="66%">
 <!-- ![](images/pages/page1/page1_s3_adj_cut_ends.png) -->
 
@@ -153,7 +199,7 @@ screen 3 controls:
   * k1 + e3: adjust selected cutter end
   * k1 + e1: fine adjust selected cutter end
 
-#### screen 4 controls: move cutter
+#### screen 4: move cutter
 <img src="images/pages/page1/page1_s4_move_cutter.png" width="66%">
 <!-- ![](images/pages/page1/page1_s4_move_cutter.png) -->
 
@@ -166,7 +212,7 @@ screen 4 controls:
   * k1 + e3: adjust selected cutter location
   * k1 + e1: fine adjust selected cutter location
 
-#### screen 5 controls: adjust rate
+#### screen 5: adjust rate
 <img src="images/pages/page1/page1_s5_rate.png" width="66%">
 <!-- ![](images/pages/page1/page1_s5_rate.png) -->
 
@@ -178,7 +224,7 @@ screen 5 controls:
   * e3: adjust selected voice rate
   * k1 + e3: fine adjust selected voice rate
 
-#### screen 6 controls: adjust level
+#### screen 6: adjust level
 <img src="images/pages/page1/page1_s6_level.png" width="66%">
 <!-- ![](images/pages/page1/page1_s6_level.png) -->
 
@@ -190,7 +236,7 @@ screen 6 controls:
   * e3: adjust selected voice level
   * k1 + e3: adjust all voice levels
 
-#### screen 7 controls: autogenerate cutters
+#### screen 7: autogenerate cutters
 <img src="images/pages/page1/page1_s7_autogenerate.png" width="66%">
 <!-- ![](images/pages/page1/page1_s7_autogenerate.png) -->
 
@@ -205,11 +251,145 @@ screen 7 controls:
   * e3: autogenerate clips by level (up to 20)
   * k1 + e3: autogenerate clips with even spacing (up to 20)
 
-### page 2: envelopes
+### page 2: live sampling selector/cutter
+the live sampling selector/cutter page controls a simple sample player/cutter with 1-3 voices. 
+
+key terms: 
+
+* *playhead*: there are 3 playheads that may be set independently to play through a loaded sample
+* *cutter*: a slice of a live sample
+
+sample controls available on all page 1 screens:
+  * e2: next/prev control screen
+  * k1 + k3: show instructions
+
+#### screen 1: select/scrub sample/voice
+<img src="images/pages/page1/page1_s1_sample.png" width="66%">
+<!-- ![](images/pages/page1/page1_s1_sample.png) -->
+
+the banded graphic that appears once a sample has been loaded depicts amplitude (volume) changes in the sample. darker bands represent softer sounds and lighter bands represent louder sounds.
+
+screen 1 controls:
+  * k2: select a new sample to play 
+  * k1 + e3: scrub the playhead 
+  * e3: select the active voice
+
+#### screen 2: play mode
+<img src="images/pages/page1/page1_s2_play_mode.png" width="66%">
+<!-- ![](images/pages/page1/page1_s2_play_mode.png) -->
+
+there are five play modes that can be set individually (e3) for each of the 3 playheads:
+
+* *stop*: stops the selected playhead
+* *loop all*: the selected playhead plays through the entire sequence
+* *all cuts*: the selected playhead jumps from one cutter to the next (assuming multiple cutters have been generated on screen 6)
+* *sel cut*: the selected playhead plays just the selected cutter
+* *1-shot*: the selected playhead plays just the selected cutter one time
+
+on this screen, k1 + e3 sets the play modes for all six playheads at once.
+
+screen 2 controls:
+  * k1 + k2: stop/start selected voice
+  * e3: set the play mode of the selected cutter
+  * k1 + e3: set the play mode of all cutters
+  <!-- * k2/k3: delete/add cutter -->
+
+#### screen 3: adjust cut ends
+<img src="images/pages/page1/page1_s3_adj_cut_ends.png" width="66%">
+<!-- ![](images/pages/page1/page1_s3_adj_cut_ends.png) -->
+
+the cutter(s) ends may be controlled on this screen.
+
+screen 3 controls:
+  <!-- * k2/k3: delete/add cutter -->
+  * k1 + k2: stop/start sel voice
+  * k1 + e2: select cutter
+  * e3: select cutter end to adjust
+  * k1 + e3: adjust selected cutter end
+  * k1 + e1: fine adjust selected cutter end
+
+#### screen 4: move cutter
+<img src="images/pages/page1/page1_s4_move_cutter.png" width="66%">
+<!-- ![](images/pages/page1/page1_s4_move_cutter.png) -->
+
+the location of the cutter(s) may be controlled on this screen.
+
+screen 4 controls:
+  <!-- * k2/k3: delete/add cutter -->
+  * k1 + k2: stop/start sel voice
+  * k1 + e2: select cutter
+  * k1 + e3: adjust selected cutter location
+  * k1 + e1: fine adjust selected cutter location
+
+#### screen 5: adjust rate
+<img src="images/pages/page1/page1_s5_rate.png" width="66%">
+<!-- ![](images/pages/page1/page1_s5_rate.png) -->
+
+the rate of each playhead may be controlled on this screen.
+
+screen 5 controls:
+  <!-- * k2/k3: delete/add cutter -->
+  * k1 + k2: stop/start sel voice
+  * e3: adjust selected voice rate
+  * k1 + e3: fine adjust selected voice rate
+
+#### screen 6: buffer length
+<img src="images/pages/new_page2/new_page2_s6_buf_len.png" width="66%">
+
+the rate of each playhead may be controlled on this screen.
+
+screen 6 controls:
+  <!-- * k2/k3: delete/add cutter -->
+  * k1 + k2: stop/start sel voice
+  * e3: adjust selected voice's buffer rate
+  * k1 + e3: fine adjust selected voice's buffer rate
+
+#### screen 7: adjust levels: preservation/recording/input
+<img src="images/pages/new_page2/new_page2_s6_pre_rec_in.png" width="66%">
+
+three controls may be modified on this screen:
+  * pre: the amount of live sampled audio that is preserved with each pass of a playhead
+  * rec: the recording level
+  * live: toggles the input levels between 1db and 0 (-infinite db)
+
+screen 7 controls:
+  <!-- * k2/k3: delete/add cutter -->
+  * e3: adjust amount of recording to preserve with each pass of the playhead
+  * k1 + e3: adjust recording level
+  * k3: toggle the input levels between on (1db) and off (-infinity db)
+
+#### screen 8: adjust level
+<img src="images/pages/page1/page1_s6_level.png" width="66%">
+<!-- ![](images/pages/page1/page1_s6_level.png) -->
+
+the audio level of each playhead may be controlled on this screen.
+
+screen 8 controls:
+  <!-- * k2/k3: delete/add cutter -->
+  * k1 + k2: stop/start sel voice
+  * e3: adjust selected voice level
+  * k1 + e3: adjust all voice levels
+
+#### screen 9: autogenerate cutters
+<img src="images/pages/page1/page1_s7_autogenerate.png" width="66%">
+<!-- ![](images/pages/page1/page1_s7_autogenerate.png) -->
+
+cutters may be added and removed from this screen. 
+
+if cutters are added with e3, each cutter is set at a point of the sample where a large change in levels has been detected (e.g. at the start/end of a sound). 
+
+if cutters are added with k1 + e3, each cutter is evenly spaced.
+
+screen 9 controls:
+  * k1 + k2: stop/start sel voice
+  * e3: autogenerate clips by level (up to 20)
+  * k1 + e3: autogenerate clips with even spacing (up to 20)
+
+### page 3: envelopes
 <img src="images/pages/page2/page2_envelopes.png" width="66%">
 <!-- ![](images/pages/page2/page2_envelopes.png) -->
 
-the two shapes displayed on page 2 represent envelopes which may be applied to external devices (i.e. crow, jf, midi, w/). the first envelope is also be used to shape the granular envelope if enabled (see *effects* below for details). 
+the two shapes displayed on page 3 represent envelopes which may be applied to external devices (i.e. crow, jf, midi, w/). the first envelope is also be used to shape the granular envelope if enabled (see *effects* below for details). 
 
 an extension of Mark Eats' [envgraph class](https://github.com/monome/norns/blob/main/lua/lib/envgraph.lua), the two envelopes may be set with a variable number of control points or *nodes*.
 
@@ -242,7 +422,7 @@ pressing k1+k2 on the env screen brings up the *env modulation* menu. once enabl
 
 <!-- In addition, the *show env mod params* parameter makes the parameter modulation navigation visible (again, useful for controlling the ui via midi). -->
 
-### page 3: sequencer
+### page 4: sequencer
 
 selecting the third page (*sqncr*) using norns encoder e1 brings up the sequencer view. this page is only available if a grid with 16 or more columns is attached to the norns.
 
@@ -270,13 +450,15 @@ the sequencer is built around the [Lattice](http://norns.local/doc/modules/Latti
 * (B) *sequence steps* (rows 1, cols 6-14): each sequence set contains up to 9 steps. At each sequence step, multiple types of outputs may be sequenced.
   * the number of active sequence steps may be controlled from the params menu (PARAMETERS>EDIT>sequencing) by updating the *num steps* parameter.
 * (C) *output types* (row 2, cols 6-14): there are 4 *output types*
-    * softcut (sc): select to control the sample loaded on norns page 1
+    * recorded audio sample (recsamp): select to control the sample loaded on norns page 1
+    * live audio sample (recsamp): select to control the sample loaded on norns page 2
     * devices (dev): select to control external devices
     * effects (eff): select to activate effects defined in the SuperCollider engine.
     * time: select to update values related to the sequencer's step and tempo parameters
 * (D) *outputs* (row 3, cols 6-14)
   * each *output type* has multiple *outputs*:
-    * softcut (sc): sequence a softcut voice (up to 6 voices can be sequenced at each step)
+    * recorded audio sample (recsamp): sequence a softcut voice for a recorded sample (up to 3 voices can be sequenced at each step)
+    * live audio sample (livsamp): sequence a softcut voice for a live sample (up to 3 voices can be sequenced at each step)
     * devices (dev): there are 4 device outputs that may be selected: midi, crow, just friends, and w/
     * effects (eff): there are 6 effect outputs that may be selected:
       * amp (level): sets the level of the SuperCollider engine's audio output
@@ -294,7 +476,8 @@ the sequencer is built around the [Lattice](http://norns.local/doc/modules/Latti
 * (E) *modes* (row 4, cols 6-14)
   * each *output* has multiple *modes*
     * *IMPORTANT NOTE* multiple modes may be active for each output at each sequence step
-    * softcut (sc) voices 1-6
+    * recorded audio sample (recsamp) voices 1-3
+    * live audio sample (livesamp) voices 1-3
         * v_mode: the voice/playhead mode 
           <!-- * *stop*: stop the *voice*
           * *loop all*: loops through the whole sequence
