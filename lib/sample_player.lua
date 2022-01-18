@@ -405,7 +405,7 @@ function sample_player.autogenerate_cutters(num_cutters)
     -- make evenly spaced cuts
     -- if  alt_key_active then
       sample_player.cutters = {}
-      -- cutter_rates = {}
+      cutter_rates = {}
       -- local cutter1_start_x = 0
       -- local cutter1_finish_x = 128/num_cutters
       -- sample_player.cutters[1] = Cutter:new(1,cutter1_start_x,cutter1_finish_x)
@@ -422,8 +422,8 @@ function sample_player.autogenerate_cutters(num_cutters)
       end
 
       for i=1,3,1 do
-        if spl.cutter_assignments[i] > num_cutters then
-          spl.cutter_assignments[i] = num_cutters
+        if sample_player.cutter_assignments[i] > num_cutters then
+          sample_player.cutter_assignments[i] = num_cutters
         end
       end
     -- else
