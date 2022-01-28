@@ -2,6 +2,7 @@
 local parameters = {}
 
 function parameters.init()
+  save_load.init()
 
   params:add_separator("RECORD PLAYER")
   params:add_trigger("set_", "record player")
@@ -253,7 +254,7 @@ params:hide("note_offset")
   ------------------------------
   if g.cols and g.cols >= 16 then 
     params:add_separator("SEQUENCING")
-    params:add_group("sequencing",11)
+    params:add_group("sequencing",6)
     
     params:add{
       type = "number", id = "step_size", name = "step size", min=1, max=8, default=1,
@@ -371,7 +372,6 @@ params:hide("note_offset")
   end
   
 
-  save_load.init()
 
 
 

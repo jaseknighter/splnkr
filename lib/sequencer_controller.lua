@@ -229,8 +229,6 @@ sc.output_params_map = {
     -- clock/lattice/pattern: tempo, meter, pattern division
 }
 
-function sc.get_num_cutters() return cutters and #cutters > 0 and #cutters or 1 end
-
 function sc.get_output_control_specs_map()
     local map = sc.output_control_specs_map and sc.output_control_specs_map or
                     nil
@@ -238,15 +236,17 @@ function sc.get_output_control_specs_map()
 end
 
 function sc.refresh_output_control_specs_map()
-    local num_cutters = sc.get_num_cutters()
-    local cutters = {}
+    local sample_player_cutters = {}
+    for i=1, sample_player.num_cutters, 1 do table.insert(sample_player_cutters,i) end
+    
+    local spl_cutters = {}
+    for i=1, spl.num_cutters, 1 do table.insert(spl_cutters,i) end
+        
     local min_note = initializing == false and params:get("note_offset") * -1 or
                          NOTE_OFFSET_DEFAULT
 
     local scale_length = initializing == false and params:get("scale_length") or SCALE_LENGTH_DEFAULT
     local max_note = scale_length - min_note
-    
-    for i = 1, num_cutters, 1 do table.insert(cutters, i) end
     
     if initializing == true then 
         midi_note1_mode = {"note", min_note, max_note, nil, "pitch", "pitch"} 
@@ -271,7 +271,7 @@ function sc.refresh_output_control_specs_map()
                     "option", {"stp", "la", "ac", "sc", "1sh"}, nil, nil,
                     "v_mode", "v_mode"
                 }, -- play mode
-                {"option", cutters, nil, "cutter", "cutter"}, -- cutter
+                {"option", sample_player_cutters, nil, "cutter", "cutter"}, -- cutter
                 {"number", "0.00", 20, 1, "rate", "rate"}, -- rate
                 {"option", {-1, 1}, 2, nil, "direction", "direction"}, -- direction
                 {"number", '0.00', 10, 0.20, "level", "level"} -- level (amp)
@@ -279,7 +279,7 @@ function sc.refresh_output_control_specs_map()
                 {
                     "option", {"stp", "lp", "ac", "sc", "1sh"}, nil, nil,
                     "v_mode", "v_mode"
-                }, {"option", cutters, nil, "cutter", "cutter"},
+                }, {"option", sample_player_cutters, nil, "cutter", "cutter"},
                 {"number", "0.00", 20.00, 1, "rate", "rate"},
                 {"option", {-1, 1}, 2, nil, "direction", "direction"},
                 {"number", '0.00', 10, "level", "level"}
@@ -287,31 +287,7 @@ function sc.refresh_output_control_specs_map()
                 {
                     "option", {"stp", "lp", "ac", "sc", "1sh"}, nil, nil,
                     "v_mode", "v_mode"
-                }, {"option", cutters, nil, "cutter", "cutter"},
-                {"number", "0.00", 20.00, 1, "rate", "rate"},
-                {"option", {-1, 1}, 2, nil, "direction", "direction"},
-                {"number", '0.00', 10, "level", "level"}
-            }, {
-                {
-                    "option", {"stp", "lp", "ac", "sc", "1sh"}, nil, nil,
-                    "v_mode", "v_mode"
-                }, {"option", cutters, nil, "cutter", "cutter"},
-                {"number", "0.00", 20.00, 1, "rate", "rate"},
-                {"option", {-1, 1}, 2, nil, "direction", "direction"},
-                {"number", '0.00', 10, "level", "level"}
-            }, {
-                {
-                    "option", {"stp", "lp", "ac", "sc", "1sh"}, nil, nil,
-                    "v_mode", "v_mode"
-                }, {"option", cutters, nil, "cutter", "cutter"},
-                {"number", "0.00", 20.00, 1, "rate", "rate"},
-                {"option", {-1, 1}, 2, nil, "direction", "direction"},
-                {"number", '0.00', 10, "level", "level"}
-            }, {
-                {
-                    "option", {"stp", "lp", "ac", "sc", "1sh"}, nil, nil,
-                    "v_mode", "v_mode"
-                }, {"option", cutters, nil, "cutter", "cutter"},
+                }, {"option", sample_player_cutters, nil, "cutter", "cutter"},
                 {"number", "0.00", 20.00, 1, "rate", "rate"},
                 {"option", {-1, 1}, 2, nil, "direction", "direction"},
                 {"number", '0.00', 10, "level", "level"}
@@ -323,7 +299,7 @@ function sc.refresh_output_control_specs_map()
                     "option", {"stp", "la", "ac", "sc", "1sh"}, nil, nil,
                     "v_mode", "v_mode"
                 }, -- play mode
-                {"option", cutters, nil, "cutter", "cutter"}, -- cutter
+                {"option", spl_cutters, nil, "cutter", "cutter"}, -- cutter
                 {"number", "0.00", 20, 1, "rate", "rate"}, -- rate
                 {"option", {-1, 1}, 2, nil, "direction", "direction"}, -- direction
                 {"number", '0.00', 10, 0.20, "level", "level"} -- level (amp)
@@ -331,7 +307,7 @@ function sc.refresh_output_control_specs_map()
                 {
                     "option", {"stp", "lp", "ac", "sc", "1sh"}, nil, nil,
                     "v_mode", "v_mode"
-                }, {"option", cutters, nil, "cutter", "cutter"},
+                }, {"option", spl_cutters, nil, "cutter", "cutter"},
                 {"number", "0.00", 20.00, 1, "rate", "rate"},
                 {"option", {-1, 1}, 2, nil, "direction", "direction"},
                 {"number", '0.00', 10, "level", "level"}
@@ -339,31 +315,7 @@ function sc.refresh_output_control_specs_map()
                 {
                     "option", {"stp", "lp", "ac", "sc", "1sh"}, nil, nil,
                     "v_mode", "v_mode"
-                }, {"option", cutters, nil, "cutter", "cutter"},
-                {"number", "0.00", 20.00, 1, "rate", "rate"},
-                {"option", {-1, 1}, 2, nil, "direction", "direction"},
-                {"number", '0.00', 10, "level", "level"}
-            }, {
-                {
-                    "option", {"stp", "lp", "ac", "sc", "1sh"}, nil, nil,
-                    "v_mode", "v_mode"
-                }, {"option", cutters, nil, "cutter", "cutter"},
-                {"number", "0.00", 20.00, 1, "rate", "rate"},
-                {"option", {-1, 1}, 2, nil, "direction", "direction"},
-                {"number", '0.00', 10, "level", "level"}
-            }, {
-                {
-                    "option", {"stp", "lp", "ac", "sc", "1sh"}, nil, nil,
-                    "v_mode", "v_mode"
-                }, {"option", cutters, nil, "cutter", "cutter"},
-                {"number", "0.00", 20.00, 1, "rate", "rate"},
-                {"option", {-1, 1}, 2, nil, "direction", "direction"},
-                {"number", '0.00', 10, "level", "level"}
-            }, {
-                {
-                    "option", {"stp", "lp", "ac", "sc", "1sh"}, nil, nil,
-                    "v_mode", "v_mode"
-                }, {"option", cutters, nil, "cutter", "cutter"},
+                }, {"option", spl_cutters, nil, "cutter", "cutter"},
                 {"number", "0.00", 20.00, 1, "rate", "rate"},
                 {"option", {-1, 1}, 2, nil, "direction", "direction"},
                 {"number", '0.00', 10, "level", "level"}

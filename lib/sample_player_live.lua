@@ -44,7 +44,6 @@ spl.selected_cutter_group = 1
 spl.levels = {1,1,1,1,1,1}
 spl.length = 10
 spl.last_sample_positions = {}
-spl.waveform_loaded = false
 
 spl.live_voices = {}
 
@@ -64,7 +63,7 @@ spl_nav_labels = {
   "autogenerate clips"
 }
 
-play_mode_text = {
+sample_player.play_mode_labels = {
   "stop",
   "loop all",
   "all cuts",
@@ -92,14 +91,12 @@ function spl.init()
 
     spl.voice_rates[i] = i == 4 and 1 or 0
   end
-  -- softcut.event_phase(spl.playhead_position_update)
   softcut.poll_start_phase()
   softcut.event_render(sample_player.on_render)
 
   spl.cut_detector = CutDetector:new()
 
   if spl.mode == "live" then
-    -- spl.waveform_loaded = true
     for i=4,6,1 do
       spl.live_voices[i] = {} 
       spl.live_voices[i].rec = 0.50
@@ -180,9 +177,6 @@ function spl.select_next_voice(direction)
 end
 
 function spl.reset(voice, set_position_at_start)
-  -- softcut.buffer(voice,2)
-  -- softcut.loop(voice,1)
-  
   if spl.cutters[1] then
     if spl.play_modes[voice] > 1 and spl.cutter_assignments[voice] > 0 then
        spl.voices_start_finish[voice][1] = util.linlin(10,120,0,spl.length,spl.cutters[spl.cutter_assignments[voice]]:get_start_x_updated())
@@ -203,17 +197,6 @@ function spl.reset(voice, set_position_at_start)
     softcut.play(voice,1)
     if set_position_at_start then 
       local pos
-
-
-      -- if spl.voice_rates[voice] > 0 then
-      --   pos = spl.sample_positions[voice] * spl.length
-      --   -- pos = spl.voices_start_finish[voice][1]
-      --   softcut.position(voice, pos)
-      -- else
-      --   pos = spl.voices_start_finish[voice][2]
-      -- end
-      
-      
       pos = spl.sample_positions[voice] * spl.length
       softcut.position(voice, pos)
       softcut.enable(voice,1)
@@ -222,7 +205,6 @@ function spl.reset(voice, set_position_at_start)
     softcut.play(voice,0)
     softcut.enable(voice,0)
   end
-  -- spl.update_content(2,0,spl.length,128)
 end
 
 -- mode 0: stop
@@ -286,78 +268,54 @@ function spl.update_content(buffer,winstart,winend,samples)
   softcut.render_buffer(buffer, winstart, winend - winstart, 128)
 end
 
-function spl.autogenerate_cutters(num_cutters)
-  if spl.waveform_loaded or spl.mode == "live" then
-    -- make evenly spaced cuts
-    -- if  alt_key_active then
-      spl.cutters = {}
-      local cutter_spacing = 128/num_cutters
-      for i=1,num_cutters,1
-      do
-        local new_cutter_start_x, new_cutter_finish_x
-        new_cutter_start_x = cutter_spacing*(i-1)
-        new_cutter_finish_x = cutter_spacing*(i)
-        table.insert(spl.cutters, i, Cutter:new(i, new_cutter_start_x, new_cutter_finish_x))
-        -- table.insert(cutter_rates, i,1)
-      end
-      for i=4,6,1 do
-        if spl.cutter_assignments[i] > num_cutters then
-          spl.cutter_assignments[i] = num_cutters
-        end
-      end
-      
-    -- else
-    --   -- make cuts according to sample levels
-    --   spl.cutters = spl.cutters and spl.cutters or {}
-    --   -- cutter_rates = cutter_rates and cutter_rates or {}
-      
-    --   -- get the cut indices and resort them lowest to highest
-    --   local sorted_cut_indices = spl.cut_detector.get_sorted_cut_indices()
-    --   local autogen_cut_indices = {}
-    --   -- for i=1,MAX_spl.cutters-1,1
-    --   for i=1,#sorted_cut_indices-1,1
-    --   do
-    --     local new_cutter = sorted_cut_indices[i] and sorted_cut_indices[i] or 0
-    --     table.insert(autogen_cut_indices,new_cutter)
-    --   end
-      
-    --   table.sort(autogen_cut_indices)
-    --   tab.print(autogen_cut_indices)
-    --   local start_index =  num_cutters > #spl.cutters and #spl.cutters + 1 or num_cutters + 1
-    --   -- for i=start_index,MAX_spl.cutters,1
-    --   for i=start_index,#spl.cutters,1 do
-    --     if spl.cutters[i] then
-    --       table.remove(spl.cutters, i)
-    --       -- table.remove(cutter_rates, i)
-    --     end
-    --   end  
-        
-        
-    --   for i=start_index,num_cutters,1 do
-    --     if i<=num_cutters then
-    --       local new_cutter_start_x = autogen_cut_indices[i]
-    --       local new_cutter_finish_x = autogen_cut_indices[i+1] and autogen_cut_indices[i+1] or 128
-    --       -- print(i,new_cutter_finish_x,new_cutter_start_x)
-    --       table.insert(spl.cutters, i, Cutter:new(i, new_cutter_start_x, new_cutter_finish_x))
-    --       -- table.insert(cutter_rates, i,1)
-    --     end
-      -- end
-    -- end
-    
-    spl.cutters_start_finish_update()
-    spl.active_cutter = 1
-    spl.selected_cutter_group = 1
-    local display_mode = spl.nav_active_control == 3 and 1 or 2
-    spl.cutters[1]:set_display_mode(display_mode)
+function spl.autogenerate_cutters(num_cutters, override)
+  -- if spl.mode == "live" then
+  local starting_cutter = spl.cutters[i] and spl.cutters[i]+1 or 1
+  
+local cutter_spacing = 128/num_cutters
+local found_modified = false
 
-    for i=4,6,1 do
-      if spl.cutter_assignments[i] > num_cutters then
-        spl.cutter_assignments[i] = num_cutters
-      end
-    end
-    spl.update()     
-
+for i=#spl.cutters,1,-1 do
+  if (spl.cutters[i].modified ~= true and found_modified == false) or override == true then
+    table.remove(spl.cutters,i)
+  else
+    found_modified = true
   end
+end
+
+for i=starting_cutter,num_cutters,1
+  do
+    if spl.cutters[i] == nil then
+      local new_cutter_start_x, new_cutter_finish_x
+      new_cutter_start_x = cutter_spacing*(i-1)
+      new_cutter_finish_x = cutter_spacing*(i)
+      table.insert(spl.cutters, i, Cutter:new(i, new_cutter_start_x, new_cutter_finish_x))
+    end
+      -- table.insert(cutter_rates, i,1)
+  end
+  for i=4,6,1 do
+    if spl.cutter_assignments[i] > num_cutters then
+      spl.cutter_assignments[i] = num_cutters
+    end
+  end
+
+  spl.num_cutters = #spl.cutters
+  sequencer_controller.refresh_output_control_specs_map()
+
+  spl.cutters_start_finish_update()
+  spl.active_cutter = 1
+  spl.selected_cutter_group = 1
+  local display_mode = spl.nav_active_control == 3 and 1 or 2
+  spl.cutters[1]:set_display_mode(display_mode)
+
+  for i=4,6,1 do
+    if spl.cutter_assignments[i] > num_cutters then
+      spl.cutter_assignments[i] = num_cutters
+    end
+  end
+  spl.update()     
+
+  -- end
 end
 
 function spl.draw_sub_nav ()
@@ -403,7 +361,7 @@ function spl.draw_top_nav (msg)
   end
   if msg == nil then
     if spl.nav_active_control == 2 then
-      subnav_title = subnav_title .. ": " .. play_mode_text[spl.play_modes[spl.selected_voice]+1]
+      subnav_title = subnav_title .. ": " .. sample_player.play_mode_labels[spl.play_modes[spl.selected_voice]+1]
     elseif spl.nav_active_control == 3 and spl.cutters[spl.active_cutter] then
       local cut_loc
       local active_edge = spl.cutters[spl.active_cutter]:get_active_edge()
@@ -432,7 +390,7 @@ function spl.draw_top_nav (msg)
     elseif spl.nav_active_control == 7 then
       local pre = spl.live_voices[spl.selected_voice].pre
       local rec = spl.live_voices[spl.selected_voice].rec
-      local input = params:get("input_level")
+      local input = fn.round_decimals (params:get("input_level"),2)
       subnav_title = subnav_title .. ": " .. pre .. "/" .. rec .. "/" .. input
     elseif spl.nav_active_control == 8 then
       subnav_title = subnav_title .. ": " .. spl.levels[spl.selected_voice]
@@ -478,7 +436,7 @@ function spl.update()
       -- draw the waveform
       local x_pos = 0
       
-      if (spl.waveform_loaded == true or spl.mode == "live") then
+      if (spl.mode == "live") then
         for i,s in ipairs(spl.waveform_samples) do
           local brightness = util.round(math.abs(s) * (scale*spl.levels[spl.selected_voice]))
           brightness = util.round(util.linlin(0,30,0,15, brightness))

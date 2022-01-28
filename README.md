@@ -34,26 +34,26 @@ an amplitude and frequency tracking effects processor/sampler/sequencer for mono
   * e3: select playhead
   * k1 + e3: scrub playhead
 * screen 2: play mode
-  * k2: delete cutter
+  * k1 + k2: delete cutter
   * e3: set play mode selected cutter
   * k1 + e3: set play mode all cutters
 * screen 3: adjust cut ends
-  * k2: delete cutter
+  * k1 + k2: delete cutter
   * k1 + e2: select end
   * k1 + e3: adjust end
   * k1 + e1: fine adjust end
   * e3: select cutter end
 * screen 4: move cutter
-  * k2: delete cutter
+  * k1 + k2: delete cutter
   * k1 + e2: select cutter
   * k1 + e3: move cutter
   * k1 + e1: fine move cutter
 * screen 5: adjust rate
-  * k2: delete cutter
+  * k1 + k2: delete cutter
   * e3: adjust selected playhead rate
   * k1 + e3: fine adjust selected playhead rate
 * screen 6: adjust level
-  * k2: delete cutter
+  * k1 + k2: delete cutter
   * e3: adjust selected playhead level
   * e3: adjust all playhead levels
 * screen 7: autogenerate cutters
@@ -71,35 +71,35 @@ an amplitude and frequency tracking effects processor/sampler/sequencer for mono
   * e3: select playhead
   * k1 + e3: scrub playhead
 * screen 2: play mode
-  * k2: delete cutter
+  * k1 + k2: delete cutter
   * e3: set play mode selected cutter
   * k1 + e3: set play mode all cutters
 * screen 3: adjust cut ends
-  * k2: delete cutter
+  * k1 + k2: delete cutter
   * k1 + e2: select end
   * k1 + e3: adjust end
   * k1 + e1: fine adjust end
   * e3: select cutter end
 * screen 4: move cutter
-  * k2: delete cutter
+  * k1 + k2: delete cutter
   * k1 + e2: select cutter
   * k1 + e3: move cutter
   * k1 + e1: fine move cutter
 * screen 5: adjust rate
-  * k2: delete cutter
+  * k1 + k2: delete cutter
   * e3: adjust selected playhead rate
   * k1 + e3: fine adjust selected playhead rate
 * screen 6: adjust buffer length
-  * k2: delete cutter
+  * k1 + k2: delete cutter
   * e3: adjust buffer length
   * k1 + e3: fine adjust selected buffer length
 * screen 7: adjust levels: preservation/recording/input
-  * k2: delete cutter
+  * k1 + k2: delete cutter
   * e3: adjust amount of recording to preserve with each pass of the playhead
   * k1 + e3: adjust recording level
   * k3: toggle the input levels between on (1db) and off (-infinity db)
 * screen 8: adjust level
-  * k2: delete cutter
+  * k1 + k2: delete cutter
   * e3: adjust selected playhead level
   * e3: adjust all playhead levels
 * screen 9: autogenerate cutters
@@ -730,6 +730,10 @@ the top 7 buttons in each row of the grid are used to set the value of the param
 ## misc parameters
 the controls covered in the section below are found in the PARAMETERS>EDIT menu. with a few exceptions, these are not controllable with the grid sequencer.
 
+### data management 
+the current state of screens 1 & 2 and the grid sequencer may be saved, loaded, and deleted from the *data management* sub-menu.
+
+
 ### record player
 records the loaded audio sample. how the sample gets recorded depends on the `play mode` setting:
 * *stop*: record the entire sample 
@@ -754,9 +758,6 @@ when the *splnkr* script is unloaded (e.g. when loading a different script or re
 the *splnkr* script's SuperCollider engine includes frequency and amplitude detection which can be set in the params menu to trigger midi notes and crow notes/envelopes/gates/triggers. a number of options are provided to filter the frequency and amplitude (level) ranges sent to midi and crow. the notes sent to midi and crow can also be quantized to the values set in in SCALES, NOTES, AND TEMPO section of the params menu.
 
 interesting feedback occurs when the source of audio that is routed to the SuperCollider engine from the norns audio in jacks (see *audio routing* above), is also being controlled with the *splnkr* script's amp/freq detection capabilities.
-
-### saving sequences 
-the current state of the grid sequencer may be saved and recalled from the *sequencing* sub-menu.
 
 ### inputs/outputs 
 settings for midi, crow, jf, and w/ are avaiable in the params menu.
