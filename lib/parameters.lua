@@ -1203,14 +1203,14 @@ params:hide("note_offset")
     params:hide(envelope_curves[1])
     params:hide(envelope_levels[num_envelope_controls])
   
-  
-    params:add_separator("env mod params")
-    params:add{type = "option", id = "show_env_mod_params", name = "show env mod params",
-    options = {"off","on"}, default = 1,
-    action = function(x)
-      if x == 1 then show_env_mod_params = false else show_env_mod_params = true end
-    end}
-
+    if envelope_id == 1 then 
+      params:add_separator("env mod params")
+      params:add{type = "option", id = "show_env_mod_params", name = "show env mod params",
+      options = {"off","on"}, default = 1,
+      action = function(x)
+        if x == 1 then show_env_mod_params = false else show_env_mod_params = true end
+      end}
+    end
 
     if envelope_id == 1 then 
       params:add_taper("randomize_env_probability1", "1: env mod probability", 0, 100, 100, 0, "%")
