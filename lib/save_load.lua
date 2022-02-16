@@ -3,17 +3,27 @@ local sc = sequencer_controller
 local folder_path = norns.state.data .. "splnkr_data/" 
 local pset_folder_path  = folder_path .. ".psets/"
 
-function save_load.save_splnkr_data(file_name)
-  if file_name then
+function save_load.save_splnkr_data(name_or_path)
+  if name_or_path then
     if os.rename(folder_path, folder_path) == nil then
       os.execute("mkdir " .. folder_path)
       os.execute("mkdir " .. pset_folder_path)
       os.execute("touch" .. pset_folder_path)
     end
-    local pset_path = pset_folder_path .. file_name
-    params:write(pset_path)
 
-    local save_path = folder_path .. file_name  ..".spl"
+    local save_path
+    
+    if string.find(name_or_path,"/") == 1 then
+      local x,y = string.find(name_or_path,folder_path)
+      local filename = string.sub(name_or_path,y+1,#name_or_path-4)
+      local pset_path = pset_folder_path .. filename
+      params:write(pset_path)
+      save_path = name_or_path
+    else
+      local pset_path = pset_folder_path .. name_or_path
+      params:write(pset_path)
+      save_path = folder_path .. name_or_path  ..".spl"
+    end
     
     -- save sequence data
     local sequence_data = sequencer_controller.sequins_outputs_table
@@ -210,10 +220,13 @@ function save_load.init()
   -- end
   
   params:add_separator("DATA MANAGEMENT")
-  params:add_group("splnkr data",3)
+  params:add_group("splnkr data",4)
 
   params:add_trigger("save_splnkr_data", "> SAVE SPLNKR DATA")
   params:set_action("save_splnkr_data", function(x) textentry.enter(save_load.save_splnkr_data) end)
+
+  params:add_trigger("overwrite_splnkr_data", "> OVERWRITE SPLNKR DATA")
+  params:set_action("overwrite_splnkr_data", function(x) fileselect.enter(folder_path, save_load.save_splnkr_data) end)
 
   params:add_trigger("remove_splnkr_data", "< REMOVE SPLNKR DATA")
   params:set_action("remove_splnkr_data", function(x) fileselect.enter(folder_path, save_load.remove_splnkr_data) end)
