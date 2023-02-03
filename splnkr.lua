@@ -1,5 +1,5 @@
 ---splnkr
--- v0.2.0 @jaseknighter
+-- v0.3.0 @jaseknighter
 -- https://llllllll.co/t/51191
 --
 -- k1+k3 for basic instructions
