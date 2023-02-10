@@ -222,4 +222,3 @@ function cleanup ()
   os.execute("jack_connect crone:output_5 SuperCollider:in_1;")  
   os.execute("jack_connect crone:output_6 SuperCollider:in_2;")
 end
-
