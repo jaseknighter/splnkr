@@ -119,7 +119,7 @@ function dmp.init_ratchet(ssid, ratchet_data)
     local lattice = sequencer_controller.lattice
     local next_pat_ix = #dmp.ratchet_pats+1
     dmp.ratchet_pats[next_pat_ix] = {}
-    dmp.ratchet_pats[next_pat_ix] = lattice:new_pattern({
+    dmp.ratchet_pats[next_pat_ix] = lattice:new_sprocket({
       action = function()
         local pat = dmp.ratchet_pats[next_pat_ix]
         if active_ssid == ssid then

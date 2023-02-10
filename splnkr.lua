@@ -124,7 +124,7 @@ function init()
     ppqn = 96
   }
   
-  grid_pattern = lattice_grid:new_pattern{
+  grid_pattern = lattice_grid:new_sprocket{
     action = function(t) 
         grid_filter:animate() 
     end,

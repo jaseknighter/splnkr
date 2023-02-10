@@ -14,7 +14,7 @@ function Sequencer:new(lattice,id)
 
   s.division = 1
   s.enabled = true
-  s.pattern = s.lattice:new_pattern{
+  s.pattern = s.lattice:new_sprocket{
     action = function(t) 
       if s.id == sequencer_controller.get_active_sequinset_id() then
         s:pattern_event(t)
