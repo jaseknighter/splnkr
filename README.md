@@ -27,7 +27,7 @@ an amplitude and frequency tracking effects processor/sampler/sequencer for mono
 * all screens
   * e1: previous page 
   * e2: next/prev control screen
-  * k1 + k2: stop/start selected voice
+  * k1 + k2: remove cutter
   * k1 + k3: show instructions
 * screen 1: select/scrub sample/voice
   * k2: select audio sample
