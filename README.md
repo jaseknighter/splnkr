@@ -149,13 +149,13 @@ sample controls available on all page 1 screens:
 #### screen 1: select/scrub sample/voice
 
 with no sample loaded:<br>
-<img src="images/pages/page1/page1_s1_start.png" width="66%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/pages/page1/page1_s1_start.png" width="66%">
 <!-- ![](images/pages/page1/page1_s1_start.png) -->
 
 the script first loads with instructions to press k2 to select a sample. once a sample has been selected, e2 navigates to other page 1 screens. 
 
 with sample loaded:<br>
-<img src="images/pages/page1/page1_s1_sample.png" width="66%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/pages/page1/page1_s1_sample.png" width="66%">
 <!-- ![](images/pages/page1/page1_s1_sample.png) -->
 
 the banded graphic that appears once a sample has been loaded depicts amplitude (volume) changes in the sample. darker bands represent softer sounds and lighter bands represent louder sounds.
@@ -166,7 +166,7 @@ screen 1 controls:
   * e3: select the active voice
 
 #### screen 2: play mode
-<img src="images/pages/page1/page1_s2_play_mode.png" width="66%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/pages/page1/page1_s2_play_mode.png" width="66%">
 <!-- ![](images/pages/page1/page1_s2_play_mode.png) -->
 
 there are five play modes that can be set individually (e3) for each of the 3 playheads:
@@ -186,7 +186,7 @@ screen 2 controls:
   <!-- * k2/k3: delete/add cutter -->
 
 #### screen 3: adjust cut ends
-<img src="images/pages/page1/page1_s3_adj_cut_ends.png" width="66%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/pages/page1/page1_s3_adj_cut_ends.png" width="66%">
 <!-- ![](images/pages/page1/page1_s3_adj_cut_ends.png) -->
 
 the cutter(s) ends may be controlled on this screen.
@@ -200,7 +200,7 @@ screen 3 controls:
   * k1 + e1: fine adjust selected cutter end
 
 #### screen 4: move cutter
-<img src="images/pages/page1/page1_s4_move_cutter.png" width="66%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/pages/page1/page1_s4_move_cutter.png" width="66%">
 <!-- ![](images/pages/page1/page1_s4_move_cutter.png) -->
 
 the location of the cutter(s) may be controlled on this screen.
@@ -213,7 +213,7 @@ screen 4 controls:
   * k1 + e1: fine adjust selected cutter location
 
 #### screen 5: adjust rate
-<img src="images/pages/page1/page1_s5_rate.png" width="66%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/pages/page1/page1_s5_rate.png" width="66%">
 <!-- ![](images/pages/page1/page1_s5_rate.png) -->
 
 the rate of each playhead may be controlled on this screen.
@@ -225,7 +225,7 @@ screen 5 controls:
   * k1 + e3: fine adjust selected voice rate
 
 #### screen 6: adjust level
-<img src="images/pages/page1/page1_s6_level.png" width="66%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/pages/page1/page1_s6_level.png" width="66%">
 <!-- ![](images/pages/page1/page1_s6_level.png) -->
 
 the audio level of each playhead may be controlled on this screen.
@@ -237,7 +237,7 @@ screen 6 controls:
   * k1 + e3: adjust all voice levels
 
 #### screen 7: autogenerate cutters
-<img src="images/pages/page1/page1_s7_autogenerate.png" width="66%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/pages/page1/page1_s7_autogenerate.png" width="66%">
 <!-- ![](images/pages/page1/page1_s7_autogenerate.png) -->
 
 cutters may be added and removed from this screen. 
@@ -264,7 +264,7 @@ sample controls available on all page 1 screens:
   * k1 + k3: show instructions
 
 #### screen 1: select/scrub sample/voice
-<img src="images/pages/page1/page1_s1_sample.png" width="66%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/pages/page1/page1_s1_sample.png" width="66%">
 <!-- ![](images/pages/page1/page1_s1_sample.png) -->
 
 the banded graphic that appears once a sample has been loaded depicts amplitude (volume) changes in the sample. darker bands represent softer sounds and lighter bands represent louder sounds.
@@ -275,7 +275,7 @@ screen 1 controls:
   * e3: select the active voice
 
 #### screen 2: play mode
-<img src="images/pages/page1/page1_s2_play_mode.png" width="66%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/pages/page1/page1_s2_play_mode.png" width="66%">
 <!-- ![](images/pages/page1/page1_s2_play_mode.png) -->
 
 there are five play modes that can be set individually (e3) for each of the 3 playheads:
@@ -295,7 +295,7 @@ screen 2 controls:
   <!-- * k2/k3: delete/add cutter -->
 
 #### screen 3: adjust cut ends
-<img src="images/pages/page1/page1_s3_adj_cut_ends.png" width="66%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/pages/page1/page1_s3_adj_cut_ends.png" width="66%">
 <!-- ![](images/pages/page1/page1_s3_adj_cut_ends.png) -->
 
 the cutter(s) ends may be controlled on this screen.
@@ -309,7 +309,7 @@ screen 3 controls:
   * k1 + e1: fine adjust selected cutter end
 
 #### screen 4: move cutter
-<img src="images/pages/page1/page1_s4_move_cutter.png" width="66%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/pages/page1/page1_s4_move_cutter.png" width="66%">
 <!-- ![](images/pages/page1/page1_s4_move_cutter.png) -->
 
 the location of the cutter(s) may be controlled on this screen.
@@ -322,7 +322,7 @@ screen 4 controls:
   * k1 + e1: fine adjust selected cutter location
 
 #### screen 5: adjust rate
-<img src="images/pages/page1/page1_s5_rate.png" width="66%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/pages/page1/page1_s5_rate.png" width="66%">
 <!-- ![](images/pages/page1/page1_s5_rate.png) -->
 
 the rate of each playhead may be controlled on this screen.
@@ -334,7 +334,7 @@ screen 5 controls:
   * k1 + e3: fine adjust selected voice rate
 
 #### screen 6: buffer length
-<img src="images/pages/new_page2/new_page2_s6_buf_len.png" width="66%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/pages/new_page2/new_page2_s6_buf_len.png" width="66%">
 
 the rate of each playhead may be controlled on this screen.
 
@@ -345,7 +345,7 @@ screen 6 controls:
   * k1 + e3: fine adjust selected voice's buffer rate
 
 #### screen 7: adjust levels: preservation/recording/input
-<img src="images/pages/new_page2/new_page2_s6_pre_rec_in.png" width="66%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/pages/new_page2/new_page2_s6_pre_rec_in.png" width="66%">
 
 three controls may be modified on this screen:
   * pre: the amount of live sampled audio that is preserved with each pass of a playhead
@@ -359,7 +359,7 @@ screen 7 controls:
   * k3: toggle the input levels between on (1db) and off (-infinity db)
 
 #### screen 8: adjust level
-<img src="images/pages/page1/page1_s6_level.png" width="66%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/pages/page1/page1_s6_level.png" width="66%">
 <!-- ![](images/pages/page1/page1_s6_level.png) -->
 
 the audio level of each playhead may be controlled on this screen.
@@ -371,7 +371,7 @@ screen 8 controls:
   * k1 + e3: adjust all voice levels
 
 #### screen 9: autogenerate cutters
-<img src="images/pages/page1/page1_s7_autogenerate.png" width="66%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/pages/page1/page1_s7_autogenerate.png" width="66%">
 <!-- ![](images/pages/page1/page1_s7_autogenerate.png) -->
 
 cutters may be added and removed from this screen. 
@@ -386,7 +386,7 @@ screen 9 controls:
   * k1 + e3: autogenerate clips with even spacing (up to 20)
 
 ### page 3: envelopes
-<img src="images/pages/page2/page2_envelopes.png" width="66%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/pages/page2/page2_envelopes.png" width="66%">
 <!-- ![](images/pages/page2/page2_envelopes.png) -->
 
 the two shapes displayed on page 3 represent envelopes which may be applied to external devices (i.e. crow, jf, midi, w/). the first envelope is also be used to shape the granular envelope if enabled (see *effects* below for details). 
@@ -406,7 +406,7 @@ with a few exceptions, the last of the three control types (node time, node leve
 fine grain controls: all of the envelope controls allow for fine grain control using k1+e3.
 
 #### envelope modulation
-<img src="images/pages/page2/page2_envelope_mods.png" width="66%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/pages/page2/page2_envelope_mods.png" width="66%">
 <!-- ![](images/pages/page2/page2_envelope_mods.png) -->
 
 pressing k1+k2 on the env screen brings up the *env modulation* menu. once enabled, the menu can be navigated using e2 and e3. each envelope has eight modulation parameters:  
@@ -440,7 +440,7 @@ the sequencer is built around the [Lattice](http://norns.local/doc/modules/Latti
 
 
 #### sequencer grid controls
-<img src="images/sequencer_grid.png" width="100%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/sequencer_grid.png" width="100%">
 <!-- ![](images/sequencer_grid.png) -->
 
 * (1) *filter mode* selector (row 8, col 15): switches the grid to the bandpass filter control mode.
@@ -654,7 +654,7 @@ copy paste is available in a number of areas:
 #### sequencer norns ui
 page 3 of the norns ui shows the sequencer's state. 
 
-<img src="images/sequencer_screen_1.png" width="66%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/sequencer_screen_1.png" width="66%">
 <!-- ![](images/sequencer_screen_1.png) -->
 
  the screenshot above shows the norns ui when a sequence step is being setup, prior to a sub-sequence step value being set.
@@ -672,7 +672,7 @@ LEGEND
 * (C) *selection values*: displays the items available to select based on the active ui group 
   * in the example above, the values shown are the parameters available for the softcut output types (i.e., *v_mode, cutter, rate, direction, level*)
 
-<img src="images/sequencer_screen_2.png" width="66%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/sequencer_screen_2.png" width="66%">
 <!-- ![](images/sequencer_screen_2.png) -->
 
   the screenshot above shows the values set for a given output/mode/param for a single sequin (sequence step) for a selected sequence set. 
@@ -704,7 +704,7 @@ there are three parameters for each of the filterbanks' 16 channels:
 * center frequency (cf)
 
 ### filterbank grid controls
-<img src="images/filter_grid.png" width="100%">
+<img src="https://raw.githubusercontent.com/jaseknighter/splnkr/main/images/filter_grid.png" width="100%">
 
 LEGEND
 
